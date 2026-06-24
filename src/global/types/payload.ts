@@ -1,3 +1,4 @@
-export type Payload = {
+export type JwtPayload = {
   id: string;
+  role: string;
 };
