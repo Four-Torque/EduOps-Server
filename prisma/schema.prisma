@@ -19,6 +19,13 @@ enum UserStatus {
   LEAVE
 }
 
+enum SalaryStatus {
+  // 지급대기
+  PENDING 
+  // 지급완료
+  COMPLETED
+}
+
 model User {
   id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name     String     @db.VarChar(20)
@@ -27,6 +34,21 @@ model User {
   password String     @db.VarChar(20)
   role     Role       @default(TEACHER)
   status   UserStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salaries Salary[]
+}
+
+model Salary {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  baseSalary Int @db.Integer
+  bonus Int @db.Integer
+  paymentDate DateTime @db.Timestamptz()
+  status SalaryStatus @default(PENDING)
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
