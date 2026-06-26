@@ -9,6 +9,10 @@ export enum ErrorCode {
 
   // 사용자 관련 에러
   USER_NOT_FOUND = 'USER_001',
+
+  // 급여 관련 에러
+  SALARY_NOT_FOUND = 'SALARY_001',
+  SALARY_ALREADY_PAID = 'SALARY_002',
 }
 
 export const ErrorCodeMap: Record<
@@ -37,5 +41,15 @@ export const ErrorCodeMap: Record<
   [ErrorCode.USER_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '사용자를 찾을 수 없습니다.',
+  },
+
+  // 급여 관련 에러
+  [ErrorCode.SALARY_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '급여를 찾을 수 없습니다.',
+  },
+  [ErrorCode.SALARY_ALREADY_PAID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '급여가 이미 지급되었습니다.',
   },
 };

@@ -40,4 +40,15 @@ export class SalaryService {
     );
     return response;
   }
+
+  async paySalary(id: string): Promise<SalaryResponse> {
+    const salary = await this.salaryRepository.findById(id);
+    if (!salary) throw new ApiException(ErrorCode.SALARY_NOT_FOUND);
+    if (salary.status === SalaryStatus.COMPLETED)
+      throw new ApiException(ErrorCode.SALARY_ALREADY_PAID);
+
+    const updatedSalary = await this.salaryRepository.updateSalary(id);
+    const response: SalaryResponse = SalaryResponse.fromEntity(updatedSalary);
+    return response;
+  }
 }

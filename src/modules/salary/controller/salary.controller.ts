@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { SalaryService } from '../service/salary.service';
 import { SalaryStatus } from '@prisma/client';
 import { SalaryResponse } from '../response/salary.response';
@@ -26,6 +34,12 @@ export class SalaryController {
       userId,
       status,
     );
+    return response;
+  }
+
+  @Patch('/:id/pay')
+  async paySalary(@Param('id') id: string): Promise<SalaryResponse> {
+    const response: SalaryResponse = await this.salaryService.paySalary(id);
     return response;
   }
 }
