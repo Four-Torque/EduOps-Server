@@ -1,10 +1,12 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
 import { CreateUserRequest } from 'src/modules/user/request/create-user.request';
-import { Message, ResponseMessage, setCookies } from 'src/global';
+import { Message, Public, ResponseMessage, setCookies } from 'src/global';
 import { AuthRequest } from '../request/auth.request';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { RefreshGuard } from '../guards/refresh.guard';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -30,6 +32,17 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const { accessToken, refreshToken } = await this.authService.login(request);
+    return setCookies(response, accessToken, refreshToken);
+  }
+
+  @UseGuards(RefreshGuard)
+  @Post('refresh')
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { accessToken, refreshToken } =
+      await this.authService.refresh(request);
     return setCookies(response, accessToken, refreshToken);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
   ApiException,
@@ -16,6 +16,8 @@ import { RedisKey, RedisService } from 'src/redis';
 import { AuthRequest } from '../request/auth.request';
 import * as bcrypt from 'bcryptjs';
 import { User } from '@prisma/client';
+import { Request } from 'express';
+import { TokenResponse } from '../response/token.response';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +27,8 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly jwtService: JwtService,
   ) {}
+
+  private readonly LOGGER = new Logger(AuthService.name);
 
   async register(request: CreateUserRequest): Promise<void> {
     const user = await this.userService.findByEmail(request.email);
@@ -69,7 +73,7 @@ export class AuthService {
     await this.redis.del(redisKey);
   }
 
-  async login(request: AuthRequest) {
+  async login(request: AuthRequest): Promise<TokenResponse> {
     const user: Omit<User, 'password'> = await this.validateUser(request);
     const redisKey = RedisKey.userRefreshToken(user.id);
 
@@ -86,6 +90,55 @@ export class AuthService {
     }
     await this.redis.set(redisKey, tokens.refreshToken, 7 * 24 * 60 * 60);
 
+    return tokens;
+  }
+
+  async refresh(req: Request): Promise<TokenResponse> {
+    const oldRefreshToken = req.cookies['eo_rtk'];
+    if (!oldRefreshToken) {
+      this.LOGGER.warn('리프레시 토큰 쿠키가 없습니다.');
+      throw new ApiException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+    }
+
+    const cachedTokens = await this.redis.get(
+      RedisKey.cachedTokens(oldRefreshToken),
+    );
+    if (cachedTokens) {
+      return JSON.parse(cachedTokens) as TokenResponse;
+    }
+
+    const payload = await this.jwtService
+      .verifyAsync(oldRefreshToken, {
+        secret: JWT_REFRESH_SECRET_KEY,
+      })
+      .catch((err) => {
+        this.LOGGER.warn(`유효하지 않은 리프레시 토큰: ${err.message}`);
+        throw new ApiException(ErrorCode.INVALID_REFRESH_TOKEN);
+      });
+
+    const user = await this.userService.findById(payload.id);
+    if (!user) throw new ApiException(ErrorCode.USER_NOT_FOUND);
+
+    const redisKey = RedisKey.userRefreshToken(user.id);
+    const storedRefreshToken = await this.redis.get(redisKey);
+
+    if (!storedRefreshToken || storedRefreshToken !== oldRefreshToken) {
+      throw new ApiException(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    const tokens = await this.generateTokens({
+      id: payload.id,
+      role: payload.role,
+    });
+
+    await Promise.all([
+      this.redis.set(redisKey, tokens.refreshToken, 7 * 24 * 60 * 60),
+      this.redis.set(
+        RedisKey.cachedTokens(oldRefreshToken),
+        JSON.stringify(tokens),
+        5,
+      ),
+    ]);
     return tokens;
   }
 
