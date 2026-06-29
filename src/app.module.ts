@@ -9,18 +9,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { RequestMiddleware } from './global';
 import { UserModule } from './modules/user/user.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtGuard } from './modules/auth/guards/jwt.guard';
+import { SalaryModule } from './modules/salary/salary.module';
 
 @Module({
-  imports: [GlobalModule, RedisModule, PrismaModule, UserModule, AuthModule],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtGuard,
-    },
-  ],
+  imports: [GlobalModule, RedisModule, PrismaModule, UserModule, SalaryModule],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

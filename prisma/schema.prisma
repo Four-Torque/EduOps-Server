@@ -32,6 +32,7 @@ model Salary {
   User        User         @relation(fields: [userId], references: [id])
 }
 
+
 enum Role {
   TEACHER
   DIRECTOR
