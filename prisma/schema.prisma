@@ -7,6 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String     @db.VarChar(20)
+  email     String     @unique @db.VarChar(50)
+  phone     String     @unique @db.VarChar(20)
+  password  String     @db.VarChar(100)
+  role      Role       @default(TEACHER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  status    UserStatus @default(ACTIVE)
+
+  Salary    Salary[]
+  StaffAttendance StaffAttendance[]
+}
+
+model Salary {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  baseSalary  Int
+  bonus       Int
+  paymentDate DateTime     @db.Timestamptz(6)
+  status      SalaryStatus @default(PENDING)
+  userId      String       @db.Uuid
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  User        User         @relation(fields: [userId], references: [id])
+}
+
+
+model StaffAttendance {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id])
+  workDate DateTime @db.Date
+  checkInTime DateTime? @db.Timestamptz()
+  checkOutTime DateTime? @db.Timestamptz()
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum Role {
   TEACHER
   DIRECTOR
@@ -20,49 +60,8 @@ enum UserStatus {
 }
 
 enum SalaryStatus {
-  // 지급대기
-  PENDING 
-  // 지급완료
+  PENDING
   COMPLETED
 }
 
-model User {
-  id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name     String     @db.VarChar(20)
-  email    String     @unique @db.VarChar(50)
-  phone    String     @unique @db.VarChar(20)
-  password String     @db.VarChar(20)
-  role     Role       @default(TEACHER)
-  status   UserStatus @default(ACTIVE)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  salaries Salary[]
-  staffAttendances StaffAttendance[]
-}
-
-model Salary {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  baseSalary Int @db.Integer
-  bonus Int @db.Integer
-  paymentDate DateTime @db.Timestamptz()
-  status SalaryStatus @default(PENDING)
-  userId String @db.Uuid
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model StaffAttendance {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId String @db.Uuid
-  user User @relation(fields: [userId], references: [id])
-  workDate DateTime @db.Date
-  checkInTime DateTime? @db.Timestamptz()
-  checkOutTime DateTime? @db.Timestamptz()
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}

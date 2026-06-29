@@ -7,7 +7,7 @@ import {
 import { GlobalModule } from './global/global.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
-import { RequestMiddleware } from './global/middlewares/logger.middleware';
+import { RequestMiddleware } from './global';
 import { UserModule } from './modules/user/user.module';
 import { SalaryModule } from './modules/salary/salary.module';
 
