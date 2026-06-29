@@ -6,4 +6,5 @@ export const RedisKey = {
   verificationRegister: (token: string) =>
     `${PREFIX}:verification:register:${token}`,
   verificationReset: (token: string) => `${PREFIX}:verification:reset:${token}`,
+  userRefreshToken: (userId: string) => `${PREFIX}:RT:${userId}`,
 };

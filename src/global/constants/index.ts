@@ -9,3 +9,9 @@ export const CLIENT_URL = process.env.CLIENT_URL;
 export const EMAIL_URL = process.env.EMAIL_URL;
 export const SENDER_EMAIL = process.env.SENDER_EMAIL;
 export const SENDER_PWD = process.env.SENDER_PWD;
+export const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+export const JWT_REFRESH_SECRET_KEY = process.env.JWT_REFRESH_SECRET_KEY;
+export const JWT_SECRET_EXPIRES_IN = Number(process.env.JWT_SECRET_EXPIRES_IN);
+export const JWT_REFRESH_EXPIRES_IN = Number(
+  process.env.JWT_REFRESH_EXPIRES_IN,
+);

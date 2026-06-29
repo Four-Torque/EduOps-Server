@@ -10,6 +10,7 @@ export enum ErrorCode {
   // 인증 관련 에러
   VERIFICATION_FAILED = 'AUTH_001',
   VERIFICATION_TOKEN_INVALID = 'AUTH_002',
+  INVALID_EMAIL_OR_PASSWORD = 'AUTH_003',
 
   // 사용자 관련 에러
   USER_NOT_FOUND = 'USER_001',
@@ -46,6 +47,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.VERIFICATION_TOKEN_INVALID]: {
     status: HttpStatus.BAD_REQUEST,
     message: '인증 토큰이 유효하지 않습니다.',
+  },
+  [ErrorCode.INVALID_EMAIL_OR_PASSWORD]: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '이메일 또는 비밀번호가 올바르지 않습니다.',
   },
 
   // 사용자 관련 에러

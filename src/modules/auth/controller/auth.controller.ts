@@ -1,7 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
 import { CreateUserRequest } from 'src/modules/user/request/create-user.request';
-import { Message, ResponseMessage } from 'src/global';
+import { Message, ResponseMessage, setCookies } from 'src/global';
+import { AuthRequest } from '../request/auth.request';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,5 +22,14 @@ export class AuthController {
     @Body('type') type: string,
   ): Promise<void> {
     await this.authService.verify(token, type);
+  }
+
+  @Post('login')
+  async login(
+    @Body() request: AuthRequest,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const { accessToken, refreshToken } = await this.authService.login(request);
+    return setCookies(response, accessToken, refreshToken);
   }
 }
