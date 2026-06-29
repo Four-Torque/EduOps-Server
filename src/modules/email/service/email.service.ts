@@ -24,7 +24,7 @@ export class EmailService {
     payload,
   }: {
     type: string;
-    payload: CreateUserRequest;
+    payload: CreateUserRequest | { email: string };
   }) {
     const token = uuid();
 

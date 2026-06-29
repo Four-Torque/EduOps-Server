@@ -21,4 +21,8 @@ export class UserRepository {
   create(data: Prisma.UserCreateInput) {
     return this.prisma.user.create({ data });
   }
+
+  async resetPassword(data: Prisma.UserUpdateArgs) {
+    return this.prisma.user.update(data);
+  }
 }

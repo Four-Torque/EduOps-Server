@@ -18,6 +18,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '@prisma/client';
 import { Request } from 'express';
 import { TokenResponse } from '../response/token.response';
+import { ResetPasswordRequest } from '../request/reset-password.request';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +50,7 @@ export class AuthService {
     if (type === 'register') {
       await this.verifyRegister(token);
     } else if (type === 'reset') {
+      await this.verifyResetPassword(token);
     }
     throw new ApiException(ErrorCode.VERIFICATION_FAILED);
   }
@@ -142,6 +144,23 @@ export class AuthService {
     return tokens;
   }
 
+  async sendResetPasswordMail(email: string): Promise<void> {
+    const existingUser = await this.userService.findByEmail(email);
+    if (!existingUser) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    this.emailService.sendVerificationEmail({
+      type: 'reset',
+      payload: { email },
+    });
+  }
+
+  async resetPassword(request: ResetPasswordRequest): Promise<void> {
+    const response = await this.userService.resetPassword(request);
+    return response;
+  }
+
   private async generateTokens(payload: JwtPayload) {
     return {
       accessToken: await this.jwtService.signAsync(payload, {
@@ -163,5 +182,17 @@ export class AuthService {
     } else {
       throw new ApiException(ErrorCode.INVALID_EMAIL_OR_PASSWORD);
     }
+  }
+
+  private async verifyResetPassword(token: string): Promise<{ email: string }> {
+    const redisKey = RedisKey.verificationReset(token);
+    const emailStr = await this.redis.get(redisKey);
+    if (!emailStr) {
+      throw new ApiException(ErrorCode.VERIFICATION_TOKEN_INVALID);
+    }
+
+    const email = JSON.parse(emailStr) as string;
+
+    return { email };
   }
 }
