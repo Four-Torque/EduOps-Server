@@ -13,7 +13,7 @@ export class StaffAttendanceRepository {
     return this.prisma.staffAttendance.findMany({
       where: {
         userId,
-        ...(workDate && { workDate: new Date(workDate) }),
+        ...(workDate && { workDate }),
       },
     });
   }

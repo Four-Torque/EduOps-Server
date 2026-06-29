@@ -29,7 +29,7 @@ export class CreateStaffAttendanceRequest {
   ): Prisma.StaffAttendanceCreateInput {
     return {
       user: { connect: { id: request.userId } },
-      workDate: request.workDate ? new Date(request.workDate) : new Date(),
+      workDate: request.workDate,
       checkInTime: request.checkInTime,
     };
   }
