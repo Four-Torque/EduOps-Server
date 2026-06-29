@@ -21,6 +21,11 @@ export enum ErrorCode {
   // 급여 관련 에러
   SALARY_NOT_FOUND = 'SALARY_001',
   SALARY_ALREADY_PAID = 'SALARY_002',
+
+  // 직원 근태 관련 에러
+  ATTENDANCE_NOT_FOUND = 'ATTENDANCE_001',
+  ATTENDANCE_ALREADY_EXISTS = 'ATTENDANCE_002',
+  ATTENDANCE_ALREADY_CHECKED_OUT = 'ATTENDANCE_003',
 }
 
 export const ErrorCodeMap: Record<
@@ -76,6 +81,7 @@ export const ErrorCodeMap: Record<
     status: HttpStatus.CONFLICT,
     message: '이미 존재하는 사용자입니다.',
   },
+
   // 급여 관련 에러
   [ErrorCode.SALARY_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
@@ -84,5 +90,19 @@ export const ErrorCodeMap: Record<
   [ErrorCode.SALARY_ALREADY_PAID]: {
     status: HttpStatus.BAD_REQUEST,
     message: '급여가 이미 지급되었습니다.',
+  },
+
+  // 직원 근태 관련 에러
+  [ErrorCode.ATTENDANCE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '근태를 찾을 수 없습니다.',
+  },
+  [ErrorCode.ATTENDANCE_ALREADY_EXISTS]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 존재하는 근태입니다.',
+  },
+  [ErrorCode.ATTENDANCE_ALREADY_CHECKED_OUT]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이미 체크아웃된 근태입니다.',
   },
 };

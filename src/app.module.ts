@@ -10,9 +10,19 @@ import { RedisModule } from './redis/redis.module';
 import { RequestMiddleware } from './global';
 import { UserModule } from './modules/user/user.module';
 import { SalaryModule } from './modules/salary/salary.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { StaffAttendanceModule } from './modules/attendance/attendance.module';
 
 @Module({
-  imports: [GlobalModule, RedisModule, PrismaModule, UserModule, SalaryModule],
+  imports: [
+    GlobalModule,
+    RedisModule,
+    PrismaModule,
+    UserModule,
+    SalaryModule,
+    AuthModule,
+    StaffAttendanceModule,
+  ],
   providers: [],
 })
 export class AppModule implements NestModule {

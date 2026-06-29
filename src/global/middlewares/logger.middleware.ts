@@ -6,7 +6,6 @@ export class RequestMiddleware implements NestMiddleware {
   constructor(private readonly logger: Logger) {}
   use(req: Request, res: Response, next: NextFunction) {
     if (NODE_ENV === 'development') {
-      console.log('dddd');
       this.logger.log(
         JSON.stringify({
           url: req.url,
