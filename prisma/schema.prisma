@@ -39,6 +39,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   salaries Salary[]
+  staffAttendances StaffAttendance[]
 }
 
 model Salary {
@@ -49,6 +50,18 @@ model Salary {
   status SalaryStatus @default(PENDING)
   userId String @db.Uuid
   user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StaffAttendance {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields: [userId], references: [id])
+  workDate DateTime @db.Date
+  checkInTime DateTime? @db.Timestamptz()
+  checkOutTime DateTime? @db.Timestamptz()
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
