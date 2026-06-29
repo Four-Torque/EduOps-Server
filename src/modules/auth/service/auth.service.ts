@@ -31,6 +31,11 @@ export class AuthService {
 
   private readonly LOGGER = new Logger(AuthService.name);
 
+  /**
+   * register 함수는 사용자의 회원가입 요청을 처리합니다.
+   * @param request - 회원가입 요청 데이터 (CreateUserRequest)
+   * @throws ApiException - 이미 존재하는 이메일일 경우 USER_ALREADY_EXISTS 에러 발생
+   */
   async register(request: CreateUserRequest): Promise<void> {
     const user = await this.userService.findByEmail(request.email);
     if (user) {
@@ -42,6 +47,12 @@ export class AuthService {
     });
   }
 
+  /**
+   * verify 함수는 이메일 인증 토큰을 검증하고 회원가입 또는 비밀번호 재설정을 완료합니다.
+   * @param token - 이메일 인증 토큰
+   * @param type - 인증 유형 ('register' 또는 'reset')
+   * @throws ApiException - 토큰이 유효하지 않거나 인증 실패 시 에러 발생
+   */
   async verify(token: string, type: string): Promise<void> {
     if (!token) {
       throw new ApiException(ErrorCode.VERIFICATION_TOKEN_INVALID);
@@ -55,26 +66,12 @@ export class AuthService {
     throw new ApiException(ErrorCode.VERIFICATION_FAILED);
   }
 
-  private async verifyRegister(token: string): Promise<void> {
-    const redisKey = RedisKey.verificationRegister(token);
-    const cachedUserData = await this.redis.get(redisKey);
-    if (!cachedUserData) {
-      throw new ApiException(ErrorCode.VERIFICATION_TOKEN_INVALID);
-    }
-
-    const userData = JSON.parse(cachedUserData) as CreateUserRequest;
-
-    const user = await this.userService.findByEmail(userData.email);
-    if (user) {
-      await this.redis.del(redisKey);
-      throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
-    }
-
-    await this.userService.create(userData);
-
-    await this.redis.del(redisKey);
-  }
-
+  /**
+   * login 함수는 사용자의 로그인 요청을 처리하고 액세스 토큰과 리프레시 토큰을 생성합니다.
+   * @param request - 로그인 요청 데이터 (AuthRequest)
+   * @returns - 생성된 액세스 토큰과 리프레시 토큰 (TokenResponse)
+   * @throws ApiException - 이메일 또는 비밀번호가 유효하지 않을 경우 INVALID_EMAIL_OR_PASSWORD 에러 발생
+   */
   async login(request: AuthRequest): Promise<TokenResponse> {
     const user: Omit<User, 'password'> = await this.validateUser(request);
     const redisKey = RedisKey.userRefreshToken(user.id);
@@ -95,6 +92,12 @@ export class AuthService {
     return tokens;
   }
 
+  /**
+   * refresh 함수는 리프레시 토큰을 사용하여 새로운 액세스 토큰과 리프레시 토큰을 생성합니다.
+   * @param req - HTTP 요청 객체
+   * @returns - 생성된 액세스 토큰과 리프레시 토큰 (TokenResponse)
+   * @throws ApiException - 리프레시 토큰이 없거나 유효하지 않을 경우 에러 발생
+   */
   async refresh(req: Request): Promise<TokenResponse> {
     const oldRefreshToken = req.cookies['eo_rtk'];
     if (!oldRefreshToken) {
@@ -144,6 +147,11 @@ export class AuthService {
     return tokens;
   }
 
+  /**
+   * sendResetPasswordMail 함수는 비밀번호 재설정 이메일을 전송합니다.
+   * @param email - 비밀번호 재설정을 요청한 사용자의 이메일
+   * @throws ApiException - 사용자가 존재하지 않을 경우 USER_NOT_FOUND 에러 발생
+   */
   async sendResetPasswordMail(email: string): Promise<void> {
     const existingUser = await this.userService.findByEmail(email);
     if (!existingUser) {
@@ -156,11 +164,46 @@ export class AuthService {
     });
   }
 
+  /**
+   * resetPassword 함수는 비밀번호 재설정 요청을 처리합니다.
+   * @param request - 비밀번호 재설정 요청 데이터 (ResetPasswordRequest)
+   * @throws ApiException - 토큰이 유효하지 않거나 사용자가 존재하지 않을 경우 에러 발생
+   */
   async resetPassword(request: ResetPasswordRequest): Promise<void> {
     const response = await this.userService.resetPassword(request);
     return response;
   }
 
+  /**
+   * verifyRegister 함수는 회원가입 이메일 인증 토큰을 검증하고 사용자를 생성합니다.
+   * @param token - 회원가입 이메일 인증 토큰
+   * @throws ApiException - 토큰이 유효하지 않거나 이미 존재하는 이메일일 경우 에러 발생
+   */
+  private async verifyRegister(token: string): Promise<void> {
+    const redisKey = RedisKey.verificationRegister(token);
+    const cachedUserData = await this.redis.get(redisKey);
+    if (!cachedUserData) {
+      throw new ApiException(ErrorCode.VERIFICATION_TOKEN_INVALID);
+    }
+
+    const userData = JSON.parse(cachedUserData) as CreateUserRequest;
+
+    const user = await this.userService.findByEmail(userData.email);
+    if (user) {
+      await this.redis.del(redisKey);
+      throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
+    }
+
+    await this.userService.create(userData);
+
+    await this.redis.del(redisKey);
+  }
+
+  /**
+   * generateTokens 함수는 주어진 페이로드를 기반으로 액세스 토큰과 리프레시 토큰을 생성합니다.
+   * @param payload - JWT 페이로드 (사용자 ID 및 역할 정보)
+   * @returns - 생성된 액세스 토큰과 리프레시 토큰 (TokenResponse)
+   */
   private async generateTokens(payload: JwtPayload) {
     return {
       accessToken: await this.jwtService.signAsync(payload, {
@@ -174,6 +217,12 @@ export class AuthService {
     };
   }
 
+  /**
+   * validateUser 함수는 사용자의 이메일과 비밀번호를 검증합니다.
+   * @param request - 로그인 요청 데이터 (AuthRequest)
+   * @returns - 검증된 사용자 정보
+   * @throws ApiException - 이메일 또는 비밀번호가 유효하지 않을 경우 INVALID_EMAIL_OR_PASSWORD 에러 발생
+   */
   private async validateUser(request: AuthRequest) {
     const { email, password } = request;
     const user = await this.userService.findByEmail(email);
@@ -184,6 +233,12 @@ export class AuthService {
     }
   }
 
+  /**
+   * verifyResetPassword 함수는 비밀번호 재설정 이메일 인증 토큰을 검증합니다.
+   * @param token - 비밀번호 재설정 이메일 인증 토큰
+   * @returns - 검증된 이메일 정보
+   * @throws ApiException - 토큰이 유효하지 않을 경우 에러 발생
+   */
   private async verifyResetPassword(token: string): Promise<{ email: string }> {
     const redisKey = RedisKey.verificationReset(token);
     const emailStr = await this.redis.get(redisKey);
