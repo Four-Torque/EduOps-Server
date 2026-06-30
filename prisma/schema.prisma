@@ -14,35 +14,192 @@ model User {
   phone     String     @unique @db.VarChar(20)
   password  String     @db.VarChar(100)
   role      Role       @default(TEACHER)
+  status    UserStatus @default(ACTIVE)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  status    UserStatus @default(ACTIVE)
 
-  Salary    Salary[]
-  StaffAttendance StaffAttendance[]
+  salaries           Salary[]
+  staffAttendances   StaffAttendance[]
+  classes            Class[]
+  classFiles         ClassFile[]
+  assetsApplications AssetsApplication[]
 }
 
 model Salary {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   baseSalary  Int
   bonus       Int
-  paymentDate DateTime     @db.Timestamptz(6)
+  paymentDate DateTime?    @db.Timestamptz(6)
   status      SalaryStatus @default(PENDING)
+  user        User         @relation(fields: [userId], references: [id])
   userId      String       @db.Uuid
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  User        User         @relation(fields: [userId], references: [id])
 }
 
-
 model StaffAttendance {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId String @db.Uuid
-  user User @relation(fields: [userId], references: [id])
-  workDate String @db.VarChar(20)
-  checkInTime DateTime? @db.Timestamptz()
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @db.Uuid
+  user         User      @relation(fields: [userId], references: [id])
+  workDate     String    @db.VarChar(20)
+  checkInTime  DateTime? @db.Timestamptz()
   checkOutTime DateTime? @db.Timestamptz()
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
 
+model Class {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teacher   User        @relation(fields: [teacherId], references: [id])
+  teacherId String      @db.Uuid
+  name      String      @db.VarChar(20)
+  fee       Int
+  startDate DateTime?   @db.Timestamptz()
+  endDate   DateTime?   @db.Timestamptz()
+  status    ClassStatus @default(OPEN)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  classFiles         ClassFile[]
+  schedules          Schedule[]
+  studentAttendances StudentAttendance[]
+  enrollments        Enrollment[]
+  payments           Payment[]
+  exams              Exam[]
+}
+
+model ClassFile {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class      Class    @relation(fields: [classId], references: [id])
+  classId    String   @db.Uuid
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+  uploaderId String   @db.Uuid
+  fileName   String   @db.VarChar(100)
+  filePath   String   @db.VarChar(200)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Schedule {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   String   @db.Uuid
+  dayOfWeek Int
+  startTime DateTime @db.Timestamptz()
+  endTime   DateTime @db.Timestamptz()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AssetsApplication {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user           User              @relation(fields: [userId], references: [id])
+  userId         String            @db.Uuid
+  category       Category          @relation(fields: [categoryId], references: [id])
+  categoryId     String            @db.Uuid
+  name           String            @db.VarChar(100)
+  quantity       Int
+  price          Int
+  acceptedReason String?           @db.VarChar(200)
+  rejectedReason String?           @db.VarChar(200)
+  status         ApplicationStatus @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model Category {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assetsApplications AssetsApplication[]
+  asset              Asset[]
+}
+
+model Asset {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @db.Uuid
+  name       String   @db.VarChar(100)
+  stock      Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Student {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String        @db.VarChar(50)
+  phone       String        @db.VarChar(20)
+  parentPhone String        @db.VarChar(20)
+  status      StudentStatus @default(ENROLLED)
+  birth       String        @db.VarChar(20)
+  address     String        @db.VarChar(50)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  studentAttendances StudentAttendance[]
+  enrollments        Enrollment[]
+  payments           Payment[]
+  examResults        ExamResult[]
+}
+
+model StudentAttendance {
+  id          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  student     Student                 @relation(fields: [studentId], references: [id])
+  studentId   String                  @db.Uuid
+  class       Class                   @relation(fields: [classId], references: [id])
+  classId     String                  @db.Uuid
+  lectureDate String                  @db.VarChar(20)
+  status      StudentAttendanceStatus @default(ABSENT)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+}
+
+model Enrollment {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class      Class    @relation(fields: [classId], references: [id])
+  classId    String   @db.Uuid
+  student    Student  @relation(fields: [studentId], references: [id])
+  studentId  String   @db.Uuid
+  enrollDate DateTime @db.Timestamptz()
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Payment {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class       Class       @relation(fields: [classId], references: [id])
+  classId     String      @db.Uuid
+  student     Student     @relation(fields: [studentId], references: [id])
+  studentId   String      @db.Uuid
+  amount      Int
+  paymentType PaymentType @default(UNPAID)
+  paymentDate DateTime?   @db.Timestamptz()
+  dueDate     DateTime    @db.Timestamptz()
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Exam {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  class     Class     @relation(fields: [classId], references: [id])
+  classId   String    @db.Uuid
+  name      String    @db.VarChar(20)
+  examDate  DateTime? @db.Timestamptz()
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  examResults ExamResult[]
+}
+
+model ExamResult {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  exam      Exam     @relation(fields: [examId], references: [id])
+  examId    String   @db.Uuid
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId String   @db.Uuid
+  score     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -64,4 +221,32 @@ enum SalaryStatus {
   COMPLETED
 }
 
+enum ClassStatus {
+  OPEN
+  CLOSED
+}
 
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum StudentStatus {
+  ENROLLED // 등록
+  SUSPENDED // 정학
+  EXPELLED // 퇴학
+}
+
+enum StudentAttendanceStatus {
+  ATTENDED // 출석
+  ABSENT // 결석
+  TARDY // 지각
+  LEFT_EARLY // 조퇴
+}
+
+enum PaymentType {
+  PAID // 완납
+  UNPAID // 미납
+  REFUNDED // 환불
+}
