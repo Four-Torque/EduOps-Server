@@ -12,7 +12,9 @@ import {
 import { AuthService } from '../service/auth.service';
 import { CreateUserRequest } from 'src/modules/user/request/create-user.request';
 import {
+  clearCookies,
   ErrorCode,
+  JwtPayload,
   Message,
   Public,
   ResponseMessage,
@@ -27,6 +29,7 @@ import {
   ApiErrorResponse,
   ApiSuccessResponse,
 } from 'src/global/decorators/swagger.decorator';
+import { User } from '@prisma/client';
 import { EmailResponse } from '../response/email.response';
 
 @Public()
@@ -79,6 +82,21 @@ export class AuthController {
   ): Promise<void> {
     const { accessToken, refreshToken } = await this.authService.login(request);
     return setCookies(response, accessToken, refreshToken);
+  }
+
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃을 진행합니다.',
+  })
+  @ApiSuccessResponse()
+  @Post('logout')
+  async logout(
+    @Req() req: Request & { user: JwtPayload },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const user = req.user as User;
+    await this.authService.logout(user.id);
+    clearCookies(res);
   }
 
   @ApiOperation({

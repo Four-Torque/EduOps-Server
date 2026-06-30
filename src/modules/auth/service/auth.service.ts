@@ -41,6 +41,12 @@ export class AuthService {
     if (user) {
       throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
     }
+
+    const existingPhone = await this.userService.findByPhone(request.phone);
+    if (existingPhone) {
+      throw new ApiException(ErrorCode.PHONE_ALREADY_EXISTS);
+    }
+
     this.emailService.sendVerificationEmail({
       type: 'register',
       payload: request,
@@ -90,6 +96,16 @@ export class AuthService {
     await this.redis.set(redisKey, tokens.refreshToken, 7 * 24 * 60 * 60);
 
     return tokens;
+  }
+
+  /**
+   * logout 함수는 사용자의 로그아웃 요청을 처리하고 리프레시 토큰을 삭제합니다.
+   * @param userId - 로그아웃 요청을 한 사용자의 ID
+   * @returns - Promise<void>
+   */
+  async logout(userId: string): Promise<void> {
+    const redisKey = RedisKey.userRefreshToken(userId);
+    await this.redis.del(redisKey);
   }
 
   /**
