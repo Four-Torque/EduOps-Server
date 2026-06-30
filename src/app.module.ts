@@ -12,6 +12,8 @@ import { UserModule } from './modules/user/user.module';
 import { SalaryModule } from './modules/salary/salary.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { StaffAttendanceModule } from './modules/attendance/attendance.module';
+import { JwtGuard } from './modules/auth/guards/jwt.guard';
+import { APP_GUARD } from '@nestjs/core/constants';
 
 @Module({
   imports: [
@@ -23,7 +25,13 @@ import { StaffAttendanceModule } from './modules/attendance/attendance.module';
     AuthModule,
     StaffAttendanceModule,
   ],
-  providers: [],
+ 
+  providers: [
+      {
+        provide: APP_GUARD,
+        useClass: JwtGuard,
+      },
+    ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
