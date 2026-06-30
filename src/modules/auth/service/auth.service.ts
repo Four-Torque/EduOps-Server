@@ -93,6 +93,16 @@ export class AuthService {
   }
 
   /**
+   * logout 함수는 사용자의 로그아웃 요청을 처리하고 리프레시 토큰을 삭제합니다.
+   * @param userId - 로그아웃 요청을 한 사용자의 ID
+   * @returns - Promise<void>
+   */
+  async logout(userId: string): Promise<void> {
+    const redisKey = RedisKey.userRefreshToken(userId);
+    await this.redis.del(redisKey);
+  }
+
+  /**
    * refresh 함수는 리프레시 토큰을 사용하여 새로운 액세스 토큰과 리프레시 토큰을 생성합니다.
    * @param req - HTTP 요청 객체
    * @returns - 생성된 액세스 토큰과 리프레시 토큰 (TokenResponse)
