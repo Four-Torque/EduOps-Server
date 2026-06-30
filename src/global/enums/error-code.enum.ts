@@ -7,12 +7,25 @@ export enum ErrorCode {
   FORBIDDEN = 'COMMON_002',
   UNAUTHORIZED = 'COMMON_003',
 
+  // 인증 관련 에러
+  VERIFICATION_FAILED = 'AUTH_001',
+  VERIFICATION_TOKEN_INVALID = 'AUTH_002',
+  INVALID_EMAIL_OR_PASSWORD = 'AUTH_003',
+  REFRESH_TOKEN_NOT_FOUND = 'AUTH_004',
+  INVALID_REFRESH_TOKEN = 'AUTH_005',
+
   // 사용자 관련 에러
   USER_NOT_FOUND = 'USER_001',
+  USER_ALREADY_EXISTS = 'USER_002',
 
   // 급여 관련 에러
   SALARY_NOT_FOUND = 'SALARY_001',
   SALARY_ALREADY_PAID = 'SALARY_002',
+
+  // 직원 근태 관련 에러
+  ATTENDANCE_NOT_FOUND = 'ATTENDANCE_001',
+  ATTENDANCE_ALREADY_EXISTS = 'ATTENDANCE_002',
+  ATTENDANCE_ALREADY_CHECKED_OUT = 'ATTENDANCE_003',
 }
 
 export const ErrorCodeMap: Record<
@@ -37,10 +50,36 @@ export const ErrorCodeMap: Record<
     message: '인증이 필요합니다.',
   },
 
+  // 인증 관련 에러
+  [ErrorCode.VERIFICATION_FAILED]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이메일 인증에 실패했습니다.',
+  },
+  [ErrorCode.VERIFICATION_TOKEN_INVALID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '인증 토큰이 유효하지 않습니다.',
+  },
+  [ErrorCode.INVALID_EMAIL_OR_PASSWORD]: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '이메일 또는 비밀번호가 올바르지 않습니다.',
+  },
+  [ErrorCode.REFRESH_TOKEN_NOT_FOUND]: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '리프레시 토큰을 찾을 수 없습니다.',
+  },
+  [ErrorCode.INVALID_REFRESH_TOKEN]: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '리프레시 토큰이 유효하지 않습니다.',
+  },
+
   // 사용자 관련 에러
   [ErrorCode.USER_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '사용자를 찾을 수 없습니다.',
+  },
+  [ErrorCode.USER_ALREADY_EXISTS]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 존재하는 사용자입니다.',
   },
 
   // 급여 관련 에러
@@ -51,5 +90,19 @@ export const ErrorCodeMap: Record<
   [ErrorCode.SALARY_ALREADY_PAID]: {
     status: HttpStatus.BAD_REQUEST,
     message: '급여가 이미 지급되었습니다.',
+  },
+
+  // 직원 근태 관련 에러
+  [ErrorCode.ATTENDANCE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '근태를 찾을 수 없습니다.',
+  },
+  [ErrorCode.ATTENDANCE_ALREADY_EXISTS]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 존재하는 근태입니다.',
+  },
+  [ErrorCode.ATTENDANCE_ALREADY_CHECKED_OUT]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이미 체크아웃된 근태입니다.',
   },
 };

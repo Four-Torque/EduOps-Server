@@ -34,11 +34,15 @@ export class SalaryService {
     userId: string,
     status?: SalaryStatus,
   ): Promise<SalaryResponse[]> {
-    const salaries = await this.salaryRepository.findByuserId(userId, status);
-    const response: SalaryResponse[] = salaries.map((salary) =>
-      SalaryResponse.fromEntity(salary),
-    );
-    return response;
+    try {
+      const salaries = await this.salaryRepository.findByuserId(userId, status);
+      const response: SalaryResponse[] = salaries.map((salary) =>
+        SalaryResponse.fromEntity(salary),
+      );
+      return response;
+    } catch (error) {
+      throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async paySalary(id: string): Promise<SalaryResponse> {

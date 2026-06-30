@@ -38,8 +38,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     let responseBody: any = {
       statusCode: status,
-      message: message,
       path: request.url,
+      message: message,
       timestamp: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
     };
 
