@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import { ApiException, ErrorCode } from 'src/global';
 import { UserResponse } from '../response/user.response';
-import { User } from '@prisma/client';
+import { Role, User, UserStatus } from '@prisma/client';
 import { CreateUserRequest } from '../request/create-user.request';
 import * as bcrypt from 'bcryptjs';
 import { ResetPasswordRequest } from 'src/modules/auth/request/reset-password.request';
 import { RedisKey, RedisService } from 'src/redis';
+import { PaginatedUserResponse } from '../response/user-list.response';
+import { UpdateUserRequest } from '../request/update-user.request';
 
 @Injectable()
 export class UserService {
@@ -86,5 +88,65 @@ export class UserService {
       ResetPasswordRequest.toEntity(user.id, hashedPassword),
     );
     await this.redis.del(redisKey);
+  }
+
+  /**
+   * getUserList 메서드는 유저의 목록을 조회합니다
+   * @param role
+   * @param status
+   * @param page
+   * @param limit
+   * @returns
+   */
+  async getList(
+    role: Role,
+    status: UserStatus,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedUserResponse> {
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.userRepository.findList(role, status, skip, limit),
+      this.userRepository.countList(role, status),
+    ]);
+
+    return {
+      total,
+      page,
+      data: users.map((user) => UserResponse.fromEntity(user)),
+    };
+  }
+
+  /**
+   * updateUser 메서드는 사용자의 특정 정보를 수정/업데이트합니다
+   * @param id
+   * @param request
+   * @returns
+   */
+  async update(id: string, request: UpdateUserRequest): Promise<UserResponse> {
+    const existing = await this.userRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const data = UpdateUserRequest.toEntity(request);
+    const updated = await this.userRepository.update(id, data);
+
+    const response: UserResponse = UserResponse.fromEntity(updated);
+    return response;
+  }
+
+  /**
+   * delete 메서드는 사용자의 정보를 완전 삭제합니다
+   * @param id
+   */
+  async delete(id: string): Promise<void> {
+    const existing = await this.userRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    await this.userRepository.delete(id);
   }
 }

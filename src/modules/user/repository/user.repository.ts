@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Role, User, UserStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -24,5 +24,43 @@ export class UserRepository {
 
   async resetPassword(data: Prisma.UserUpdateArgs) {
     return this.prisma.user.update(data);
+  }
+
+  async findList(
+    role: Role,
+    status: UserStatus,
+    skip: number,
+    take: number,
+  ): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where: {
+        ...(role && { role }),
+        ...(status && { status }),
+      },
+      skip,
+      take,
+    });
+  }
+
+  async countList(role: Role, status: UserStatus): Promise<number> {
+    return this.prisma.user.count({
+      where: {
+        ...(role && { role }),
+        ...(status && { status }),
+      },
+    });
+  }
+
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
