@@ -17,6 +17,7 @@ export enum ErrorCode {
   // 사용자 관련 에러
   USER_NOT_FOUND = 'USER_001',
   USER_ALREADY_EXISTS = 'USER_002',
+  PHONE_ALREADY_EXISTS = 'USER_003',
 
   // 급여 관련 에러
   SALARY_NOT_FOUND = 'SALARY_001',
@@ -80,6 +81,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.USER_ALREADY_EXISTS]: {
     status: HttpStatus.CONFLICT,
     message: '이미 존재하는 사용자입니다.',
+  },
+  [ErrorCode.PHONE_ALREADY_EXISTS]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 존재하는 전화번호입니다.',
   },
 
   // 급여 관련 에러

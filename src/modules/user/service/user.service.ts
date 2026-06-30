@@ -49,6 +49,16 @@ export class UserService {
   }
 
   /**
+   * findByPhone 메서드는 주어진 전화번호를 가진 사용자를 조회합니다.
+   * @param phone - 조회할 사용자의 전화번호
+   * @returns Promise<User | null> - 조회된 사용자 객체 또는 null을 반환합니다.
+   */
+  async;
+  findByPhone(phone: string): Promise<User | null> {
+    return this.userRepository.findByPhone(phone);
+  }
+
+  /**
    * getSession 메서드는 주어진 사용자 ID를 기반으로 세션 정보를 조회합니다.
    * @param userId - 조회할 사용자의 ID
    * @returns Promise<UserResponse> - 조회된 사용자 정보를 UserResponse 형태로 반환합니다.

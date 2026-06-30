@@ -41,6 +41,12 @@ export class AuthService {
     if (user) {
       throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
     }
+
+    const existingPhone = await this.userService.findByPhone(request.phone);
+    if (existingPhone) {
+      throw new ApiException(ErrorCode.PHONE_ALREADY_EXISTS);
+    }
+
     this.emailService.sendVerificationEmail({
       type: 'register',
       payload: request,

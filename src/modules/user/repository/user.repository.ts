@@ -18,6 +18,12 @@ export class UserRepository {
     });
   }
 
+  findByPhone(phone: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { phone },
+    });
+  }
+
   create(data: Prisma.UserCreateInput) {
     return this.prisma.user.create({ data });
   }
