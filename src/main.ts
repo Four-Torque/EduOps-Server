@@ -39,6 +39,16 @@ async function bootstrap() {
     .setTitle('EduOps API')
     .setDescription('EduOps API 명세')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        in: 'header',
+      },
+      'eo_atk',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

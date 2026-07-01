@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { StudentService } from '../service/student.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { PaginatedStudentResponse } from '../response/student-list.response';
 import { StudentStatus } from '@prisma/client';
 import {
@@ -38,6 +38,10 @@ export class StudentController {
   )
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.STUDENT_LIST_FETCHED)
+  @ApiQuery({ name: 'status', required: false, enum: StudentStatus })
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
   @Get('/')
   async getStudentList(
     @Query('status') status?: StudentStatus,
@@ -54,8 +58,8 @@ export class StudentController {
   }
 
   @ApiOperation({
-    summary: '학생 목록 조회',
-    description: '학생 목록을 조회합니다. status, name으로 필터 가능',
+    summary: '학생 상세 조회',
+    description: '학생의 상세 정보를 조회합니다',
   })
   @ApiSuccessResponse(ResponseMessage.STUDENT_FETCHED, StudentResponse)
   @ApiErrorResponse(ErrorCode.STUDENT_NOT_FOUND)
