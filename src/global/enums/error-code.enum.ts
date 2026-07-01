@@ -61,7 +61,7 @@ export const ErrorCodeMap: Record<
     message: '인증 토큰이 유효하지 않습니다.',
   },
   [ErrorCode.INVALID_EMAIL_OR_PASSWORD]: {
-    status: HttpStatus.UNAUTHORIZED,
+    status: HttpStatus.BAD_REQUEST,
     message: '이메일 또는 비밀번호가 올바르지 않습니다.',
   },
   [ErrorCode.REFRESH_TOKEN_NOT_FOUND]: {
