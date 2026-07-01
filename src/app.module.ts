@@ -25,13 +25,13 @@ import { APP_GUARD } from '@nestjs/core/constants';
     AuthModule,
     StaffAttendanceModule,
   ],
- 
+
   providers: [
-      {
-        provide: APP_GUARD,
-        useClass: JwtGuard,
-      },
-    ],
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
