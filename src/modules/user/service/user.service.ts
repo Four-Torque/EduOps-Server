@@ -55,8 +55,7 @@ export class UserService {
    * @param phone - 조회할 사용자의 전화번호
    * @returns Promise<User | null> - 조회된 사용자 객체 또는 null을 반환합니다.
    */
-  async;
-  findByPhone(phone: string): Promise<User | null> {
+  async findByPhone(phone: string): Promise<User | null> {
     return this.userRepository.findByPhone(phone);
   }
 

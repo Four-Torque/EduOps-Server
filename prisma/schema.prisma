@@ -128,15 +128,14 @@ model Asset {
 }
 
 model Student {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String        @db.VarChar(50)
-  phone       String        @db.VarChar(20)
-  parentPhone String        @db.VarChar(20)
-  status      StudentStatus @default(ENROLLED)
-  birth       String        @db.VarChar(20)
-  address     String        @db.VarChar(50)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String        @db.VarChar(50)
+  phone     String        @db.VarChar(20)
+  status    StudentStatus @default(ENROLLED)
+  birth     String        @db.VarChar(20)
+  address   String        @db.VarChar(50)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   studentAttendances StudentAttendance[]
   enrollments        Enrollment[]

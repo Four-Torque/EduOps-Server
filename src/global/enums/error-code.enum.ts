@@ -27,6 +27,11 @@ export enum ErrorCode {
   ATTENDANCE_NOT_FOUND = 'ATTENDANCE_001',
   ATTENDANCE_ALREADY_EXISTS = 'ATTENDANCE_002',
   ATTENDANCE_ALREADY_CHECKED_OUT = 'ATTENDANCE_003',
+
+  // 학생 관련 에러
+  STUDENT_NOT_FOUND = 'STUDENT_001',
+  STUDENT_ALREADY_EXISTS = 'STUDENT_002',
+  STUDENT_ALREADY_ENROLLED = 'STUDENT_003',
 }
 
 export const ErrorCodeMap: Record<
@@ -109,5 +114,19 @@ export const ErrorCodeMap: Record<
   [ErrorCode.ATTENDANCE_ALREADY_CHECKED_OUT]: {
     status: HttpStatus.BAD_REQUEST,
     message: '이미 체크아웃된 근태입니다.',
+  },
+
+  // 학생 관련 에러
+  [ErrorCode.STUDENT_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '학생을 찾을 수 없습니다.',
+  },
+  [ErrorCode.STUDENT_ALREADY_EXISTS]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 존재하는 학생입니다.',
+  },
+  [ErrorCode.STUDENT_ALREADY_ENROLLED]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이미 등록된 학생입니다.',
   },
 };
