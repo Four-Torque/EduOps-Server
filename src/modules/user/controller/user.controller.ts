@@ -28,8 +28,6 @@ import { CreateUserRequest } from '../request/create-user.request';
 import { UpdateUserRequest } from '../request/update-user.request';
 
 @ApiTags('유저')
-// @TODO Guard활성화
-// @UseGuards(JwtGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
