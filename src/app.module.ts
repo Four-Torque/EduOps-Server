@@ -15,6 +15,7 @@ import { StaffAttendanceModule } from './modules/attendance/attendance.module';
 import { JwtGuard } from './modules/auth/guards/jwt.guard';
 import { APP_GUARD } from '@nestjs/core/constants';
 import { StudentModule } from './modules/student/student.module';
+import { VendorModule } from './vendor/vendor.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { StudentModule } from './modules/student/student.module';
     AuthModule,
     StaffAttendanceModule,
     StudentModule,
+    VendorModule,
   ],
 
   providers: [
