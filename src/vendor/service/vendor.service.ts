@@ -4,6 +4,7 @@ import { VendorRepository } from '../repository/vendor.repository';
 import { VendorResponse } from '../response/vendor.response';
 import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
 import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
+import { ApiException, ErrorCode } from 'src/global';
 
 @Injectable()
 export class VendorService {
@@ -27,6 +28,15 @@ export class VendorService {
       this.vendorRepository.count(take, skip),
     ]);
     const response = PaginatedVendorResponse.fromEntity(page, total, vendors);
+    return response;
+  }
+
+  async findById(id: string): Promise<VendorResponse> {
+    const vendor = await this.vendorRepository.findById(id);
+    if (!vendor) {
+      throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
+    }
+    const response = VendorResponse.fromEntity(vendor);
     return response;
   }
 }

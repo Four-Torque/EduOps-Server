@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Vendor } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -29,6 +29,12 @@ export class VendorRepository {
     return this.prisma.vendor.count({
       skip,
       take,
+    });
+  }
+
+  async findById(id: string): Promise<Vendor | null> {
+    return this.prisma.vendor.findUnique({
+      where: { id },
     });
   }
 }

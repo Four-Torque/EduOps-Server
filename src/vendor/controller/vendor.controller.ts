@@ -1,10 +1,16 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { VendorService } from '../service/vendor.service';
 import { Role } from 'src/global/decorators/role.decorator';
 import { CreateVendorRequest } from '../request/create-vendor.request';
 import { VendorResponse } from '../response/vendor.response';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiSuccessResponse, Message, ResponseMessage } from 'src/global';
+import {
+  ApiErrorResponse,
+  ApiSuccessResponse,
+  ErrorCode,
+  Message,
+  ResponseMessage,
+} from 'src/global';
 import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
 import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
 
@@ -36,6 +42,18 @@ export class VendorController {
     @Query() request: PaginatedVendorRequest,
   ): Promise<PaginatedVendorResponse> {
     const response = await this.vendorService.findAll(request);
+    return response;
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: '구매처 상세 조회',
+    description: '구매처 상세 정보를 조회합니다.',
+  })
+  @ApiSuccessResponse(null, VendorResponse)
+  @ApiErrorResponse(ErrorCode.VENDOR_NOT_FOUND)
+  async findById(@Param('id') id: string): Promise<VendorResponse> {
+    const response = await this.vendorService.findById(id);
     return response;
   }
 }
