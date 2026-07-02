@@ -1,10 +1,12 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { VendorService } from '../service/vendor.service';
 import { Role } from 'src/global/decorators/role.decorator';
 import { CreateVendorRequest } from '../request/create-vendor.request';
 import { VendorResponse } from '../response/vendor.response';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiSuccessResponse, Message, ResponseMessage } from 'src/global';
+import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
+import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
 
 @Role('DIRECTOR', 'MANAGER')
 @ApiTags('구매처')
@@ -21,6 +23,19 @@ export class VendorController {
   @Post()
   async create(@Body() request: CreateVendorRequest): Promise<VendorResponse> {
     const response = await this.vendorService.create(request);
+    return response;
+  }
+
+  @ApiOperation({
+    summary: '구매처 목록 조회',
+    description: '구매처 목록을 조회합니다.',
+  })
+  @ApiSuccessResponse(null, PaginatedVendorResponse)
+  @Get()
+  async findAll(
+    @Query() request: PaginatedVendorRequest,
+  ): Promise<PaginatedVendorResponse> {
+    const response = await this.vendorService.findAll(request);
     return response;
   }
 }

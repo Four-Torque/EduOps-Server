@@ -11,4 +11,24 @@ export class VendorRepository {
       data,
     });
   }
+
+  async findAll(
+    take: number,
+    skip: number,
+  ): Promise<Prisma.VendorGetPayload<{}>[]> {
+    return this.prisma.vendor.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take,
+      skip,
+    });
+  }
+
+  count(take: number, skip: number): Promise<number> {
+    return this.prisma.vendor.count({
+      skip,
+      take,
+    });
+  }
 }
