@@ -12,6 +12,7 @@ import { ClassService } from '../service/class.service';
 import { CreateClassRequest } from '../request/create-class.request';
 import { ClassResponse } from '../response/class.response';
 import { PaginatedClassResponse } from '../response/paginated-class.response';
+import { ClassStudentAttendanceResponse } from '../response/class-student-attendance.response';
 import { ClassStatus } from '@prisma/client';
 import {
   ApiErrorResponse,
@@ -94,11 +95,30 @@ export class ClassController {
     summary: '강좌 상세 조회',
     description: '강좌 상세 정보를 조회합니다.',
   })
-  @ApiSuccessResponse(null, ClassResponse)
+  @ApiSuccessResponse(ResponseMessage.CLASS_FETCHED, ClassResponse)
   @ApiErrorResponse(ErrorCode.CLASS_NOT_FOUND)
   @Get('/:id')
   async findById(@Param('id') id: string): Promise<ClassResponse> {
     const response = await this.classService.findById(id);
+    return response;
+  }
+
+  @ApiOperation({
+    summary: '강좌 수강생 출결 리스트 조회',
+    description: '특정 강좌의 수강생 목록과 출결 현황을 조회합니다.',
+  })
+  @ApiSuccessResponse(null, ClassStudentAttendanceResponse, true)
+  @ApiErrorResponse(ErrorCode.CLASS_NOT_FOUND)
+  @ApiQuery({ name: 'lectureDate', required: true, example: '2023-10-31' })
+  @Get('/:id/attendance')
+  async getAttendances(
+    @Param('id') classId: string,
+    @Query('lectureDate') lectureDate: string,
+  ): Promise<ClassStudentAttendanceResponse[]> {
+    const response = await this.classService.getAttendances(
+      classId,
+      lectureDate,
+    );
     return response;
   }
 }

@@ -148,6 +148,7 @@ export const ErrorCodeMap: Record<
   [ErrorCode.CLASS_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 강좌를 찾을 수 없습니다.',
+  },
   // 카테고리 관련 에러
   [ErrorCode.CATEGORY_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,

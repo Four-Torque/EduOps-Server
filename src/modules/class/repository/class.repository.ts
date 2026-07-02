@@ -63,4 +63,27 @@ export class ClassRepository {
       where,
     });
   }
+
+  async findStudentsWithAttendance(classId: string, lectureDate: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { classId },
+      include: {
+        student: true,
+      },
+      orderBy: {
+        student: {
+          name: 'asc',
+        },
+      },
+    });
+
+    const attendances = await this.prisma.studentAttendance.findMany({
+      where: {
+        classId,
+        lectureDate,
+      },
+    });
+
+    return { enrollments, attendances };
+  }
 }
