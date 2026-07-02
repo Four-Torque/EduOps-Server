@@ -31,7 +31,10 @@ export class StudentAttendanceController {
     summary: '학생 출결 생성',
     description: '학생 출결을 생성합니다',
   })
-  @ApiSuccessResponse(ResponseMessage.ATTENDANCE_CREATED)
+  @ApiSuccessResponse(
+    ResponseMessage.ATTENDANCE_CREATED,
+    StudentAttendanceResponse,
+  )
   @ApiErrorResponse(
     ErrorCode.STUDENT_NOT_FOUND,
     ErrorCode.INTERNAL_SERVER_ERROR,
@@ -49,7 +52,10 @@ export class StudentAttendanceController {
     summary: '학생 출결 상태 변경',
     description: '학생 출결의 상태를 변경합니다',
   })
-  @ApiSuccessResponse(ResponseMessage.ATTENDANCE_UPDATED)
+  @ApiSuccessResponse(
+    ResponseMessage.ATTENDANCE_UPDATED,
+    StudentAttendanceResponse,
+  )
   @ApiErrorResponse(ErrorCode.ATTENDANCE_NOT_FOUND)
   @Message(ResponseMessage.ATTENDANCE_UPDATED)
   @Patch('/:id')

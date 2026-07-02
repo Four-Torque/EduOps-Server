@@ -33,4 +33,9 @@ export enum ResponseMessage {
   VENDOR_CREATED = '구매처가 성공적으로 생성되었습니다.',
   VENDOR_UPDATED = '구매처 정보가 성공적으로 업데이트되었습니다.',
   VENDOR_DELETED = '구매처가 성공적으로 삭제되었습니다.',
+
+  // 강좌 관련
+  CLASS_CREATED = '강좌가 성공적으로 생성되었습니다.',
+  CLASS_FETCHED = '강좌가 성공적으로 조회되었습니다.',
+  CLASS_UPDATED = '강좌가 성공적으로 업데이트되었습니다.',
 }

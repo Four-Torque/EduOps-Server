@@ -37,6 +37,17 @@ export class StudentResponse {
     example: '서울특별시 강남구 테헤란로 123',
   })
   address: string;
+  @ApiProperty({
+    description: '생성 일자',
+    example: '2023-12-31T00:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: '수정 일자',
+    example: '2023-12-31T00:00:00.000Z',
+  })
+  updatedAt: Date;
 
   static fromEntity(entity: Student): StudentResponse {
     const response = new StudentResponse();
@@ -46,6 +57,8 @@ export class StudentResponse {
     response.status = entity.status;
     response.birth = entity.birth;
     response.address = entity.address;
+    response.createdAt = entity.createdAt;
+    response.updatedAt = entity.updatedAt;
     return response;
   }
 }
