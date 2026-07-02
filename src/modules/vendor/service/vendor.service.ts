@@ -11,6 +11,11 @@ import { UpdateVendorRequest } from '../request/update-vendor.request';
 export class VendorService {
   constructor(private readonly vendorRepository: VendorRepository) {}
 
+  /**
+   * 구매처 생성
+   * @param request CreateVendorRequest
+   * @returns VendorResponse
+   */
   async create(request: CreateVendorRequest): Promise<VendorResponse> {
     const newVendor = await this.vendorRepository.create(
       CreateVendorRequest.toEntity(request),
@@ -19,7 +24,14 @@ export class VendorService {
     return response;
   }
 
-  async findAll(request: PaginatedVendorRequest) {
+  /**
+   * 구매처 목록 조회
+   * @param request PaginatedVendorRequest
+   * @returns PaginatedVendorResponse
+   */
+  async findAll(
+    request: PaginatedVendorRequest,
+  ): Promise<PaginatedVendorResponse> {
     const { page = 1, limit } = request;
     const take = limit ?? 10;
     const skip = page && take ? (page - 1) * take : 0;
@@ -32,6 +44,11 @@ export class VendorService {
     return response;
   }
 
+  /**
+   * 구매처 상세 조회
+   * @param id string
+   * @returns VendorResponse
+   */
   async findById(id: string): Promise<VendorResponse> {
     const vendor = await this.vendorRepository.findById(id);
     if (!vendor) {
@@ -41,6 +58,12 @@ export class VendorService {
     return response;
   }
 
+  /**
+   * 구매처 수정
+   * @param id string
+   * @param request UpdateVendorRequest
+   * @returns VendorResponse
+   */
   async update(
     id: string,
     request: UpdateVendorRequest,
@@ -55,5 +78,18 @@ export class VendorService {
     );
     const response = VendorResponse.fromEntity(updatedVendor);
     return response;
+  }
+
+  /**
+   * 구매처 삭제
+   * @param ids string[]
+   * @returns void
+   */
+  async delete(ids: string[]): Promise<void> {
+    const vendors = await Promise.all(ids.map((id) => this.findById(id)));
+    if (vendors.length !== ids.length) {
+      throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
+    }
+    await this.vendorRepository.delete(ids);
   }
 }

@@ -44,4 +44,14 @@ export class VendorRepository {
       data,
     });
   }
+
+  async delete(ids: string[]): Promise<Prisma.BatchPayload> {
+    return this.prisma.vendor.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
 }

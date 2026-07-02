@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { VendorService } from '../service/vendor.service';
 import { Role } from 'src/global/decorators/role.decorator';
 import { CreateVendorRequest } from '../request/create-vendor.request';
@@ -72,5 +81,17 @@ export class VendorController {
   ): Promise<VendorResponse> {
     const response = await this.vendorService.update(id, request);
     return response;
+  }
+
+  @Delete()
+  @ApiOperation({
+    summary: '구매처 삭제',
+    description: '구매처를 삭제합니다.',
+  })
+  @ApiSuccessResponse(ResponseMessage.VENDOR_DELETED)
+  @ApiErrorResponse(ErrorCode.VENDOR_NOT_FOUND)
+  @Message(ResponseMessage.VENDOR_DELETED)
+  async delete(@Body('ids') ids: string[]): Promise<void> {
+    await this.vendorService.delete(ids);
   }
 }
