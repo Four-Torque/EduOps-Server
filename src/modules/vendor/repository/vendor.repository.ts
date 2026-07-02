@@ -37,4 +37,11 @@ export class VendorRepository {
       where: { id },
     });
   }
+
+  async update(id: string, data: Prisma.VendorUpdateInput): Promise<Vendor> {
+    return this.prisma.vendor.update({
+      where: { id },
+      data,
+    });
+  }
 }

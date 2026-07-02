@@ -5,6 +5,7 @@ import { VendorResponse } from '../response/vendor.response';
 import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
 import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
 import { ApiException, ErrorCode } from 'src/global';
+import { UpdateVendorRequest } from '../request/update-vendor.request';
 
 @Injectable()
 export class VendorService {
@@ -37,6 +38,22 @@ export class VendorService {
       throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
     }
     const response = VendorResponse.fromEntity(vendor);
+    return response;
+  }
+
+  async update(
+    id: string,
+    request: UpdateVendorRequest,
+  ): Promise<VendorResponse> {
+    const vendor = await this.vendorRepository.findById(id);
+    if (!vendor) {
+      throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
+    }
+    const updatedVendor = await this.vendorRepository.update(
+      id,
+      UpdateVendorRequest.toEntity(request),
+    );
+    const response = VendorResponse.fromEntity(updatedVendor);
     return response;
   }
 }

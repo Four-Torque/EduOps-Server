@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { VendorService } from '../service/vendor.service';
 import { Role } from 'src/global/decorators/role.decorator';
 import { CreateVendorRequest } from '../request/create-vendor.request';
@@ -13,6 +13,7 @@ import {
 } from 'src/global';
 import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
 import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
+import { UpdateVendorRequest } from '../request/update-vendor.request';
 
 @Role('DIRECTOR', 'MANAGER')
 @ApiTags('구매처')
@@ -54,6 +55,22 @@ export class VendorController {
   @ApiErrorResponse(ErrorCode.VENDOR_NOT_FOUND)
   async findById(@Param('id') id: string): Promise<VendorResponse> {
     const response = await this.vendorService.findById(id);
+    return response;
+  }
+
+  @Put(':id')
+  @ApiOperation({
+    summary: '구매처 수정',
+    description: '구매처 정보를 수정합니다.',
+  })
+  @ApiSuccessResponse(ResponseMessage.VENDOR_UPDATED, VendorResponse)
+  @ApiErrorResponse(ErrorCode.VENDOR_NOT_FOUND)
+  @Message(ResponseMessage.VENDOR_UPDATED)
+  async update(
+    @Param('id') id: string,
+    @Body() request: UpdateVendorRequest,
+  ): Promise<VendorResponse> {
+    const response = await this.vendorService.update(id, request);
     return response;
   }
 }
