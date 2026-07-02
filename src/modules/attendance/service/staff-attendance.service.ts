@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { StaffAttendanceRepository } from '../repository/staff_attendance.repository';
+import { StaffAttendanceRepository } from '../repository/staff-attendance.repository';
 import { StaffAttendanceResponse } from '../response/staff-attendance.response';
 import { ApiException, ErrorCode } from 'src/global';
 import { CreateStaffAttendanceRequest } from '../request/create-staff-attendance.request';
@@ -50,8 +50,7 @@ export class StaffAttendanceService {
         workDate: date,
         checkInTime: today,
       });
-      const attendance =
-        await this.staffAttendanceRepository.createAttendance(data);
+      const attendance = await this.staffAttendanceRepository.create(data);
 
       const response: StaffAttendanceResponse =
         StaffAttendanceResponse.fromEntity(attendance);

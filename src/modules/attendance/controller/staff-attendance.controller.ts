@@ -7,7 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { StaffAttendanceService } from '../service/staff_attendance.service';
+import { StaffAttendanceService } from '../service/staff-attendance.service';
 import { StaffAttendanceResponse } from '../response/staff-attendance.response';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
@@ -71,11 +71,9 @@ export class StaffAttendanceController {
   @Message(ResponseMessage.ATTENDANCE_CHECKED_IN)
   @Post('/check-in')
   async checkIn(
-    @Body() createStaffAttendanceRequest: CreateStaffAttendanceRequest,
+    @Body() request: CreateStaffAttendanceRequest,
   ): Promise<StaffAttendanceResponse> {
-    const attendance = await this.staffAttendanceService.checkIn(
-      createStaffAttendanceRequest,
-    );
+    const attendance = await this.staffAttendanceService.checkIn(request);
     return attendance;
   }
 

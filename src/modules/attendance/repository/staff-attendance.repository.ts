@@ -24,7 +24,7 @@ export class StaffAttendanceRepository {
     });
   }
 
-  async createAttendance(
+  async create(
     data: Prisma.StaffAttendanceCreateInput,
   ): Promise<StaffAttendance> {
     return this.prisma.staffAttendance.create({

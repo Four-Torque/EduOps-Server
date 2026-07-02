@@ -9,10 +9,11 @@ export enum ResponseMessage {
   SALARY_UPDATED = '급여가 성공적으로 업데이트되었습니다.',
   SALARY_FETCHED = '급여가 성공적으로 조회되었습니다.',
 
-  // 직원 근태 관련
-  ATTENDANCE_FETCHED = '직원 근태가 성공적으로 조회되었습니다.',
+  // 직원 근태 / 학생 출결 관련
+  ATTENDANCE_FETCHED = '직원 근태 / 학생 출결이 성공적으로 조회되었습니다.',
   ATTENDANCE_CHECKED_IN = '직원 체크인이 성공적으로 완료되었습니다.',
-  ATTENDANCE_UPDATED = '직원 근태가 성공적으로 업데이트되었습니다.',
+  ATTENDANCE_UPDATED = '직원 근태 / 학생 출결이 성공적으로 업데이트되었습니다.',
+  ATTENDANCE_CREATED = '학생 출결이 성공적으로 생성되었습니다.',
 
   // 유저 관련
   USER_LIST_FETCHED = '유저 목록이 성공적으로 조회되었습니다.',
