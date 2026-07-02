@@ -100,11 +100,14 @@ model AssetsApplication {
   name           String            @db.VarChar(100)
   quantity       Int
   price          Int
-  acceptedReason String?           @db.VarChar(200)
-  rejectedReason String?           @db.VarChar(200)
+  reason         String            @db.Text
+  rejectedReason String?           @db.Text
   status         ApplicationStatus @default(PENDING)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  requestedAt    DateTime          @default(now())
+  processedAt    DateTime?
+
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  vendorId String @db.Uuid
 }
 
 model Category {
@@ -114,7 +117,7 @@ model Category {
   updatedAt DateTime @updatedAt
 
   assetsApplications AssetsApplication[]
-  asset              Asset[]
+  assets             Asset[]
 }
 
 model Asset {
@@ -125,6 +128,21 @@ model Asset {
   stock      Int      @default(1)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  vendorId String @db.Uuid
+}
+
+model Vendor {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(100)
+  phone     String   @db.VarChar(20)
+  email     String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assets             Asset[]
+  assetsApplications AssetsApplication[]
 }
 
 model Student {
