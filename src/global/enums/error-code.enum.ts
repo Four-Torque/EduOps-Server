@@ -35,6 +35,9 @@ export enum ErrorCode {
 
   // 구매처 관련 에러
   VENDOR_NOT_FOUND = 'VENDOR_001',
+
+  // 카테고리 관련 에러
+  CATEGORY_NOT_FOUND = 'CATEGORY_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -137,5 +140,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.VENDOR_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 구매처를 찾을 수 없습니다.',
+  },
+
+  // 카테고리 관련 에러
+  [ErrorCode.CATEGORY_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 카테고리를 찾을 수 없습니다.',
   },
 };
