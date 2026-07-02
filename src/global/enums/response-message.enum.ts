@@ -28,4 +28,9 @@ export enum ResponseMessage {
   STUDENT_CREATED = '학생이 성공적으로 생성되었습니다.',
   STUDENT_UPDATED = '학생 정보가 성공적으로 업데이트되었습니다.',
   STUDENT_DELETED = '학생이 성공적으로 삭제되었습니다.',
+
+  // 구매처 관련
+  VENDOR_CREATED = '구매처가 성공적으로 생성되었습니다.',
+  VENDOR_UPDATED = '구매처 정보가 성공적으로 업데이트되었습니다.',
+  VENDOR_DELETED = '구매처가 성공적으로 삭제되었습니다.',
 }

@@ -32,6 +32,9 @@ export enum ErrorCode {
   STUDENT_NOT_FOUND = 'STUDENT_001',
   STUDENT_ALREADY_EXISTS = 'STUDENT_002',
   STUDENT_ALREADY_ENROLLED = 'STUDENT_003',
+
+  // 구매처 관련 에러
+  VENDOR_NOT_FOUND = 'VENDOR_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -128,5 +131,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.STUDENT_ALREADY_ENROLLED]: {
     status: HttpStatus.BAD_REQUEST,
     message: '이미 등록된 학생입니다.',
+  },
+
+  // 구매처 관련 에러
+  [ErrorCode.VENDOR_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 구매처를 찾을 수 없습니다.',
   },
 };
