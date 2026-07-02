@@ -16,6 +16,7 @@ import { JwtGuard } from './modules/auth/guards/jwt.guard';
 import { APP_GUARD } from '@nestjs/core/constants';
 import { StudentModule } from './modules/student/student.module';
 import { VendorModule } from './modules/vendor/vendor.module';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { VendorModule } from './modules/vendor/vendor.module';
     StaffAttendanceModule,
     StudentModule,
     VendorModule,
+    CategoryModule,
   ],
 
   providers: [
