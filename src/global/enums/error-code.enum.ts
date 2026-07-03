@@ -44,6 +44,9 @@ export enum ErrorCode {
 
   // 결제 관련 에러
   PAYMENT_NOT_FOUND = 'PAYMENT_001',
+
+  // 수강 등록 관련 에러
+  ENROLLMENT_NOT_FOUND = 'ENROLLMENT_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -164,5 +167,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.PAYMENT_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 결제를 찾을 수 없습니다.',
+  },
+
+  // 수강 등록 관련 에러
+  [ErrorCode.ENROLLMENT_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '수강 내역을 찾을 수 없습니다.',
   },
 };

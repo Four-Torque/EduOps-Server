@@ -70,6 +70,7 @@ export class PaymentService {
 
     const data: Prisma.PaymentUpdateInput = {
       ...(request.paymentType && { paymentType: request.paymentType }),
+      ...(request.title !== undefined && { title: request.title }),
       ...(request.amount !== undefined && { amount: request.amount }),
       ...(request.dueDate && { dueDate: request.dueDate }),
     };
@@ -88,5 +89,9 @@ export class PaymentService {
 
     const updated = await this.paymentRepository.findById(id);
     return PaymentResponse.fromEntity(updated);
+  }
+
+  async deleteUnpaidPayments(studentId: string, classId: string): Promise<void> {
+    await this.paymentRepository.deleteUnpaidPayments(studentId, classId);
   }
 }

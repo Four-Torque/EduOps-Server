@@ -1,9 +1,17 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentType } from '@prisma/client';
-import { IsDate, IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdatePaymentRequest {
+  @ApiPropertyOptional({
+    description: '청구 제목 변경',
+    example: '11월 기초수학 수강료',
+  })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
   @ApiPropertyOptional({
     description: '결제 상태 변경 (PAID, UNPAID, REFUNDED)',
     enum: PaymentType,

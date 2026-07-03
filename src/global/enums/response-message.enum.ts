@@ -49,4 +49,9 @@ export enum ResponseMessage {
   PAYMENT_UPDATED = '결제 정보가 성공적으로 업데이트되었습니다.',
   PAYMENT_FETCHED = '결제 정보가 성공적으로 조회되었습니다.',
   PAYMENT_DELETED = '결제가 성공적으로 삭제되었습니다.',
+
+  // 수강 등록 관련
+  ENROLLMENT_CREATED = '수강 등록이 성공적으로 완료되었습니다.',
+  ENROLLMENT_FETCHED = '수강 내역이 성공적으로 조회되었습니다.',
+  ENROLLMENT_DELETED = '수강 등록이 성공적으로 취소되었습니다.',
 }

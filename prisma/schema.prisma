@@ -190,6 +190,7 @@ model Payment {
   classId     String      @db.Uuid
   student     Student     @relation(fields: [studentId], references: [id])
   studentId   String      @db.Uuid
+  title       String      @db.VarChar(100)
   amount      Int
   paymentType PaymentType @default(UNPAID)
   paymentDate DateTime?   @db.Timestamptz()

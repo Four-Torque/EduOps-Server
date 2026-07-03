@@ -71,4 +71,14 @@ export class PaymentRepository {
       data,
     });
   }
+
+  async deleteUnpaidPayments(studentId: string, classId: string) {
+    return this.prisma.payment.deleteMany({
+      where: {
+        studentId,
+        classId,
+        paymentType: 'UNPAID', // PaymentType.UNPAID 상수 사용 가능 (하지만 prisma 타입 상 'UNPAID'로 매핑됨)
+      },
+    });
+  }
 }

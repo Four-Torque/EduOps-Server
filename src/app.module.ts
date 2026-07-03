@@ -19,6 +19,7 @@ import { VendorModule } from './modules/vendor/vendor.module';
 import { ClassModule } from './modules/class/class.module';
 import { CategoryModule } from './modules/category/category.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { EnrollmentModule } from './modules/enrollment/enrollment.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     ClassModule,
     CategoryModule,
     PaymentModule,
+    EnrollmentModule,
   ],
 
   providers: [

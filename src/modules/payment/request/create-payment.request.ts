@@ -19,6 +19,13 @@ export class CreatePaymentRequest {
   studentId: string;
 
   @ApiProperty({
+    description: '청구 제목 (어떤 목적으로 결제하는지 설명)',
+    example: '11월 기초수학 수강료',
+  })
+  @IsString()
+  title: string;
+
+  @ApiProperty({
     description: '청구 금액',
     example: 150000,
   })
@@ -46,6 +53,7 @@ export class CreatePaymentRequest {
     return {
       class: { connect: { id: request.classId } },
       student: { connect: { id: request.studentId } },
+      title: request.title,
       amount: request.amount,
       dueDate: request.dueDate,
       ...(request.paymentType && { paymentType: request.paymentType }),

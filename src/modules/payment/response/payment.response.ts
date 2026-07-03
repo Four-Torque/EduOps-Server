@@ -21,6 +21,12 @@ export class PaymentResponse {
   studentId: string;
 
   @ApiProperty({
+    description: '청구 제목',
+    example: '11월 기초수학 수강료',
+  })
+  title: string;
+
+  @ApiProperty({
     description: '청구 금액',
     example: 150000,
   })
@@ -81,6 +87,7 @@ export class PaymentResponse {
     response.id = entity.id;
     response.classId = entity.classId;
     response.studentId = entity.studentId;
+    response.title = entity.title;
     response.amount = entity.amount;
     response.paymentType = entity.paymentType;
     response.paymentDate = entity.paymentDate;
