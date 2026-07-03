@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma, Role, UserStatus } from '@prisma/client';
+import { Prisma, Role, UserStatus, EmploymentStatus } from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserRequest {
@@ -35,12 +35,22 @@ export class UpdateUserRequest {
   @IsOptional()
   status?: UserStatus;
 
+  @ApiProperty({
+    description: '근로 상태',
+    example: 'WORKING',
+    required: false,
+  })
+  @IsEnum(EmploymentStatus)
+  @IsOptional()
+  employmentStatus?: EmploymentStatus;
+
   static toEntity(request: UpdateUserRequest): Prisma.UserUpdateInput {
     return {
       ...(request.name && { name: request.name }),
       ...(request.phone && { phone: request.phone }),
       ...(request.role && { role: request.role }),
       ...(request.status && { status: request.status }),
+      ...(request.employmentStatus && { employmentStatus: request.employmentStatus }),
     };
   }
 }

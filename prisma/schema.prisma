@@ -13,10 +13,11 @@ model User {
   email     String     @unique @db.VarChar(50)
   phone     String     @unique @db.VarChar(20)
   password  String     @db.VarChar(100)
-  role      Role       @default(TEACHER)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  role             Role             @default(TEACHER)
+  status           UserStatus       @default(ACTIVE)
+  employmentStatus EmploymentStatus @default(WORKING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   salaries           Salary[]
   staffAttendances   StaffAttendance[]
@@ -233,7 +234,12 @@ enum Role {
 enum UserStatus {
   ACTIVE
   INACTIVE
-  LEAVE
+}
+
+enum EmploymentStatus {
+  WORKING
+  ON_LEAVE
+  RESIGNED
 }
 
 enum SalaryStatus {
