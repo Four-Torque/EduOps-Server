@@ -38,8 +38,12 @@ export enum ErrorCode {
 
   // 강좌 관련 에러
   CLASS_NOT_FOUND = 'CLASS_001',
+
   // 카테고리 관련 에러
   CATEGORY_NOT_FOUND = 'CATEGORY_001',
+
+  // 결제 관련 에러
+  PAYMENT_NOT_FOUND = 'PAYMENT_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -144,14 +148,21 @@ export const ErrorCodeMap: Record<
     message: '해당 구매처를 찾을 수 없습니다.',
   },
 
-  // 클래스 관런 에러
+  // 강좌 관런 에러
   [ErrorCode.CLASS_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 강좌를 찾을 수 없습니다.',
   },
+
   // 카테고리 관련 에러
   [ErrorCode.CATEGORY_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 카테고리를 찾을 수 없습니다.',
+  },
+
+  // 결제 관련 에러
+  [ErrorCode.PAYMENT_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 결제를 찾을 수 없습니다.',
   },
 };

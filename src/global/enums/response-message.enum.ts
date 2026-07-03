@@ -38,8 +38,15 @@ export enum ResponseMessage {
   CLASS_CREATED = '강좌가 성공적으로 생성되었습니다.',
   CLASS_FETCHED = '강좌가 성공적으로 조회되었습니다.',
   CLASS_UPDATED = '강좌가 성공적으로 업데이트되었습니다.',
+
   // 카테고리 관련
   CATEGORY_CREATED = '카테고리가 성공적으로 생성되었습니다.',
   CATEGORY_UPDATED = '카테고리 정보가 성공적으로 업데이트되었습니다.',
   CATEGORY_DELETED = '카테고리가 성공적으로 삭제되었습니다.',
+
+  // 결제 관련
+  PAYMENT_CREATED = '결제가 성공적으로 생성되었습니다.',
+  PAYMENT_UPDATED = '결제 정보가 성공적으로 업데이트되었습니다.',
+  PAYMENT_FETCHED = '결제 정보가 성공적으로 조회되었습니다.',
+  PAYMENT_DELETED = '결제가 성공적으로 삭제되었습니다.',
 }
