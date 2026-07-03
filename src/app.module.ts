@@ -18,6 +18,7 @@ import { StudentModule } from './modules/student/student.module';
 import { VendorModule } from './modules/vendor/vendor.module';
 import { ClassModule } from './modules/class/class.module';
 import { CategoryModule } from './modules/category/category.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CategoryModule } from './modules/category/category.module';
     VendorModule,
     ClassModule,
     CategoryModule,
+    PaymentModule,
   ],
 
   providers: [
