@@ -55,7 +55,6 @@ model Class {
   name      String      @db.VarChar(20)
   fee       Int
   capacity  Int         @default(0)
-  room      String      @db.VarChar(50) @default("미배정")
   startDate DateTime?   @db.Timestamptz()
   endDate   DateTime?   @db.Timestamptz()
   status    ClassStatus @default(OPEN)
@@ -89,6 +88,7 @@ model Schedule {
   dayOfWeek Int
   startTime String @db.VarChar(5)
   endTime   String @db.VarChar(5)
+  room      String @db.VarChar(50) @default("미배정")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

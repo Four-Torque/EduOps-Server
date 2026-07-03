@@ -32,13 +32,6 @@ export class CreateClassRequest {
   capacity: number;
 
   @ApiProperty({
-    description: '배정 강의실',
-    example: '101호',
-  })
-  @IsString()
-  room: string;
-
-  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -58,7 +51,6 @@ export class CreateClassRequest {
       name: request.name,
       fee: request.fee,
       capacity: request.capacity,
-      room: request.room,
       startDate: request.startDate,
       endDate: request.endDate,
     };

@@ -46,13 +46,6 @@ export class ClassResponse {
   currentStudents: number;
 
   @ApiProperty({
-    description: '배정 강의실',
-    example: '101호',
-  })
-  @IsString()
-  room: string;
-
-  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -103,7 +96,6 @@ export class ClassResponse {
     response.name = entity.name;
     response.fee = entity.fee;
     response.capacity = entity.capacity;
-    response.room = entity.room;
     response.startDate = entity.startDate;
     response.endDate = entity.endDate;
     response.status = entity.status;
@@ -118,6 +110,7 @@ export class ClassResponse {
         dayOfWeek: s.dayOfWeek,
         startTime: s.startTime,
         endTime: s.endTime,
+        room: s.room,
       }));
     }
 

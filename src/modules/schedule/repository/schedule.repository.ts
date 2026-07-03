@@ -41,4 +41,38 @@ export class ScheduleRepository {
     });
     return result.count;
   }
+
+  async findOverlappingForTeacher(
+    teacherId: string,
+    dayOfWeek: number,
+    startTime: string,
+    endTime: string,
+  ): Promise<Schedule | null> {
+    return this.prisma.schedule.findFirst({
+      where: {
+        class: {
+          teacherId,
+        },
+        dayOfWeek,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime },
+      },
+    });
+  }
+
+  async findOverlappingForRoom(
+    room: string,
+    dayOfWeek: number,
+    startTime: string,
+    endTime: string,
+  ): Promise<Schedule | null> {
+    return this.prisma.schedule.findFirst({
+      where: {
+        room,
+        dayOfWeek,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime },
+      },
+    });
+  }
 }

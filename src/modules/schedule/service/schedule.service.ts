@@ -23,13 +23,33 @@ export class ScheduleService {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
 
-    // 2. 유효성 검사 (시작 시간이 종료 시간보다 빠른지 등)
+    // 2. 유효성 검사 및 중복 검사
     for (const schedule of request.schedules) {
       if (schedule.startTime >= schedule.endTime) {
-        throw new ApiException(
-          ErrorCode.BAD_REQUEST,
-          '시작 시간은 종료 시간보다 빨라야 합니다.',
+        throw new ApiException(ErrorCode.BAD_REQUEST);
+      }
+
+      // 교사 중복 검사
+      const teacherOverlap =
+        await this.scheduleRepository.findOverlappingForTeacher(
+          cls.teacherId,
+          schedule.dayOfWeek,
+          schedule.startTime,
+          schedule.endTime,
         );
+      if (teacherOverlap) {
+        throw new ApiException(ErrorCode.TEACHER_SCHEDULE_CONFLICT);
+      }
+
+      // 강의실 중복 검사
+      const roomOverlap = await this.scheduleRepository.findOverlappingForRoom(
+        schedule.room,
+        schedule.dayOfWeek,
+        schedule.startTime,
+        schedule.endTime,
+      );
+      if (roomOverlap) {
+        throw new ApiException(ErrorCode.ROOM_SCHEDULE_CONFLICT);
       }
     }
 

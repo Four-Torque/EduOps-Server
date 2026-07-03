@@ -26,6 +26,13 @@ export class ScheduleItemDto {
   })
   @IsString()
   endTime: string;
+
+  @ApiProperty({
+    description: '강의실',
+    example: '101호',
+  })
+  @IsString()
+  room: string;
 }
 
 export class CreateScheduleBulkRequest {
@@ -51,6 +58,7 @@ export class CreateScheduleBulkRequest {
       dayOfWeek: schedule.dayOfWeek,
       startTime: schedule.startTime,
       endTime: schedule.endTime,
+      room: schedule.room,
     }));
   }
 }

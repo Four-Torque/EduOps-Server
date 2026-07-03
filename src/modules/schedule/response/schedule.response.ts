@@ -32,6 +32,12 @@ export class ScheduleResponse {
   })
   endTime: string;
 
+  @ApiProperty({
+    description: '강의실',
+    example: '101호',
+  })
+  room: string;
+
   static fromEntity(entity: Schedule): ScheduleResponse {
     const response = new ScheduleResponse();
     response.id = entity.id;
@@ -39,6 +45,7 @@ export class ScheduleResponse {
     response.dayOfWeek = entity.dayOfWeek;
     response.startTime = entity.startTime;
     response.endTime = entity.endTime;
+    response.room = entity.room;
     return response;
   }
 }
