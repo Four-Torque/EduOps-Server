@@ -66,7 +66,14 @@ export class ClassResponse {
   @IsDate()
   updatedAt: Date;
 
-  static fromEntity(entity: Class): ClassResponse {
+  @ApiProperty({
+    description: '시간표 목록',
+    required: false,
+    type: () => [Object],
+  })
+  schedules?: any[];
+
+  static fromEntity(entity: Class & { schedules?: any[] }): ClassResponse {
     const response = new ClassResponse();
     response.id = entity.id;
     response.teacherId = entity.teacherId;
@@ -77,6 +84,15 @@ export class ClassResponse {
     response.status = entity.status;
     response.createdAt = entity.createdAt;
     response.updatedAt = entity.updatedAt;
+
+    if (entity.schedules) {
+      response.schedules = entity.schedules.map((s) => ({
+        id: s.id,
+        dayOfWeek: s.dayOfWeek,
+        startTime: s.startTime,
+        endTime: s.endTime,
+      }));
+    }
 
     return response;
   }

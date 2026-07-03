@@ -54,4 +54,9 @@ export enum ResponseMessage {
   ENROLLMENT_CREATED = '수강 등록이 성공적으로 완료되었습니다.',
   ENROLLMENT_FETCHED = '수강 내역이 성공적으로 조회되었습니다.',
   ENROLLMENT_DELETED = '수강 등록이 성공적으로 취소되었습니다.',
+
+  // 시간표 관련
+  SCHEDULE_CREATED = '시간표가 성공적으로 등록되었습니다.',
+  SCHEDULE_FETCHED = '시간표가 성공적으로 조회되었습니다.',
+  SCHEDULE_DELETED = '시간표가 성공적으로 삭제되었습니다.',
 }

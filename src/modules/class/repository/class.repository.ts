@@ -17,6 +17,14 @@ export class ClassRepository {
       where: {
         id,
       },
+      include: {
+        schedules: {
+          orderBy: [
+            { dayOfWeek: 'asc' },
+            { startTime: 'asc' },
+          ],
+        },
+      },
     });
   }
 
@@ -44,6 +52,14 @@ export class ClassRepository {
       where,
       skip,
       take,
+      include: {
+        schedules: {
+          orderBy: [
+            { dayOfWeek: 'asc' },
+            { startTime: 'asc' },
+          ],
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

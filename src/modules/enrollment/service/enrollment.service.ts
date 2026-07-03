@@ -16,12 +16,18 @@ export class EnrollmentService {
     private readonly studentRepository: StudentRepository,
   ) {}
 
+  /**
+   * create 메서드는 등록 정보와 결제 정보를 생성합니다.
+   * @param request
+   * @returns
+   */
   async create(request: CreateEnrollmentRequest): Promise<EnrollmentResponse> {
     // 1. 중복 수강 등록 확인
-    const existingEnrollment = await this.enrollmentRepository.findByStudentAndClass(
-      request.studentId,
-      request.classId,
-    );
+    const existingEnrollment =
+      await this.enrollmentRepository.findByStudentAndClass(
+        request.studentId,
+        request.classId,
+      );
     if (existingEnrollment) {
       throw new ApiException(ErrorCode.STUDENT_ALREADY_ENROLLED);
     }
@@ -40,19 +46,21 @@ export class EnrollmentService {
 
     // 3. 수강 데이터 생성
     const enrollmentData = CreateEnrollmentRequest.toEntity(request);
-    const createdEnrollment = await this.enrollmentRepository.create(enrollmentData);
+    const createdEnrollment =
+      await this.enrollmentRepository.create(enrollmentData);
 
     // 4. 첫 결제(청구서) 자동 생성 로직
     // 클라이언트가 넘겨준 값이 있으면 그것을 사용, 없으면 강좌 정가 사용
-    const billingAmount = request.initialAmount !== undefined ? request.initialAmount : cls.fee;
-    
+    const billingAmount =
+      request.initialAmount !== undefined ? request.initialAmount : cls.fee;
+
     // 납부 기한이 없으면 기본값으로 수강 시작일 기준 + 7일 설정
     let dueDate = request.initialDueDate;
     if (!dueDate) {
       dueDate = new Date(request.enrollDate);
       dueDate.setDate(dueDate.getDate() + 7);
     }
-    
+
     // 청구서 제목 자동 생성 (예: "23년11월-수학영재반-홍길동")
     const enrollDateObj = new Date(request.enrollDate);
     const yy = enrollDateObj.getFullYear().toString().slice(-2);
@@ -72,24 +80,42 @@ export class EnrollmentService {
     const enrollmentWithRelations = await this.enrollmentRepository.findById(
       createdEnrollment.id,
     );
-    
+
     return EnrollmentResponse.fromEntity(enrollmentWithRelations as any);
   }
 
-  async findAll(studentId?: string, classId?: string): Promise<EnrollmentResponse[]> {
+  /**
+   * findAll 메서드는 학생ID와 강좌ID로 등록 데이터 리스트를 조회합니다.
+   * @param studentId
+   * @param classId
+   * @returns
+   */
+  async findAll(
+    studentId?: string,
+    classId?: string,
+  ): Promise<EnrollmentResponse[]> {
     const data = await this.enrollmentRepository.findAll(studentId, classId);
-    return data.map((enrollment) => EnrollmentResponse.fromEntity(enrollment as any));
+    return data.map((enrollment) =>
+      EnrollmentResponse.fromEntity(enrollment as any),
+    );
   }
 
+  /**
+   * delete 메서드는 id로 해당 등록 정보와 미납 결제 정보를 삭제합니다.
+   * @param id
+   */
   async delete(id: string): Promise<void> {
     const enrollment = await this.enrollmentRepository.findById(id);
     if (!enrollment) {
       throw new ApiException(ErrorCode.ENROLLMENT_NOT_FOUND);
     }
-    
+
     // 수강을 취소할 때, 아직 내지 않은 해당 강좌의 미납(UNPAID) 청구서만 깔끔하게 일괄 삭제합니다.
     // (이미 낸 돈(PAID)이나 환불된 돈(REFUNDED) 등은 회계상 보존되어야 하므로 건드리지 않습니다.)
-    await this.paymentService.deleteUnpaidPayments(enrollment.studentId, enrollment.classId);
+    await this.paymentService.deleteUnpaidPayments(
+      enrollment.studentId,
+      enrollment.classId,
+    );
 
     // 수강 내역 삭제 처리
     await this.enrollmentRepository.delete(id);

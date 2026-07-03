@@ -47,6 +47,9 @@ export enum ErrorCode {
 
   // 수강 등록 관련 에러
   ENROLLMENT_NOT_FOUND = 'ENROLLMENT_001',
+
+  // 시간표 관련 에러
+  SCHEDULE_NOT_FOUND = 'SCHEDULE_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -173,5 +176,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.ENROLLMENT_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '수강 내역을 찾을 수 없습니다.',
+  },
+
+  // 시간표 관련 에러
+  [ErrorCode.SCHEDULE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '시간표를 찾을 수 없습니다.',
   },
 };
