@@ -45,6 +45,22 @@ export class UserResponse {
   employmentStatus: string;
 
   @ApiProperty({
+    description: '입사일',
+    example: '2023-01-01T00:00:00.000Z',
+    required: false,
+    nullable: true,
+  })
+  joinedAt: Date | null;
+
+  @ApiProperty({
+    description: '퇴사일',
+    example: '2026-07-01T00:00:00.000Z',
+    required: false,
+    nullable: true,
+  })
+  resignedAt: Date | null;
+
+  @ApiProperty({
     description: '사용자 생성일',
     example: '2026-06-25 16:27:23.356',
   })
@@ -65,6 +81,8 @@ export class UserResponse {
     response.role = entity.role;
     response.status = entity.status;
     response.employmentStatus = entity.employmentStatus;
+    response.joinedAt = entity.joinedAt;
+    response.resignedAt = entity.resignedAt;
     response.createdAt = entity.createdAt;
     response.updatedAt = entity.updatedAt;
     return response;
