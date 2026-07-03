@@ -33,6 +33,22 @@ export class UpdateClassRequest {
   fee: number;
 
   @ApiProperty({
+    description: '강좌 인원수',
+    example: 30,
+  })
+  @IsNumber()
+  @IsOptional()
+  capacity: number;
+
+  @ApiProperty({
+    description: '배정 강의실',
+    example: '101호',
+  })
+  @IsString()
+  @IsOptional()
+  room: string;
+
+  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -61,6 +77,8 @@ export class UpdateClassRequest {
       teacher: { connect: { id: request.teacherId } },
       name: request.name,
       fee: request.fee,
+      capacity: request.capacity,
+      room: request.room,
       startDate: request.startDate,
       endDate: request.endDate,
       status: request.status,

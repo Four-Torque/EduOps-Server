@@ -19,10 +19,10 @@ export class ClassRepository {
       },
       include: {
         schedules: {
-          orderBy: [
-            { dayOfWeek: 'asc' },
-            { startTime: 'asc' },
-          ],
+          orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+        },
+        _count: {
+          select: { enrollments: true },
         },
       },
     });
@@ -54,10 +54,10 @@ export class ClassRepository {
       take,
       include: {
         schedules: {
-          orderBy: [
-            { dayOfWeek: 'asc' },
-            { startTime: 'asc' },
-          ],
+          orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+        },
+        _count: {
+          select: { enrollments: true },
         },
       },
       orderBy: { createdAt: 'desc' },

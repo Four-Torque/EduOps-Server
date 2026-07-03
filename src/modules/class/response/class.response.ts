@@ -32,6 +32,27 @@ export class ClassResponse {
   fee: number;
 
   @ApiProperty({
+    description: '강좌 정원',
+    example: 30,
+  })
+  @IsNumber()
+  capacity: number;
+
+  @ApiProperty({
+    description: '현재 수강 인원',
+    example: 12,
+  })
+  @IsNumber()
+  currentStudents: number;
+
+  @ApiProperty({
+    description: '배정 강의실',
+    example: '101호',
+  })
+  @IsString()
+  room: string;
+
+  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -73,17 +94,23 @@ export class ClassResponse {
   })
   schedules?: any[];
 
-  static fromEntity(entity: Class & { schedules?: any[] }): ClassResponse {
+  static fromEntity(
+    entity: Class & { schedules?: any[]; _count?: { enrollments: number } },
+  ): ClassResponse {
     const response = new ClassResponse();
     response.id = entity.id;
     response.teacherId = entity.teacherId;
     response.name = entity.name;
     response.fee = entity.fee;
+    response.capacity = entity.capacity;
+    response.room = entity.room;
     response.startDate = entity.startDate;
     response.endDate = entity.endDate;
     response.status = entity.status;
     response.createdAt = entity.createdAt;
     response.updatedAt = entity.updatedAt;
+
+    response.currentStudents = entity._count?.enrollments || 0;
 
     if (entity.schedules) {
       response.schedules = entity.schedules.map((s) => ({

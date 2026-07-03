@@ -54,6 +54,8 @@ model Class {
   teacherId String      @db.Uuid
   name      String      @db.VarChar(20)
   fee       Int
+  capacity  Int         @default(0)
+  room      String      @db.VarChar(50) @default("미배정")
   startDate DateTime?   @db.Timestamptz()
   endDate   DateTime?   @db.Timestamptz()
   status    ClassStatus @default(OPEN)
