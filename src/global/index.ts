@@ -10,6 +10,7 @@ export * from './decorators/message.decorator';
 export * from './decorators/transactional.decorator';
 export * from './decorators/public.decorator';
 export * from './decorators/swagger.decorator';
+export * from './decorators/role.decorator';
 
 export * from './enums/error-code.enum';
 export * from './enums/response-message.enum';
