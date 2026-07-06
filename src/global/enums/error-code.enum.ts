@@ -38,6 +38,10 @@ export enum ErrorCode {
 
   // 카테고리 관련 에러
   CATEGORY_NOT_FOUND = 'CATEGORY_001',
+
+  // 자재 관련 에러
+  ASSET_NOT_FOUND = 'ASSET_001',
+  ASSET_APPLICATION_NOT_FOUND = 'ASSET_002',
 }
 
 export const ErrorCodeMap: Record<
@@ -146,5 +150,15 @@ export const ErrorCodeMap: Record<
   [ErrorCode.CATEGORY_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 카테고리를 찾을 수 없습니다.',
+  },
+
+  // 자재 관련 에러
+  [ErrorCode.ASSET_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 자재를 찾을 수 없습니다.',
+  },
+  [ErrorCode.ASSET_APPLICATION_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 자재 신청을 찾을 수 없습니다.',
   },
 };

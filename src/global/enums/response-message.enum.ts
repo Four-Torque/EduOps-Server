@@ -38,4 +38,9 @@ export enum ResponseMessage {
   CATEGORY_CREATED = '카테고리가 성공적으로 생성되었습니다.',
   CATEGORY_UPDATED = '카테고리 정보가 성공적으로 업데이트되었습니다.',
   CATEGORY_DELETED = '카테고리가 성공적으로 삭제되었습니다.',
+
+  // 자산 관련
+  ASSET_APPLICATION_CREATED = '자재 신청이 성공적으로 생성되었습니다.',
+  ASSET_APPLICATION_STATUS_CHANGED = '자재 신청 상태가 성공적으로 변경되었습니다.',
+  ASSET_APPLICATION_DELETED = '자재 신청이 성공적으로 삭제되었습니다.',
 }

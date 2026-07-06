@@ -17,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core/constants';
 import { StudentModule } from './modules/student/student.module';
 import { VendorModule } from './modules/vendor/vendor.module';
 import { CategoryModule } from './modules/category/category.module';
+import { AssetModule } from './modules/asset/asset.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CategoryModule } from './modules/category/category.module';
     SalaryModule,
     AuthModule,
     StaffAttendanceModule,
+    AssetModule,
     StudentModule,
     VendorModule,
     CategoryModule,
