@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class StudentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findList(
+  findList(
     status: StudentStatus,
     name: string,
     skip: number,
@@ -22,7 +22,7 @@ export class StudentRepository {
     });
   }
 
-  async countList(status: StudentStatus, name: string): Promise<number> {
+  countList(status: StudentStatus, name: string): Promise<number> {
     return this.prisma.student.count({
       where: {
         ...(status && { status }),
@@ -31,7 +31,7 @@ export class StudentRepository {
     });
   }
 
-  async findById(id: string): Promise<Student | null> {
+  findById(id: string): Promise<Student | null> {
     return this.prisma.student.findUnique({
       where: {
         id,
@@ -39,18 +39,18 @@ export class StudentRepository {
     });
   }
 
-  async create(data: Prisma.StudentCreateInput): Promise<Student> {
+  create(data: Prisma.StudentCreateInput): Promise<Student> {
     return this.prisma.student.create({ data });
   }
 
-  async update(id: string, data: Prisma.StudentUpdateInput): Promise<Student> {
+  update(id: string, data: Prisma.StudentUpdateInput): Promise<Student> {
     return this.prisma.student.update({
       where: { id },
       data,
     });
   }
 
-  async delete(id: string): Promise<Student> {
+  delete(id: string): Promise<Student> {
     return this.prisma.student.delete({
       where: { id },
     });

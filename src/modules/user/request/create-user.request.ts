@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { Prisma, EmploymentStatus } from '@prisma/client';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateUserRequest {
   @ApiProperty({
@@ -36,6 +43,15 @@ export class CreateUserRequest {
   @Length(8, 20)
   password: string;
 
+  @ApiProperty({
+    description: '근로 상태',
+    example: 'WORKING',
+    required: false,
+  })
+  @IsEnum(EmploymentStatus)
+  @IsOptional()
+  employmentStatus?: EmploymentStatus;
+
   static toEntity(
     request: CreateUserRequest,
     hashedPassword: string,
@@ -45,6 +61,9 @@ export class CreateUserRequest {
       name: request.name,
       phone: request.phone,
       password: hashedPassword,
+      ...(request.employmentStatus && {
+        employmentStatus: request.employmentStatus,
+      }),
     };
   }
 }

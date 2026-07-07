@@ -36,12 +36,28 @@ export enum ErrorCode {
   // 구매처 관련 에러
   VENDOR_NOT_FOUND = 'VENDOR_001',
 
+  // 강좌 관련 에러
+  CLASS_NOT_FOUND = 'CLASS_001',
+
   // 카테고리 관련 에러
   CATEGORY_NOT_FOUND = 'CATEGORY_001',
 
   // 자재 관련 에러
   ASSET_NOT_FOUND = 'ASSET_001',
   ASSET_APPLICATION_NOT_FOUND = 'ASSET_002',
+  // 결제 관련 에러
+  PAYMENT_NOT_FOUND = 'PAYMENT_001',
+
+  // 수강 등록 관련 에러
+  ENROLLMENT_NOT_FOUND = 'ENROLLMENT_001',
+
+  // 시간표 관련 에러
+  SCHEDULE_NOT_FOUND = 'SCHEDULE_001',
+  TEACHER_SCHEDULE_CONFLICT = 'SCHEDULE_002',
+  ROOM_SCHEDULE_CONFLICT = 'SCHEDULE_003',
+
+  // 시험 관련 에러
+  EXAM_NOT_FOUND = 'EXAM_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -146,6 +162,12 @@ export const ErrorCodeMap: Record<
     message: '해당 구매처를 찾을 수 없습니다.',
   },
 
+  // 강좌 관런 에러
+  [ErrorCode.CLASS_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 강좌를 찾을 수 없습니다.',
+  },
+
   // 카테고리 관련 에러
   [ErrorCode.CATEGORY_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
@@ -160,5 +182,35 @@ export const ErrorCodeMap: Record<
   [ErrorCode.ASSET_APPLICATION_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 자재 신청을 찾을 수 없습니다.',
+  // 결제 관련 에러
+  [ErrorCode.PAYMENT_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 결제를 찾을 수 없습니다.',
+  },
+
+  // 수강 등록 관련 에러
+  [ErrorCode.ENROLLMENT_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '수강 내역을 찾을 수 없습니다.',
+  },
+
+  // 시간표 관련 에러
+  [ErrorCode.SCHEDULE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '시간표를 찾을 수 없습니다.',
+  },
+  [ErrorCode.TEACHER_SCHEDULE_CONFLICT]: {
+    status: HttpStatus.CONFLICT,
+    message: '해당 교사의 다른 시간표와 겹칩니다.',
+  },
+  [ErrorCode.ROOM_SCHEDULE_CONFLICT]: {
+    status: HttpStatus.CONFLICT,
+    message: '해당 강의실이 이미 다른 강좌에 의해 사용 중입니다.',
+  },
+
+  // 시험 관련 에러
+  [ErrorCode.EXAM_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 시험을 찾을 수 없습니다.',
   },
 };

@@ -13,10 +13,13 @@ model User {
   email     String     @unique @db.VarChar(50)
   phone     String     @unique @db.VarChar(20)
   password  String     @db.VarChar(100)
-  role      Role       @default(TEACHER)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  role             Role             @default(TEACHER)
+  status           UserStatus       @default(ACTIVE)
+  employmentStatus EmploymentStatus @default(WORKING)
+  joinedAt         DateTime?        @db.Date
+  resignedAt       DateTime?        @db.Date
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   salaries           Salary[]
   staffAttendances   StaffAttendance[]
@@ -54,6 +57,7 @@ model Class {
   teacherId String      @db.Uuid
   name      String      @db.VarChar(20)
   fee       Int
+  capacity  Int         @default(0)
   startDate DateTime?   @db.Timestamptz()
   endDate   DateTime?   @db.Timestamptz()
   status    ClassStatus @default(OPEN)
@@ -85,8 +89,9 @@ model Schedule {
   class     Class    @relation(fields: [classId], references: [id])
   classId   String   @db.Uuid
   dayOfWeek Int
-  startTime DateTime @db.Timestamptz()
-  endTime   DateTime @db.Timestamptz()
+  startTime String @db.VarChar(5)
+  endTime   String @db.VarChar(5)
+  room      String @db.VarChar(50) @default("미배정")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -190,6 +195,7 @@ model Payment {
   classId     String      @db.Uuid
   student     Student     @relation(fields: [studentId], references: [id])
   studentId   String      @db.Uuid
+  title       String      @db.VarChar(100)
   amount      Int
   paymentType PaymentType @default(UNPAID)
   paymentDate DateTime?   @db.Timestamptz()
@@ -230,7 +236,12 @@ enum Role {
 enum UserStatus {
   ACTIVE
   INACTIVE
-  LEAVE
+}
+
+enum EmploymentStatus {
+  WORKING
+  ON_LEAVE
+  RESIGNED
 }
 
 enum SalaryStatus {

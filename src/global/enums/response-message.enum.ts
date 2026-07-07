@@ -34,6 +34,11 @@ export enum ResponseMessage {
   VENDOR_UPDATED = '구매처 정보가 성공적으로 업데이트되었습니다.',
   VENDOR_DELETED = '구매처가 성공적으로 삭제되었습니다.',
 
+  // 강좌 관련
+  CLASS_CREATED = '강좌가 성공적으로 생성되었습니다.',
+  CLASS_FETCHED = '강좌가 성공적으로 조회되었습니다.',
+  CLASS_UPDATED = '강좌가 성공적으로 업데이트되었습니다.',
+
   // 카테고리 관련
   CATEGORY_CREATED = '카테고리가 성공적으로 생성되었습니다.',
   CATEGORY_UPDATED = '카테고리 정보가 성공적으로 업데이트되었습니다.',
@@ -43,4 +48,27 @@ export enum ResponseMessage {
   ASSET_APPLICATION_CREATED = '자재 신청이 성공적으로 생성되었습니다.',
   ASSET_APPLICATION_STATUS_CHANGED = '자재 신청 상태가 성공적으로 변경되었습니다.',
   ASSET_APPLICATION_DELETED = '자재 신청이 성공적으로 삭제되었습니다.',
+  // 결제 관련
+  PAYMENT_CREATED = '결제가 성공적으로 생성되었습니다.',
+  PAYMENT_UPDATED = '결제 정보가 성공적으로 업데이트되었습니다.',
+  PAYMENT_FETCHED = '결제 정보가 성공적으로 조회되었습니다.',
+  PAYMENT_DELETED = '결제가 성공적으로 삭제되었습니다.',
+
+  // 수강 등록 관련
+  ENROLLMENT_CREATED = '수강 등록이 성공적으로 완료되었습니다.',
+  ENROLLMENT_FETCHED = '수강 내역이 성공적으로 조회되었습니다.',
+  ENROLLMENT_DELETED = '수강 등록이 성공적으로 취소되었습니다.',
+
+  // 시간표 관련
+  SCHEDULE_CREATED = '시간표가 성공적으로 등록되었습니다.',
+  SCHEDULE_FETCHED = '시간표가 성공적으로 조회되었습니다.',
+  SCHEDULE_DELETED = '시간표가 성공적으로 삭제되었습니다.',
+
+  // 시험 관련
+  EXAM_CREATED = '시험이 성공적으로 생성되었습니다.',
+  EXAM_FETCHED = '시험이 성공적으로 조회되었습니다.',
+  EXAM_UPDATED = '시험이 성공적으로 수정되었습니다.',
+  EXAM_DELETED = '시험이 성공적으로 삭제되었습니다.',
+  EXAM_RESULT_SAVED = '시험 점수가 성공적으로 등록/수정되었습니다.',
+  EXAM_RESULT_FETCHED = '시험 점수 목록이 성공적으로 조회되었습니다.',
 }

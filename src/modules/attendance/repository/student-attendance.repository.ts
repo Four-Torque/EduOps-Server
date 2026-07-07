@@ -11,7 +11,7 @@ import {
 export class StudentAttendanceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<StudentAttendance | null> {
+  findById(id: string): Promise<StudentAttendance | null> {
     return this.prisma.studentAttendance.findUnique({
       where: {
         id,
@@ -19,7 +19,7 @@ export class StudentAttendanceRepository {
     });
   }
 
-  async findByStudentId(
+  findByStudentId(
     studentId: string,
     lectureDate?: string,
   ): Promise<StudentAttendance[]> {
@@ -31,7 +31,7 @@ export class StudentAttendanceRepository {
     });
   }
 
-  async create(
+  create(
     data: Prisma.StudentAttendanceCreateInput,
   ): Promise<StudentAttendance> {
     return this.prisma.studentAttendance.create({
@@ -39,7 +39,7 @@ export class StudentAttendanceRepository {
     });
   }
 
-  async update(
+  update(
     id: string,
     status: StudentAttendanceStatus,
   ): Promise<StudentAttendance> {
@@ -49,7 +49,7 @@ export class StudentAttendanceRepository {
     });
   }
 
-  async findList(
+  findList(
     studentId?: string,
     classId?: string,
     lectureDate?: string,

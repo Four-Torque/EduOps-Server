@@ -7,6 +7,7 @@ export class CreateStudentAttendanceRequest {
     description: '학생 ID',
     example: 'student-uuid',
   })
+  @IsString()
   studentId: string;
 
   @ApiProperty({
