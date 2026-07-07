@@ -6,5 +6,6 @@ import { VendorRepository } from './repository/vendor.repository';
 @Module({
   controllers: [VendorController],
   providers: [VendorService, VendorRepository],
+  exports: [VendorService, VendorRepository],
 })
 export class VendorModule {}

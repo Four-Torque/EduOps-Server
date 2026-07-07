@@ -32,6 +32,7 @@ import { ScheduleModule } from './modules/schedule/schedule.module';
     SalaryModule,
     AuthModule,
     StaffAttendanceModule,
+    AssetModule,
     StudentModule,
     VendorModule,
     ExamModule,
