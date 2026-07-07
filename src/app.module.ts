@@ -24,6 +24,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { EnrollmentModule } from './modules/enrollment/enrollment.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
 import { AssetModule } from './modules/asset/asset.module';
+import { ClassSyllabusModule } from './modules/class-syllabus/class-syllabus.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { AssetModule } from './modules/asset/asset.module';
     PaymentModule,
     EnrollmentModule,
     ScheduleModule,
+    ClassSyllabusModule,
   ],
 
   providers: [
