@@ -23,6 +23,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { EnrollmentModule } from './modules/enrollment/enrollment.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
+import { AssetModule } from './modules/asset/asset.module';
 
 @Module({
   imports: [
