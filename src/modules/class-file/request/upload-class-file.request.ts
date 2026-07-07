@@ -11,7 +11,8 @@ export class UploadClassFileRequest {
   classId: string;
 
   @ApiProperty({
-    description: '업로더 ID (보통 헤더 토큰에서 추출하지만, 현재 명시적으로 받음)',
+    description:
+      '업로더 ID (보통 헤더 토큰에서 추출하지만, 현재 명시적으로 받음)',
     example: 'user-uuid-1234',
   })
   @IsString()

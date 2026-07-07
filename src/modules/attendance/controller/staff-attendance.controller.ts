@@ -13,7 +13,9 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
+  CurrentUser,
   ErrorCode,
+  JwtPayload,
   Message,
   ResponseMessage,
 } from 'src/global';
@@ -45,11 +47,15 @@ export class StaffAttendanceController {
   @Message(ResponseMessage.ATTENDANCE_FETCHED)
   @Get('/')
   async getStaffAttendance(
-    @Query('userId') userId: string,
+    @CurrentUser() user: JwtPayload,
+    @Query('userId') queryUserId?: string,
     @Query('workDate') workDate?: string,
   ): Promise<StaffAttendanceResponse[]> {
+    const isAdmin = user.role === 'MANAGER' || user.role === 'DIRECTOR';
+    const targetUserId = isAdmin && queryUserId ? queryUserId : user.id;
+
     const attendance = await this.staffAttendanceService.getStaffAttendance(
-      userId,
+      targetUserId,
       workDate,
     );
     return attendance;
@@ -72,8 +78,12 @@ export class StaffAttendanceController {
   @Post('/check-in')
   async checkIn(
     @Body() request: CreateStaffAttendanceRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<StaffAttendanceResponse> {
-    const attendance = await this.staffAttendanceService.checkIn(request);
+    const attendance = await this.staffAttendanceService.checkIn(
+      request,
+      user.id,
+    );
     return attendance;
   }
 

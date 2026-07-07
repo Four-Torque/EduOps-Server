@@ -27,7 +27,8 @@ export class CreateEnrollmentRequest {
   enrollDate: Date;
 
   @ApiPropertyOptional({
-    description: '초기 청구 금액 (입력하지 않으면 강좌의 기본 수강료로 자동 청구됩니다)',
+    description:
+      '초기 청구 금액 (입력하지 않으면 강좌의 기본 수강료로 자동 청구됩니다)',
     example: 150000,
   })
   @IsOptional()
@@ -35,7 +36,8 @@ export class CreateEnrollmentRequest {
   initialAmount?: number;
 
   @ApiPropertyOptional({
-    description: '초기 청구 납부 기한 (입력하지 않으면 수강 시작일 기준 일주일 후로 자동 설정됩니다)',
+    description:
+      '초기 청구 납부 기한 (입력하지 않으면 수강 시작일 기준 일주일 후로 자동 설정됩니다)',
     example: '2023-11-07T23:59:59.000Z',
   })
   @IsOptional()
@@ -43,7 +45,9 @@ export class CreateEnrollmentRequest {
   @Type(() => Date)
   initialDueDate?: Date;
 
-  static toEntity(request: CreateEnrollmentRequest): Prisma.EnrollmentCreateInput {
+  static toEntity(
+    request: CreateEnrollmentRequest,
+  ): Prisma.EnrollmentCreateInput {
     return {
       student: { connect: { id: request.studentId } },
       class: { connect: { id: request.classId } },

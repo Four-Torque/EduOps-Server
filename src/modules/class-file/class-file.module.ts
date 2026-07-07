@@ -13,7 +13,8 @@ import { ClassFileRepository } from './repository/class-file.repository';
         destination: './uploads/class-files',
         filename: (req, file, cb) => {
           // 파일명 중복을 피하기 위해 타임스탬프와 랜덤 문자열을 원본 파일명 앞에 붙입니다.
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = path.extname(file.originalname);
           const name = path.basename(file.originalname, ext);
           cb(null, `${name}-${uniqueSuffix}${ext}`);

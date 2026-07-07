@@ -87,7 +87,8 @@ export class PaymentController {
 
   @ApiOperation({
     summary: '결제 상태 및 정보 변경',
-    description: '미납, 완납 등의 상태를 변경하거나 청구 금액/기한을 수정합니다.',
+    description:
+      '미납, 완납 등의 상태를 변경하거나 청구 금액/기한을 수정합니다.',
   })
   @ApiSuccessResponse(ResponseMessage.PAYMENT_UPDATED, PaymentResponse)
   @ApiErrorResponse(ErrorCode.PAYMENT_NOT_FOUND)
