@@ -71,8 +71,4 @@ export enum ResponseMessage {
   EXAM_DELETED = '시험이 성공적으로 삭제되었습니다.',
   EXAM_RESULT_SAVED = '시험 점수가 성공적으로 등록/수정되었습니다.',
   EXAM_RESULT_FETCHED = '시험 점수 목록이 성공적으로 조회되었습니다.',
-  // 자산 관련
-  ASSET_APPLICATION_CREATED = '자재 신청이 성공적으로 생성되었습니다.',
-  ASSET_APPLICATION_STATUS_CHANGED = '자재 신청 상태가 성공적으로 변경되었습니다.',
-  ASSET_APPLICATION_DELETED = '자재 신청이 성공적으로 삭제되었습니다.',
 }

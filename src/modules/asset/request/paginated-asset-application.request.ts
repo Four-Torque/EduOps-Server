@@ -15,5 +15,13 @@ export class PaginatedAssetApplicationRequest {
 
   @IsOptional()
   @IsString()
+  categoryId?: string;
+
+  @IsOptional()
+  @IsString()
+  vendorId?: string;
+
+  @IsOptional()
+  @IsString()
   status?: string;
 }

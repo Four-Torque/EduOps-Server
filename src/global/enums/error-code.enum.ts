@@ -58,9 +58,6 @@ export enum ErrorCode {
 
   // 시험 관련 에러
   EXAM_NOT_FOUND = 'EXAM_001',
-  // 자재 관련 에러
-  ASSET_NOT_FOUND = 'ASSET_001',
-  ASSET_APPLICATION_NOT_FOUND = 'ASSET_002',
 }
 
 export const ErrorCodeMap: Record<
@@ -185,6 +182,7 @@ export const ErrorCodeMap: Record<
   [ErrorCode.ASSET_APPLICATION_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 자재 신청을 찾을 수 없습니다.',
+  },
   // 결제 관련 에러
   [ErrorCode.PAYMENT_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
@@ -215,14 +213,5 @@ export const ErrorCodeMap: Record<
   [ErrorCode.EXAM_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 시험을 찾을 수 없습니다.',
-  },
-  // 자재 관련 에러
-  [ErrorCode.ASSET_NOT_FOUND]: {
-    status: HttpStatus.NOT_FOUND,
-    message: '해당 자재를 찾을 수 없습니다.',
-  },
-  [ErrorCode.ASSET_APPLICATION_NOT_FOUND]: {
-    status: HttpStatus.NOT_FOUND,
-    message: '해당 자재 신청을 찾을 수 없습니다.',
   },
 };
