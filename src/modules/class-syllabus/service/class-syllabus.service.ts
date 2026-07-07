@@ -6,6 +6,7 @@ import { PaginatedClassSyllabusResponse } from '../response/paginated-class-syll
 import { RejectClassSyllabusRequest } from '../request/reject-class-syllabus.request';
 import { ApiException, ErrorCode } from 'src/global';
 import { SyllabusStatus } from '@prisma/client';
+import { Transactional } from 'src/global/decorators/transactional.decorator';
 
 @Injectable()
 export class ClassSyllabusService {
@@ -54,6 +55,7 @@ export class ClassSyllabusService {
     };
   }
 
+  @Transactional()
   async approve(id: string): Promise<ClassSyllabusResponse> {
     const existing = await this.classSyllabusRepository.findById(id);
     if (!existing) {
@@ -63,8 +65,10 @@ export class ClassSyllabusService {
       throw new ApiException(ErrorCode.CLASS_SYLLABUS_NOT_PENDING);
     }
 
-    const { syllabus } = await this.classSyllabusRepository.approveAndCreateClass(id, existing);
-    return ClassSyllabusResponse.fromEntity(syllabus);
+    const updatedSyllabus = await this.classSyllabusRepository.updateStatus(id, SyllabusStatus.APPROVED);
+    await this.classSyllabusRepository.createClassFromSyllabus(existing);
+    
+    return ClassSyllabusResponse.fromEntity(updatedSyllabus);
   }
 
   async reject(id: string, request: RejectClassSyllabusRequest): Promise<ClassSyllabusResponse> {

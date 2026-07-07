@@ -67,6 +67,9 @@ export enum ErrorCode {
   // 강좌계획서 관련 에러
   CLASS_SYLLABUS_NOT_FOUND = 'CLASS_SYLLABUS_001',
   CLASS_SYLLABUS_NOT_PENDING = 'CLASS_SYLLABUS_002',
+
+  // 쪽지/메시지 관련 에러
+  MESSAGE_NOT_FOUND = 'MESSAGE_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -246,5 +249,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.CLASS_SYLLABUS_NOT_PENDING]: {
     status: HttpStatus.BAD_REQUEST,
     message: '대기 상태의 계획서만 처리할 수 있습니다.',
+  },
+
+  // 쪽지/메시지 관련 에러
+  [ErrorCode.MESSAGE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 쪽지를 찾을 수 없습니다.',
   },
 };

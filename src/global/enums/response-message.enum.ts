@@ -82,4 +82,12 @@ export enum ResponseMessage {
   CLASS_SYLLABUS_FETCHED = '강좌계획서가 성공적으로 조회되었습니다.',
   CLASS_SYLLABUS_APPROVED = '강좌계획서가 성공적으로 승인되었습니다.',
   CLASS_SYLLABUS_REJECTED = '강좌계획서가 성공적으로 반려되었습니다.',
+
+  // 쪽지/메시지 관련
+  MESSAGE_CREATED = '쪽지가 성공적으로 전송되었습니다.',
+  MESSAGE_FETCHED = '쪽지 내용이 성공적으로 조회되었습니다.',
+  CONVERSATION_LIST_FETCHED = '대화방 목록이 성공적으로 조회되었습니다.',
+  CONVERSATION_DELETED = '대화방 나가기가 성공적으로 완료되었습니다.',
+  MESSAGE_DELETED = '쪽지가 성공적으로 삭제되었습니다.',
+  UNREAD_COUNT_FETCHED = '안 읽은 쪽지 개수가 성공적으로 조회되었습니다.',
 }

@@ -8,11 +8,11 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String     @db.VarChar(20)
-  email     String     @unique @db.VarChar(50)
-  phone     String     @unique @db.VarChar(20)
-  password  String     @db.VarChar(100)
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String           @db.VarChar(20)
+  email            String           @unique @db.VarChar(50)
+  phone            String           @unique @db.VarChar(20)
+  password         String           @db.VarChar(100)
   role             Role             @default(TEACHER)
   status           UserStatus       @default(ACTIVE)
   employmentStatus EmploymentStatus @default(WORKING)
@@ -27,6 +27,8 @@ model User {
   classFiles         ClassFile[]
   assetsApplications AssetsApplication[]
   classSyllabuses    ClassSyllabus[]
+  sentMessages       Message[]           @relation("SentMessages")
+  receivedMessages   Message[]           @relation("ReceivedMessages")
 }
 
 model Salary {
@@ -90,9 +92,9 @@ model Schedule {
   class     Class    @relation(fields: [classId], references: [id])
   classId   String   @db.Uuid
   dayOfWeek Int
-  startTime String @db.VarChar(5)
-  endTime   String @db.VarChar(5)
-  room      String @db.VarChar(50) @default("미배정")
+  startTime String   @db.VarChar(5)
+  endTime   String   @db.VarChar(5)
+  room      String   @default("미배정") @db.VarChar(50)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -228,6 +230,39 @@ model ExamResult {
   updatedAt DateTime @updatedAt
 }
 
+model ClassSyllabus {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teacher        User           @relation(fields: [teacherId], references: [id])
+  teacherId      String         @db.Uuid
+  name           String         @db.VarChar(100)
+  fee            Int
+  capacity       Int            @default(0)
+  startDate      DateTime?      @db.Timestamptz()
+  endDate        DateTime?      @db.Timestamptz()
+  targetAudience String?        @db.Text
+  description    String?        @db.Text
+  curriculum     String?        @db.Text
+  status         SyllabusStatus @default(PENDING)
+  rejectedReason String?        @db.Text
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Message {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sender            User      @relation("SentMessages", fields: [senderId], references: [id])
+  senderId          String    @db.Uuid
+  receiver          User      @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId        String    @db.Uuid
+  content           String    @db.Text
+  isRead            Boolean   @default(false)
+  readAt            DateTime? @db.Timestamptz()
+  deletedBySender   Boolean   @default(false)
+  deletedByReceiver Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
 enum Role {
   TEACHER
   DIRECTOR
@@ -281,29 +316,7 @@ enum PaymentType {
 }
 
 enum SyllabusStatus {
-  PENDING    // 대기 중
-  APPROVED   // 승인됨
-  REJECTED   // 반려됨
-}
-
-model ClassSyllabus {
-  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  teacher        User           @relation(fields: [teacherId], references: [id])
-  teacherId      String         @db.Uuid
-  
-  name           String         @db.VarChar(100)
-  fee            Int
-  capacity       Int            @default(0)
-  startDate      DateTime?      @db.Timestamptz()
-  endDate        DateTime?      @db.Timestamptz()
-  
-  targetAudience String?        @db.Text
-  description    String?        @db.Text
-  curriculum     String?        @db.Text
-  
-  status         SyllabusStatus @default(PENDING)
-  rejectedReason String?        @db.Text
-  
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  PENDING // 대기 중
+  APPROVED // 승인됨
+  REJECTED // 반려됨
 }

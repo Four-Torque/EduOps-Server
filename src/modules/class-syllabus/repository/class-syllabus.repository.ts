@@ -65,26 +65,24 @@ export class ClassSyllabusRepository {
     });
   }
 
-  async approveAndCreateClass(id: string, syllabus: ClassSyllabus) {
-    return this.prisma.$transaction(async (tx) => {
-      const updatedSyllabus = await tx.classSyllabus.update({
-        where: { id },
-        data: { status: SyllabusStatus.APPROVED },
-      });
+  async updateStatus(id: string, status: SyllabusStatus): Promise<ClassSyllabus> {
+    return this.prisma.classSyllabus.update({
+      where: { id },
+      data: { status },
+    });
+  }
 
-      const newClass = await tx.class.create({
-        data: {
-          teacherId: syllabus.teacherId,
-          name: syllabus.name,
-          fee: syllabus.fee,
-          capacity: syllabus.capacity,
-          startDate: syllabus.startDate,
-          endDate: syllabus.endDate,
-          status: ClassStatus.OPEN,
-        },
-      });
-
-      return { syllabus: updatedSyllabus, class: newClass };
+  async createClassFromSyllabus(syllabus: ClassSyllabus) {
+    return this.prisma.class.create({
+      data: {
+        teacherId: syllabus.teacherId,
+        name: syllabus.name,
+        fee: syllabus.fee,
+        capacity: syllabus.capacity,
+        startDate: syllabus.startDate,
+        endDate: syllabus.endDate,
+        status: ClassStatus.OPEN,
+      },
     });
   }
 }
