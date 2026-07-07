@@ -101,16 +101,15 @@ export class AssetApplicationRepository {
   }
 
   async findByIds(ids: string[]) {
-    console.log('findByIds called with ids:', ids);
     return this.prisma.assetsApplication.findMany({
       where: { id: { in: ids } },
     });
   }
 
-  async updateStatus(id: string, status: ApplicationStatus) {
+  async updateStatus(id: string, data: Prisma.AssetsApplicationUpdateInput) {
     return this.prisma.assetsApplication.update({
       where: { id },
-      data: { status, processedAt: new Date() },
+      data,
     });
   }
 

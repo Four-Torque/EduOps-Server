@@ -83,11 +83,17 @@ export class AssetApplicationService {
 
     if (request.status === ApplicationStatus.ACCEPTED) {
       await Promise.all([
-        this.assetApplicationRepository.updateStatus(id, request.status),
+        this.assetApplicationRepository.updateStatus(
+          id,
+          AssetChangeStatusRequest.toEntity(request),
+        ),
         this.assetRepository.updateStock(assetApplication),
       ]);
     } else {
-      await this.assetApplicationRepository.updateStatus(id, request.status);
+      await this.assetApplicationRepository.updateStatus(
+        id,
+        AssetChangeStatusRequest.toEntity(request),
+      );
     }
   }
 

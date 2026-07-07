@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AssetsApplication } from '@prisma/client';
+import { AssetsApplication, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -37,16 +37,28 @@ export class AssetRepository {
     });
   }
 
-  async findAll(take: number, skip: number, search?: string) {
+  async findAll(
+    take: number,
+    skip: number,
+    search?: string,
+    categoryId?: string,
+    vendorId?: string,
+  ) {
+    const where: Prisma.AssetWhereInput = {};
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+    if (vendorId) {
+      where.vendorId = vendorId;
+    }
     return this.prisma.asset.findMany({
-      where: search
-        ? {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          }
-        : undefined,
+      where,
       orderBy: {
         createdAt: 'desc',
       },
@@ -67,18 +79,30 @@ export class AssetRepository {
     });
   }
 
-  count(take: number, skip: number, search?: string): Promise<number> {
+  count(
+    take: number,
+    skip: number,
+    search?: string,
+    categoryId?: string,
+    vendorId?: string,
+  ): Promise<number> {
+    const where: Prisma.AssetWhereInput = {};
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+    if (vendorId) {
+      where.vendorId = vendorId;
+    }
     return this.prisma.asset.count({
-      where: search
-        ? {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          }
-        : undefined,
-      skip,
+      where,
       take,
+      skip,
     });
   }
 }

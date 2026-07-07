@@ -10,13 +10,13 @@ export class AssetService {
   async findAll(
     request: PaginatedAssetApplicationRequest,
   ): Promise<PaginatedAssetResponse> {
-    const { page, limit, search } = request;
+    const { page, limit, search, categoryId, vendorId } = request;
     const take = limit;
     const skip = page && take ? (page - 1) * take : 0;
 
     const [assets, total] = await Promise.all([
-      this.assetRepository.findAll(take, skip, search),
-      this.assetRepository.count(take, skip),
+      this.assetRepository.findAll(take, skip, search, categoryId, vendorId),
+      this.assetRepository.count(take, skip, search, categoryId, vendorId),
     ]);
     const response = PaginatedAssetResponse.fromEntity(
       page,
