@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Enrollment, Student, StudentAttendance, StudentAttendanceStatus } from '@prisma/client';
+import {
+  Enrollment,
+  Student,
+  StudentAttendance,
+  StudentAttendanceStatus,
+} from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class ClassStudentAttendanceResponse {

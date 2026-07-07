@@ -16,10 +16,7 @@ export class ScheduleRepository {
   async findByClassId(classId: string): Promise<Schedule[]> {
     return this.prisma.schedule.findMany({
       where: { classId },
-      orderBy: [
-        { dayOfWeek: 'asc' },
-        { startTime: 'asc' },
-      ],
+      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
     });
   }
 

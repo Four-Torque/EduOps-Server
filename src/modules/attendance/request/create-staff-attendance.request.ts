@@ -1,15 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
 
 export class CreateStaffAttendanceRequest {
-  @ApiProperty({
-    description: '직원 ID',
-    example: 'staff-uuid',
-  })
-  @IsString()
-  userId: string;
-
   @ApiProperty({
     description: '근무 날짜',
     example: '2023-10-01',
@@ -25,10 +18,11 @@ export class CreateStaffAttendanceRequest {
   checkInTime?: Date;
 
   static toEntity(
+    userId: string,
     request: CreateStaffAttendanceRequest,
   ): Prisma.StaffAttendanceCreateInput {
     return {
-      user: { connect: { id: request.userId } },
+      user: { connect: { id: userId } },
       workDate: request.workDate,
       checkInTime: request.checkInTime,
     };

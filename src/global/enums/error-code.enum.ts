@@ -58,6 +58,15 @@ export enum ErrorCode {
 
   // 시험 관련 에러
   EXAM_NOT_FOUND = 'EXAM_001',
+
+  // 수업 파일 관련 에러
+  CLASS_FILE_NOT_FOUND = 'CLASS_FILE_001',
+  FILE_NOT_PROVIDED = 'CLASS_FILE_002',
+  CLASS_FILE_NOT_FOUND_ON_DISK = 'CLASS_FILE_003',
+
+  // 강좌계획서 관련 에러
+  CLASS_SYLLABUS_NOT_FOUND = 'CLASS_SYLLABUS_001',
+  CLASS_SYLLABUS_NOT_PENDING = 'CLASS_SYLLABUS_002',
 }
 
 export const ErrorCodeMap: Record<
@@ -213,5 +222,29 @@ export const ErrorCodeMap: Record<
   [ErrorCode.EXAM_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 시험을 찾을 수 없습니다.',
+  },
+
+  // 수업 파일 관련 에러
+  [ErrorCode.CLASS_FILE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 수업 파일을 찾을 수 없습니다.',
+  },
+  [ErrorCode.FILE_NOT_PROVIDED]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '파일이 제공되지 않았습니다.',
+  },
+  [ErrorCode.CLASS_FILE_NOT_FOUND_ON_DISK]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '해당 파일을 디스크에서 찾을 수 없습니다.',
+  },
+
+  // 강좌계획서 관련 에러
+  [ErrorCode.CLASS_SYLLABUS_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 강좌계획서를 찾을 수 없습니다.',
+  },
+  [ErrorCode.CLASS_SYLLABUS_NOT_PENDING]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '대기 상태의 계획서만 처리할 수 있습니다.',
   },
 };

@@ -71,4 +71,15 @@ export enum ResponseMessage {
   EXAM_DELETED = '시험이 성공적으로 삭제되었습니다.',
   EXAM_RESULT_SAVED = '시험 점수가 성공적으로 등록/수정되었습니다.',
   EXAM_RESULT_FETCHED = '시험 점수 목록이 성공적으로 조회되었습니다.',
+
+  // 수업 파일 관련
+  CLASS_FILE_UPLOADED = '수업 파일이 성공적으로 업로드되었습니다.',
+  CLASS_FILE_FETCHED = '수업 파일 목록이 성공적으로 조회되었습니다.',
+  CLASS_FILE_DELETED = '수업 파일이 성공적으로 삭제되었습니다.',
+
+  // 강좌계획서 관련
+  CLASS_SYLLABUS_CREATED = '강좌계획서가 성공적으로 제출되었습니다.',
+  CLASS_SYLLABUS_FETCHED = '강좌계획서가 성공적으로 조회되었습니다.',
+  CLASS_SYLLABUS_APPROVED = '강좌계획서가 성공적으로 승인되었습니다.',
+  CLASS_SYLLABUS_REJECTED = '강좌계획서가 성공적으로 반려되었습니다.',
 }

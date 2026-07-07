@@ -68,7 +68,9 @@ export class UpdateUserRequest {
       ...(request.phone && { phone: request.phone }),
       ...(request.role && { role: request.role }),
       ...(request.status && { status: request.status }),
-      ...(request.employmentStatus && { employmentStatus: request.employmentStatus }),
+      ...(request.employmentStatus && {
+        employmentStatus: request.employmentStatus,
+      }),
       ...(request.joinedAt && { joinedAt: request.joinedAt }),
       ...(request.resignedAt && { resignedAt: request.resignedAt }),
     };

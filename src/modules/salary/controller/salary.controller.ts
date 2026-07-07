@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { SalaryService } from '../service/salary.service';
 import { SalaryStatus } from '@prisma/client';
@@ -15,7 +16,9 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
+  CurrentUser,
   ErrorCode,
+  JwtPayload,
   Message,
   ResponseMessage,
 } from 'src/global';
@@ -50,11 +53,15 @@ export class SalaryController {
   @Message(ResponseMessage.SALARY_FETCHED)
   @Get('/')
   async getSalary(
-    @Query('userId') userId: string,
+    @CurrentUser() user: JwtPayload,
+    @Query('userId') queryUserId?: string,
     @Query('status') status?: SalaryStatus,
   ): Promise<SalaryResponse[]> {
+    const isAdmin = user.role === 'MANAGER' || user.role === 'DIRECTOR';
+    const targetUserId = isAdmin && queryUserId ? queryUserId : user.id;
+
     const response: SalaryResponse[] = await this.salaryService.getSalary(
-      userId,
+      targetUserId,
       status,
     );
     return response;

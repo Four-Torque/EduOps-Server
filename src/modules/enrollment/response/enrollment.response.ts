@@ -53,7 +53,10 @@ export class EnrollmentResponse {
   className?: string;
 
   static fromEntity(
-    entity: Enrollment & { student?: { name: string }; class?: { name: string } },
+    entity: Enrollment & {
+      student?: { name: string };
+      class?: { name: string };
+    },
   ): EnrollmentResponse {
     const response = new EnrollmentResponse();
     response.id = entity.id;

@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, IsString, Max, Min, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Prisma } from '@prisma/client';
 
 export class ScheduleItemDto {
@@ -52,7 +59,9 @@ export class CreateScheduleBulkRequest {
   @Type(() => ScheduleItemDto)
   schedules: ScheduleItemDto[];
 
-  static toEntities(request: CreateScheduleBulkRequest): Prisma.ScheduleCreateManyInput[] {
+  static toEntities(
+    request: CreateScheduleBulkRequest,
+  ): Prisma.ScheduleCreateManyInput[] {
     return request.schedules.map((schedule) => ({
       classId: request.classId,
       dayOfWeek: schedule.dayOfWeek,

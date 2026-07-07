@@ -26,6 +26,7 @@ model User {
   classes            Class[]
   classFiles         ClassFile[]
   assetsApplications AssetsApplication[]
+  classSyllabuses    ClassSyllabus[]
 }
 
 model Salary {
@@ -277,4 +278,32 @@ enum PaymentType {
   PAID // 완납
   UNPAID // 미납
   REFUNDED // 환불
+}
+
+enum SyllabusStatus {
+  PENDING    // 대기 중
+  APPROVED   // 승인됨
+  REJECTED   // 반려됨
+}
+
+model ClassSyllabus {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teacher        User           @relation(fields: [teacherId], references: [id])
+  teacherId      String         @db.Uuid
+  
+  name           String         @db.VarChar(100)
+  fee            Int
+  capacity       Int            @default(0)
+  startDate      DateTime?      @db.Timestamptz()
+  endDate        DateTime?      @db.Timestamptz()
+  
+  targetAudience String?        @db.Text
+  description    String?        @db.Text
+  curriculum     String?        @db.Text
+  
+  status         SyllabusStatus @default(PENDING)
+  rejectedReason String?        @db.Text
+  
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
