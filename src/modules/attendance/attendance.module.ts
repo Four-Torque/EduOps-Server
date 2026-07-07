@@ -6,9 +6,11 @@ import { StaffAttendanceRepository } from './repository/staff-attendance.reposit
 import { StudentAttendanceController } from './controller/student-attendance.controller';
 import { StudentAttendanceService } from './service/student-attendance.service';
 import { StudentAttendanceRepository } from './repository/student-attendance.repository';
+import { StudentModule } from '../student/student.module';
+import { ClassModule } from '../class/class.module';
 
 @Module({
-  imports: [UserModule],
+  imports: [UserModule, StudentModule, ClassModule],
   controllers: [StaffAttendanceController, StudentAttendanceController],
   providers: [
     StaffAttendanceService,

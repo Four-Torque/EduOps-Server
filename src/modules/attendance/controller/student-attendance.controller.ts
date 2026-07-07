@@ -18,6 +18,8 @@ import {
   ErrorCode,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 
 @ApiTags('학생 출석')
@@ -43,8 +45,9 @@ export class StudentAttendanceController {
   @Post('/')
   async createAttendance(
     @Body() request: CreateStudentAttendanceRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<StudentAttendanceResponse> {
-    const attendance = await this.studentAttendanceService.create(request);
+    const attendance = await this.studentAttendanceService.create(request, user.branchId);
     return attendance;
   }
 

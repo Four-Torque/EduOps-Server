@@ -5,11 +5,15 @@ import { StudentAttendanceResponse } from '../response/student-attendance.respon
 import { ApiException, ErrorCode } from 'src/global';
 import { StudentAttendanceStatus } from '@prisma/client';
 import { StudentService } from 'src/modules/student/service/student.service';
+import { StudentRepository } from '../../student/repository/student.repository';
+import { ClassRepository } from '../../class/repository/class.repository';
 
 @Injectable()
 export class StudentAttendanceService {
   constructor(
     private readonly studentAttendanceRepository: StudentAttendanceRepository,
+    private readonly studentRepository: StudentRepository,
+    private readonly classRepository: ClassRepository,
   ) {}
 
   /**
@@ -19,9 +23,21 @@ export class StudentAttendanceService {
    */
   async create(
     request: CreateStudentAttendanceRequest,
+    branchId: string,
   ): Promise<StudentAttendanceResponse> {
     try {
       const { studentId, classId, lectureDate, status } = request;
+      
+      const student = await this.studentRepository.findById(studentId);
+      if (!student || student.branchId !== branchId) {
+        throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
+      }
+
+      const cls = await this.classRepository.findById(classId);
+      if (!cls || cls.branchId !== branchId) {
+        throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+      }
+
       const today = new Date();
       const date = lectureDate
         ? lectureDate

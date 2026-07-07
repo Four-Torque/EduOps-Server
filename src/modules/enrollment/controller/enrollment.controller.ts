@@ -16,6 +16,8 @@ import {
   ApiSuccessResponse,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 import { ErrorCode } from 'src/global';
 
@@ -39,8 +41,9 @@ export class EnrollmentController {
   @Post('/')
   async create(
     @Body() request: CreateEnrollmentRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<EnrollmentResponse> {
-    const response = await this.enrollmentService.create(request);
+    const response = await this.enrollmentService.create(request, user.branchId);
     return response;
   }
 

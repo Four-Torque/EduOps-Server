@@ -20,6 +20,7 @@ export class ClassFileService {
   async uploadFile(
     request: UploadClassFileRequest,
     file: Express.Multer.File,
+    userId: string,
   ): Promise<ClassFileResponse> {
     if (!file) {
       throw new ApiException(ErrorCode.FILE_NOT_PROVIDED);
@@ -29,7 +30,7 @@ export class ClassFileService {
       fileName: file.originalname,
       filePath: file.path, // Multer에 의해 지정된 로컬 경로 (예: uploads/class-files/xxx.pdf)
       class: { connect: { id: request.classId } },
-      uploader: { connect: { id: request.uploaderId } },
+      uploader: { connect: { id: userId } },
     });
 
     return ClassFileResponse.fromEntity(entity);

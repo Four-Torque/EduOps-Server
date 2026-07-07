@@ -4,13 +4,6 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class CreateStaffAttendanceRequest {
   @ApiProperty({
-    description: '직원 ID',
-    example: 'staff-uuid',
-  })
-  @IsString()
-  userId: string;
-
-  @ApiProperty({
     description: '근무 날짜',
     example: '2023-10-01',
   })
@@ -26,9 +19,10 @@ export class CreateStaffAttendanceRequest {
 
   static toEntity(
     request: CreateStaffAttendanceRequest,
+    userId: string,
   ): Prisma.StaffAttendanceCreateInput {
     return {
-      user: { connect: { id: request.userId } },
+      user: { connect: { id: userId } },
       workDate: request.workDate,
       checkInTime: request.checkInTime,
     };

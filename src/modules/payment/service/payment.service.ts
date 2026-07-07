@@ -6,17 +6,33 @@ import { PaymentResponse } from '../response/payment.response';
 import { PaginatedPaymentResponse } from '../response/paginated-payment.response';
 import { PaymentType, Prisma } from '@prisma/client';
 import { ApiException, ErrorCode } from 'src/global';
+import { StudentRepository } from '../../student/repository/student.repository';
+import { ClassRepository } from '../../class/repository/class.repository';
 
 @Injectable()
 export class PaymentService {
-  constructor(private readonly paymentRepository: PaymentRepository) {}
+  constructor(
+    private readonly paymentRepository: PaymentRepository,
+    private readonly studentRepository: StudentRepository,
+    private readonly classRepository: ClassRepository,
+  ) {}
 
   /**
    * create 메서드는 결제 정보를 생성합니다.
    * @param request
    * @returns
    */
-  async create(request: CreatePaymentRequest): Promise<PaymentResponse> {
+  async create(request: CreatePaymentRequest, branchId: string): Promise<PaymentResponse> {
+    const student = await this.studentRepository.findById(request.studentId);
+    if (!student || student.branchId !== branchId) {
+      throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
+    }
+
+    const cls = await this.classRepository.findById(request.classId);
+    if (!cls || cls.branchId !== branchId) {
+      throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+    }
+
     const data = CreatePaymentRequest.toEntity(request);
     const created = await this.paymentRepository.create(data);
     // 생성 후 다시 조회하여 연관 관계(student, class)를 가져옴

@@ -18,6 +18,8 @@ import {
   ErrorCode,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 
 @ApiTags('급여')
@@ -35,9 +37,10 @@ export class SalaryController {
   @Post('/')
   async createSalary(
     @Body() createSalaryRequest: CreateSalaryRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<SalaryResponse> {
     const response: SalaryResponse =
-      await this.salaryService.createSalary(createSalaryRequest);
+      await this.salaryService.createSalary(createSalaryRequest, user.branchId);
     return response;
   }
 

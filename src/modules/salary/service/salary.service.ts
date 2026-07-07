@@ -15,11 +15,12 @@ export class SalaryService {
 
   async createSalary(
     createSalaryRequest: CreateSalaryRequest,
+    branchId: string,
   ): Promise<SalaryResponse> {
     const existUser = await this.userService.findById(
       createSalaryRequest.userId,
     );
-    if (!existUser) {
+    if (!existUser || existUser.branchId !== branchId) {
       throw new ApiException(ErrorCode.USER_NOT_FOUND);
     }
 

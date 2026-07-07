@@ -16,6 +16,8 @@ import {
   ErrorCode,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 import { CreateStaffAttendanceRequest } from '../request/create-staff-attendance.request';
 
@@ -72,8 +74,9 @@ export class StaffAttendanceController {
   @Post('/check-in')
   async checkIn(
     @Body() request: CreateStaffAttendanceRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<StaffAttendanceResponse> {
-    const attendance = await this.staffAttendanceService.checkIn(request);
+    const attendance = await this.staffAttendanceService.checkIn(request, user.id);
     return attendance;
   }
 

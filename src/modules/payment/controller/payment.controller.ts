@@ -19,6 +19,8 @@ import {
   ApiSuccessResponse,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 import { ErrorCode } from 'src/global';
 
@@ -37,8 +39,9 @@ export class PaymentController {
   @Post('/')
   async create(
     @Body() request: CreatePaymentRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<PaymentResponse> {
-    const response = await this.paymentService.create(request);
+    const response = await this.paymentService.create(request, user.branchId);
     return response;
   }
 

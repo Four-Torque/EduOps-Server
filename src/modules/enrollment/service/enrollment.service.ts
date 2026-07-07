@@ -21,7 +21,7 @@ export class EnrollmentService {
    * @param request
    * @returns
    */
-  async create(request: CreateEnrollmentRequest): Promise<EnrollmentResponse> {
+  async create(request: CreateEnrollmentRequest, branchId: string): Promise<EnrollmentResponse> {
     // 1. 중복 수강 등록 확인
     const existingEnrollment =
       await this.enrollmentRepository.findByStudentAndClass(
@@ -34,13 +34,13 @@ export class EnrollmentService {
 
     // 1.5. 학생 존재 여부 확인
     const student = await this.studentRepository.findById(request.studentId);
-    if (!student) {
+    if (!student || student.branchId !== branchId) {
       throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
     }
 
     // 2. 강좌 정보 조회 (정가 확인용)
     const cls = await this.classRepository.findById(request.classId);
-    if (!cls) {
+    if (!cls || cls.branchId !== branchId) {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
 
@@ -74,7 +74,7 @@ export class EnrollmentService {
       amount: billingAmount,
       dueDate: dueDate,
       // paymentType은 CreatePaymentRequest 내부 로직에 의해 자동으로 기본값 UNPAID로 설정됩니다.
-    });
+    }, branchId);
 
     // 5. 생성된 수강 정보 응답용으로 재조회하여 반환
     const enrollmentWithRelations = await this.enrollmentRepository.findById(

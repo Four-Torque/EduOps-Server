@@ -31,9 +31,10 @@ export class StaffAttendanceService {
 
   async checkIn(
     createStaffAttendanceRequest: CreateStaffAttendanceRequest,
+    userId: string,
   ): Promise<StaffAttendanceResponse> {
     try {
-      const { userId, workDate } = createStaffAttendanceRequest;
+      const { workDate } = createStaffAttendanceRequest;
       const today = new Date();
       const date = workDate ? workDate : today.toISOString().split('T')[0];
 
@@ -45,11 +46,13 @@ export class StaffAttendanceService {
         throw new ApiException(ErrorCode.ATTENDANCE_ALREADY_EXISTS);
       }
 
-      const data = CreateStaffAttendanceRequest.toEntity({
+      const data = CreateStaffAttendanceRequest.toEntity(
+        {
+          workDate: date,
+          checkInTime: today,
+        },
         userId,
-        workDate: date,
-        checkInTime: today,
-      });
+      );
       const attendance = await this.staffAttendanceRepository.create(data);
 
       const response: StaffAttendanceResponse =

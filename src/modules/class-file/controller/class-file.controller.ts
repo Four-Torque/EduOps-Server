@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ClassFileService } from '../service/class-file.service';
 import { UploadClassFileRequest } from '../request/upload-class-file.request';
 import { ClassFileResponse } from '../response/class-file.response';
+import { CurrentUser, JwtPayload } from 'src/global';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
@@ -45,8 +46,9 @@ export class ClassFileController {
   async uploadFile(
     @Body() request: UploadClassFileRequest,
     @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload,
   ): Promise<ClassFileResponse> {
-    return this.classFileService.uploadFile(request, file);
+    return this.classFileService.uploadFile(request, file, user.id);
   }
 
   @ApiOperation({
