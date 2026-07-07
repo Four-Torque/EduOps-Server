@@ -17,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core/constants';
 import { StudentModule } from './modules/student/student.module';
 import { VendorModule } from './modules/vendor/vendor.module';
 import { ExamModule } from './modules/exam/exam.module';
+import { ClassFileModule } from './modules/class-file/class-file.module';
 import { ClassModule } from './modules/class/class.module';
 import { CategoryModule } from './modules/category/category.module';
 import { PaymentModule } from './modules/payment/payment.module';
@@ -36,6 +37,7 @@ import { ScheduleModule } from './modules/schedule/schedule.module';
     StudentModule,
     VendorModule,
     ExamModule,
+    ClassFileModule,
     ClassModule,
     CategoryModule,
     PaymentModule,
