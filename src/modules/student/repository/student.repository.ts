@@ -7,6 +7,7 @@ export class StudentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   findList(
+    branchId: string,
     status: StudentStatus,
     name: string,
     skip: number,
@@ -14,6 +15,7 @@ export class StudentRepository {
   ): Promise<Student[]> {
     return this.prisma.student.findMany({
       where: {
+        branchId,
         ...(status && { status }),
         ...(name && { name: { contains: name } }),
       },
@@ -22,9 +24,10 @@ export class StudentRepository {
     });
   }
 
-  countList(status: StudentStatus, name: string): Promise<number> {
+  countList(branchId: string, status: StudentStatus, name: string): Promise<number> {
     return this.prisma.student.count({
       where: {
+        branchId,
         ...(status && { status }),
         ...(name && { name: { contains: name } }),
       },

@@ -20,6 +20,7 @@ export class StudentService {
    * @returns
    */
   async getList(
+    branchId: string,
     status: StudentStatus,
     name: string,
     page: number,
@@ -28,8 +29,8 @@ export class StudentService {
     const skip = (page - 1) * limit;
 
     const [students, total] = await Promise.all([
-      this.studentRepository.findList(status, name, skip, limit),
-      this.studentRepository.countList(status, name),
+      this.studentRepository.findList(branchId, status, name, skip, limit),
+      this.studentRepository.countList(branchId, status, name),
     ]);
 
     return {
@@ -56,9 +57,9 @@ export class StudentService {
    * @param request
    * @returns
    */
-  async create(request: CreateStudentRequest): Promise<StudentResponse> {
+  async create(request: CreateStudentRequest, branchId: string): Promise<StudentResponse> {
     const response = await this.studentRepository.create(
-      CreateStudentRequest.toEntity(request),
+      CreateStudentRequest.toEntity(request, branchId),
     );
     return StudentResponse.fromEntity(response);
   }

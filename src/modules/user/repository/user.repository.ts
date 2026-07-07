@@ -33,6 +33,7 @@ export class UserRepository {
   }
 
   async findList(
+    branchId: string,
     role: Role,
     status: UserStatus,
     skip: number,
@@ -40,6 +41,7 @@ export class UserRepository {
   ): Promise<User[]> {
     return this.prisma.user.findMany({
       where: {
+        branchId,
         ...(role && { role }),
         ...(status && { status }),
       },
@@ -48,9 +50,10 @@ export class UserRepository {
     });
   }
 
-  async countList(role: Role, status: UserStatus): Promise<number> {
+  async countList(branchId: string, role: Role, status: UserStatus): Promise<number> {
     return this.prisma.user.count({
       where: {
+        branchId,
         ...(role && { role }),
         ...(status && { status }),
       },

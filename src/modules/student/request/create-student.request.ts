@@ -31,12 +31,13 @@ export class CreateStudentRequest {
   @IsString()
   address: string;
 
-  static toEntity(request: CreateStudentRequest): Prisma.StudentCreateInput {
+  static toEntity(request: CreateStudentRequest, branchId: string): Prisma.StudentCreateInput {
     return {
       name: request.name,
       phone: request.phone,
       birth: request.birth,
       address: request.address,
+      branch: { connect: { id: branchId } },
     };
   }
 }

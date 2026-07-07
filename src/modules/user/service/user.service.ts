@@ -22,10 +22,10 @@ export class UserService {
    * @param request - 사용자 생성을 위한 요청 객체
    * @returns Promise<User> - 생성된 사용자 객체를 반환합니다.
    */
-  async create(request: CreateUserRequest): Promise<User> {
+  async create(request: CreateUserRequest, branchId?: string): Promise<User> {
     const hashedPassword = bcrypt.hashSync(request.password, 10);
     const response = await this.userRepository.create(
-      CreateUserRequest.toEntity(request, hashedPassword),
+      CreateUserRequest.toEntity(request, hashedPassword, branchId),
     );
     return response;
   }
@@ -108,6 +108,7 @@ export class UserService {
    * @returns
    */
   async getList(
+    branchId: string,
     role: Role,
     status: UserStatus,
     page: number,
@@ -116,8 +117,8 @@ export class UserService {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
-      this.userRepository.findList(role, status, skip, limit),
-      this.userRepository.countList(role, status),
+      this.userRepository.findList(branchId, role, status, skip, limit),
+      this.userRepository.countList(branchId, role, status),
     ]);
 
     return {

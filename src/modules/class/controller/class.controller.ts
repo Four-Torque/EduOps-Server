@@ -6,6 +6,7 @@ import {
   Post,
   Get,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { ClassService } from '../service/class.service';
@@ -22,11 +23,13 @@ import {
   ResponseMessage,
 } from 'src/global';
 import { Role } from 'src/global/decorators/role.decorator';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
+import { CurrentUser, JwtPayload } from 'src/global';
 import { UpdateClassRequest } from '../request/update-class.request';
 
 @ApiTags('강좌')
 @Controller('class')
-// @Role('DIRECTOR')
+@UseGuards(JwtGuard)
 export class ClassController {
   constructor(private readonly classService: ClassService) {}
 
@@ -38,8 +41,11 @@ export class ClassController {
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.CLASS_CREATED)
   @Post('/')
-  async create(@Body() request: CreateClassRequest): Promise<ClassResponse> {
-    const response = await this.classService.create(request);
+  async create(
+    @Body() request: CreateClassRequest,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ClassResponse> {
+    const response = await this.classService.create(request, user.branchId);
     return response;
   }
 
@@ -54,8 +60,9 @@ export class ClassController {
   async update(
     @Param('id') id: string,
     @Body() request: UpdateClassRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<ClassResponse> {
-    const response = await this.classService.update(id, request);
+    const response = await this.classService.update(id, request, user.branchId);
     return response;
   }
 
@@ -77,11 +84,13 @@ export class ClassController {
     @Query('status') status?: ClassStatus,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @CurrentUser() user?: JwtPayload,
   ): Promise<PaginatedClassResponse> {
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 20;
 
     const response = await this.classService.findAll(
+      user.branchId,
       name,
       teacherId,
       status,

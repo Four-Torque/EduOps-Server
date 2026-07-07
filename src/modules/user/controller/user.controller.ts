@@ -29,6 +29,7 @@ import { UpdateUserRequest } from '../request/update-user.request';
 
 @ApiTags('유저')
 @Controller('user')
+@UseGuards(JwtGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -57,11 +58,13 @@ export class UserController {
     @Query('status') status?: UserStatus,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @CurrentUser() user?: JwtPayload,
   ): Promise<PaginatedUserResponse> {
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 20;
 
     const response: PaginatedUserResponse = await this.userService.getList(
+      user.branchId,
       role,
       status,
       pageNum,
@@ -93,8 +96,14 @@ export class UserController {
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.USER_CREATED)
   @Post('/')
-  async createUser(@Body() request: CreateUserRequest): Promise<UserResponse> {
-    const response: UserResponse = await this.userService.create(request);
+  async createUser(
+    @Body() request: CreateUserRequest,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<UserResponse> {
+    const response: UserResponse = await this.userService.create(
+      request,
+      user.branchId,
+    );
     return response;
   }
 

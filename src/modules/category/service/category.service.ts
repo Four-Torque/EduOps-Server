@@ -9,8 +9,8 @@ import { UpdateCategoryRequest } from '../request/update-category.request';
 export class CategoryService {
   constructor(private readonly categoryRepository: CategoryRepository) {}
 
-  async findAll(): Promise<CategoryResponse[]> {
-    const categories = await this.categoryRepository.findAll();
+  async findAll(branchId: string): Promise<CategoryResponse[]> {
+    const categories = await this.categoryRepository.findAll(branchId);
     const response: CategoryResponse[] = categories.map((category) =>
       CategoryResponse.fromEntity(category),
     );
@@ -26,9 +26,9 @@ export class CategoryService {
     return response;
   }
 
-  async create(request: CreateCategoryRequest): Promise<CategoryResponse> {
+  async create(request: CreateCategoryRequest, branchId: string): Promise<CategoryResponse> {
     const category = await this.categoryRepository.create(
-      CreateCategoryRequest.toEntity(request),
+      CreateCategoryRequest.toEntity(request, branchId),
     );
     const response = CategoryResponse.fromEntity(category);
     return response;

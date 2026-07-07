@@ -7,9 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Academy {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches Branch[]
+}
+
+model Branch {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  academy   Academy  @relation(fields: [academyId], references: [id])
+  academyId String   @db.Uuid
+  name      String   @db.VarChar(50)
+  address   String   @db.VarChar(100)
+  phone     String   @db.VarChar(20)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  classes    Class[]
+  students   Student[]
+  assets     Asset[]
+  categories Category[]
+  vendors    Vendor[]
+  assetsApplications AssetsApplication[]
+}
+
 model User {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String     @db.VarChar(20)
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch           Branch           @relation(fields: [branchId], references: [id])
+  branchId         String           @db.Uuid
+  name             String           @db.VarChar(20)
   email     String     @unique @db.VarChar(50)
   phone     String     @unique @db.VarChar(20)
   password  String     @db.VarChar(100)
@@ -53,6 +83,8 @@ model StaffAttendance {
 
 model Class {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch    Branch      @relation(fields: [branchId], references: [id])
+  branchId  String      @db.Uuid
   teacher   User        @relation(fields: [teacherId], references: [id])
   teacherId String      @db.Uuid
   name      String      @db.VarChar(20)
@@ -98,6 +130,8 @@ model Schedule {
 
 model AssetsApplication {
   id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch         Branch            @relation(fields: [branchId], references: [id])
+  branchId       String            @db.Uuid
   user           User              @relation(fields: [userId], references: [id])
   userId         String            @db.Uuid
   category       Category          @relation(fields: [categoryId], references: [id])
@@ -117,6 +151,8 @@ model AssetsApplication {
 
 model Category {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  branchId  String   @db.Uuid
   name      String   @db.VarChar(50)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,19 +163,25 @@ model Category {
 
 model Asset {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch     Branch   @relation(fields: [branchId], references: [id])
+  branchId   String   @db.Uuid
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.Uuid
-  name       String   @unique @db.VarChar(100)
+  name       String   @db.VarChar(100)
   stock      Int      @default(1)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   vendor   Vendor @relation(fields: [vendorId], references: [id])
   vendorId String @db.Uuid
+
+  @@unique([branchId, name])
 }
 
 model Vendor {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  branchId  String   @db.Uuid
   name      String   @db.VarChar(100)
   phone     String   @db.VarChar(20)
   email     String   @db.VarChar(50)
@@ -152,6 +194,8 @@ model Vendor {
 
 model Student {
   id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch    Branch        @relation(fields: [branchId], references: [id])
+  branchId  String        @db.Uuid
   name      String        @db.VarChar(50)
   phone     String        @db.VarChar(20)
   status    StudentStatus @default(ENROLLED)

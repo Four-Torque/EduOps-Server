@@ -6,8 +6,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class CategoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<Category[]> {
-    return this.prisma.category.findMany();
+  async findAll(branchId: string): Promise<Category[]> {
+    return this.prisma.category.findMany({
+      where: { branchId },
+    });
   }
 
   async findById(id: string): Promise<Category | null> {

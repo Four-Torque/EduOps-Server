@@ -54,16 +54,18 @@ export class CreateUserRequest {
 
   static toEntity(
     request: CreateUserRequest,
-    hashedPassword: string,
+    hashedPassword?: string,
+    branchId?: string,
   ): Prisma.UserCreateInput {
     return {
       email: request.email,
       name: request.name,
       phone: request.phone,
-      password: hashedPassword,
+      password: hashedPassword ?? request.password,
+      ...(branchId && { branch: { connect: { id: branchId } } }),
       ...(request.employmentStatus && {
         employmentStatus: request.employmentStatus,
       }),
-    };
+    } as Prisma.UserCreateInput;
   }
 }

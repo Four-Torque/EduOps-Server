@@ -23,15 +23,19 @@ export class AssetApplicationRepository {
         user: {
           select: {
             name: true,
+            branchId: true,
           },
         },
       },
     });
   }
 
-  async findAll(take: number, skip: number, status?: string) {
+  async findAll(branchId: string, take: number, skip: number, status?: string) {
     return this.prisma.assetsApplication.findMany({
-      where: status ? { status: status as ApplicationStatus } : undefined,
+      where: {
+        branchId,
+        ...(status ? { status: status as ApplicationStatus } : undefined),
+      },
       orderBy: {
         requestedAt: 'desc',
       },
@@ -51,15 +55,17 @@ export class AssetApplicationRepository {
         user: {
           select: {
             name: true,
+            branchId: true,
           },
         },
       },
     });
   }
 
-  findNameAndStockByAssetName(assetNames: string[]) {
+  findNameAndStockByAssetName(branchId: string, assetNames: string[]) {
     return this.prisma.asset.findMany({
       where: {
+        branchId,
         name: { in: assetNames },
       },
       select: {
@@ -69,9 +75,12 @@ export class AssetApplicationRepository {
     });
   }
 
-  count(take: number, skip: number, status?: string): Promise<number> {
+  count(branchId: string, take: number, skip: number, status?: string): Promise<number> {
     return this.prisma.assetsApplication.count({
-      where: status ? { status: status as ApplicationStatus } : undefined,
+      where: {
+        branchId,
+        ...(status ? { status: status as ApplicationStatus } : undefined),
+      },
       skip,
       take,
     });
@@ -94,6 +103,7 @@ export class AssetApplicationRepository {
         user: {
           select: {
             name: true,
+            branchId: true,
           },
         },
       },

@@ -85,6 +85,7 @@ export class AuthService {
     const payload = {
       id: user.id,
       role: user.role,
+      branchId: user.branchId,
     };
 
     const tokens = await this.generateTokens(payload);
@@ -150,6 +151,7 @@ export class AuthService {
     const tokens = await this.generateTokens({
       id: payload.id,
       role: payload.role,
+      branchId: payload.branchId,
     });
 
     await Promise.all([

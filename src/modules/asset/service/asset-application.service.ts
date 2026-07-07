@@ -8,27 +8,43 @@ import { ApiException, ErrorCode, Transactional } from 'src/global';
 import { ApplicationStatus } from '@prisma/client';
 import { AssetRepository } from '../repository/asset.repository';
 import { AssetChangeStatusRequest } from '../request/asset-change-status.request';
+import { CategoryRepository } from '../../category/repository/category.repository';
+import { VendorRepository } from '../../vendor/repository/vendor.repository';
 
 @Injectable()
 export class AssetApplicationService {
   constructor(
     private readonly assetApplicationRepository: AssetApplicationRepository,
     private readonly assetRepository: AssetRepository,
+    private readonly categoryRepository: CategoryRepository,
+    private readonly vendorRepository: VendorRepository,
   ) {}
 
   @Transactional()
   async create(
     request: AssetApplicationRequest,
     userId: string,
+    branchId: string,
   ): Promise<AssetApplicationResponse> {
+    const category = await this.categoryRepository.findById(request.categoryId);
+    if (!category || category.branchId !== branchId) {
+      throw new ApiException(ErrorCode.CATEGORY_NOT_FOUND);
+    }
+
+    const vendor = await this.vendorRepository.findById(request.vendorId);
+    if (!vendor || vendor.branchId !== branchId) {
+      throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
+    }
+
     const newAssetApplication = await this.assetApplicationRepository.create(
-      AssetApplicationRequest.toEntity(request, userId),
+      AssetApplicationRequest.toEntity(request, userId, branchId),
     );
     const response = AssetApplicationResponse.fromEntity(newAssetApplication);
     return response;
   }
 
   async findAll(
+    branchId: string,
     request: PaginatedAssetApplicationRequest,
   ): Promise<PaginatedAssetApplicationResponse> {
     const { page = 1, limit, status } = request;
@@ -36,13 +52,14 @@ export class AssetApplicationService {
     const skip = page && take ? (page - 1) * take : 0;
 
     const [assetApplications, total] = await Promise.all([
-      this.assetApplicationRepository.findAll(take, skip, status),
-      this.assetApplicationRepository.count(take, skip, status),
+      this.assetApplicationRepository.findAll(branchId, take, skip, status),
+      this.assetApplicationRepository.count(branchId, take, skip, status),
     ]);
 
     const assetNames = assetApplications.map((app) => app.name);
     const assetStocks =
       await this.assetApplicationRepository.findNameAndStockByAssetName(
+        branchId,
         assetNames,
       );
     const stockMap = new Map(

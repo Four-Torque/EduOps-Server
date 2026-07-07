@@ -13,10 +13,12 @@ export class VendorRepository {
   }
 
   async findAll(
+    branchId: string,
     take: number,
     skip: number,
   ): Promise<Prisma.VendorGetPayload<{}>[]> {
     return this.prisma.vendor.findMany({
+      where: { branchId },
       orderBy: {
         createdAt: 'desc',
       },
@@ -25,8 +27,9 @@ export class VendorRepository {
     });
   }
 
-  count(take: number, skip: number): Promise<number> {
+  count(branchId: string, take: number, skip: number): Promise<number> {
     return this.prisma.vendor.count({
+      where: { branchId },
       skip,
       take,
     });

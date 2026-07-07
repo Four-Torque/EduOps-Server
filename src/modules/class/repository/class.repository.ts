@@ -36,6 +36,7 @@ export class ClassRepository {
   }
 
   async findAll(
+    branchId: string,
     name?: string,
     teacherId?: string,
     status?: any,
@@ -43,6 +44,7 @@ export class ClassRepository {
     take?: number,
   ): Promise<Class[]> {
     const where: Prisma.ClassWhereInput = {
+      branchId,
       ...(name && { name: { contains: name } }),
       ...(teacherId && { teacherId }),
       ...(status && { status }),
@@ -65,11 +67,13 @@ export class ClassRepository {
   }
 
   async count(
+    branchId: string,
     name?: string,
     teacherId?: string,
     status?: any,
   ): Promise<number> {
     const where: Prisma.ClassWhereInput = {
+      branchId,
       ...(name && { name: { contains: name } }),
       ...(teacherId && { teacherId }),
       ...(status && { status }),

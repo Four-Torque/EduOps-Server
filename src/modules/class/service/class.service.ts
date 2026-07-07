@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ClassRepository } from '../repository/class.repository';
+import { UserRepository } from '../../user/repository/user.repository';
 import { CreateClassRequest } from '../request/create-class.request';
 import { ClassResponse } from '../response/class.response';
 import { ClassStudentAttendanceResponse } from '../response/class-student-attendance.response';
@@ -8,16 +9,24 @@ import { UpdateClassRequest } from '../request/update-class.request';
 
 @Injectable()
 export class ClassService {
-  constructor(private readonly classRepository: ClassRepository) {}
+  constructor(
+    private readonly classRepository: ClassRepository,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   /**
    * create 메서드는 강좌를 생성합니다
    * @param request
    * @returns
    */
-  async create(request: CreateClassRequest): Promise<ClassResponse> {
+  async create(request: CreateClassRequest, branchId: string): Promise<ClassResponse> {
+    const teacher = await this.userRepository.findById(request.teacherId);
+    if (!teacher || teacher.branchId !== branchId) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND); // Or a specific FORBIDDEN error
+    }
+
     const response = await this.classRepository.create(
-      CreateClassRequest.toEntity(request),
+      CreateClassRequest.toEntity(request, branchId),
     );
     return ClassResponse.fromEntity(response);
   }
@@ -31,10 +40,18 @@ export class ClassService {
   async update(
     id: string,
     request: UpdateClassRequest,
+    branchId: string,
   ): Promise<ClassResponse> {
     const existing = await this.classRepository.findById(id);
     if (!existing) {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+    }
+
+    if (request.teacherId) {
+      const teacher = await this.userRepository.findById(request.teacherId);
+      if (!teacher || teacher.branchId !== branchId) {
+        throw new ApiException(ErrorCode.USER_NOT_FOUND);
+      }
     }
 
     const data = UpdateClassRequest.toEntity(request);
@@ -67,6 +84,7 @@ export class ClassService {
    * @returns
    */
   async findAll(
+    branchId: string,
     name?: string,
     teacherId?: string,
     status?: any,
@@ -75,8 +93,8 @@ export class ClassService {
   ) {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      this.classRepository.findAll(name, teacherId, status, skip, limit),
-      this.classRepository.count(name, teacherId, status),
+      this.classRepository.findAll(branchId, name, teacherId, status, skip, limit),
+      this.classRepository.count(branchId, name, teacherId, status),
     ]);
 
     const mappedData = data.map((cls) => ClassResponse.fromEntity(cls));

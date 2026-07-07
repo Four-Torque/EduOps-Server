@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { StudentService } from '../service/student.service';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -21,9 +22,12 @@ import {
 import { StudentResponse } from '../response/student.response';
 import { CreateStudentRequest } from '../request/create-student.request';
 import { UpdateStudentRequest } from '../request/update-student.request';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
+import { CurrentUser, JwtPayload } from 'src/global';
 
 @ApiTags('학생')
 @Controller('student')
+@UseGuards(JwtGuard)
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
@@ -48,12 +52,13 @@ export class StudentController {
     @Query('name') name?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
+    @CurrentUser() user?: JwtPayload,
   ): Promise<PaginatedStudentResponse> {
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 20;
 
     const response: PaginatedStudentResponse =
-      await this.studentService.getList(status, name, pageNum, limitNum);
+      await this.studentService.getList(user.branchId, status, name, pageNum, limitNum);
     return response;
   }
 
@@ -80,9 +85,9 @@ export class StudentController {
   @Post('/')
   async createStudent(
     @Body() request: CreateStudentRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<StudentResponse> {
-    console.log(request);
-    const response: StudentResponse = await this.studentService.create(request);
+    const response: StudentResponse = await this.studentService.create(request, user.branchId);
     return response;
   }
 

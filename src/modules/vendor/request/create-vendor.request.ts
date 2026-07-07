@@ -27,11 +27,12 @@ export class CreateVendorRequest {
   @IsNotEmpty()
   email: string;
 
-  static toEntity(request: CreateVendorRequest): Prisma.VendorCreateInput {
+  static toEntity(request: CreateVendorRequest, branchId: string): Prisma.VendorCreateInput {
     return {
       name: request.name,
       phone: request.phone,
       email: request.email,
+      branch: { connect: { id: branchId } },
     };
   }
 }

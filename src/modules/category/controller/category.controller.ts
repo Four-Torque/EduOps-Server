@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from '../service/category.service';
 import { CategoryResponse } from '../response/category.response';
@@ -16,12 +17,16 @@ import {
   ErrorCode,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 import { UpdateCategoryRequest } from '../request/update-category.request';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
 
 @ApiTags('자재 카테고리')
 @Controller('category')
+@UseGuards(JwtGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
@@ -34,9 +39,10 @@ export class CategoryController {
   @Post()
   async create(
     @Body() request: CreateCategoryRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<CategoryResponse> {
     const response: CategoryResponse =
-      await this.categoryService.create(request);
+      await this.categoryService.create(request, user.branchId);
     return response;
   }
 
@@ -46,8 +52,8 @@ export class CategoryController {
   })
   @ApiSuccessResponse(null, CategoryResponse, true)
   @Get()
-  async findAll(): Promise<CategoryResponse[]> {
-    const response: CategoryResponse[] = await this.categoryService.findAll();
+  async findAll(@CurrentUser() user: JwtPayload): Promise<CategoryResponse[]> {
+    const response: CategoryResponse[] = await this.categoryService.findAll(user.branchId);
     return response;
   }
 

@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { VendorService } from '../service/vendor.service';
 import { Role } from 'src/global/decorators/role.decorator';
@@ -19,14 +20,18 @@ import {
   ErrorCode,
   Message,
   ResponseMessage,
+  CurrentUser,
+  JwtPayload,
 } from 'src/global';
 import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
 import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
 import { UpdateVendorRequest } from '../request/update-vendor.request';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
 
 @Role('DIRECTOR', 'MANAGER')
 @ApiTags('구매처')
 @Controller('vendor')
+@UseGuards(JwtGuard)
 export class VendorController {
   constructor(private readonly vendorService: VendorService) {}
 
@@ -37,8 +42,11 @@ export class VendorController {
   @ApiSuccessResponse(ResponseMessage.VENDOR_CREATED, VendorResponse)
   @Message(ResponseMessage.VENDOR_CREATED)
   @Post()
-  async create(@Body() request: CreateVendorRequest): Promise<VendorResponse> {
-    const response = await this.vendorService.create(request);
+  async create(
+    @Body() request: CreateVendorRequest,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<VendorResponse> {
+    const response = await this.vendorService.create(request, user.branchId);
     return response;
   }
 
@@ -50,8 +58,9 @@ export class VendorController {
   @Get()
   async findAll(
     @Query() request: PaginatedVendorRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<PaginatedVendorResponse> {
-    const response = await this.vendorService.findAll(request);
+    const response = await this.vendorService.findAll(user.branchId, request);
     return response;
   }
 

@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AssetApplicationService } from '../service/asset-application.service';
 import { AssetApplicationRequest } from '../request/asset-application.request';
@@ -25,9 +26,11 @@ import { PaginatedAssetApplicationRequest } from '../request/paginated-asset-app
 import { PaginatedAssetApplicationResponse } from '../response/paginated-asset-application.response';
 import { AssetChangeStatusRequest } from '../request/asset-change-status.request';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
 
 @ApiTags('자재 요청')
 @Controller('asset-application')
+@UseGuards(JwtGuard)
 export class AssetApplicationController {
   constructor(
     private readonly assetApplicationService: AssetApplicationService,
@@ -51,6 +54,7 @@ export class AssetApplicationController {
     const response = await this.assetApplicationService.create(
       request,
       user.id,
+      user.branchId,
     );
     return response;
   }
@@ -64,8 +68,9 @@ export class AssetApplicationController {
   @Get()
   async findAll(
     @Query() request: PaginatedAssetApplicationRequest,
+    @CurrentUser() user: JwtPayload,
   ): Promise<PaginatedAssetApplicationResponse> {
-    const response = await this.assetApplicationService.findAll(request);
+    const response = await this.assetApplicationService.findAll(user.branchId, request);
     return response;
   }
 

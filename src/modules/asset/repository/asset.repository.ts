@@ -14,7 +14,12 @@ export class AssetRepository {
     },
   ) {
     return this.prisma.asset.upsert({
-      where: { name: assetApplication.name },
+      where: {
+        branchId_name: {
+          branchId: assetApplication.branchId,
+          name: assetApplication.name,
+        },
+      },
       update: {
         stock: {
           increment: assetApplication.quantity,
@@ -33,20 +38,28 @@ export class AssetRepository {
             id: assetApplication.vendorId,
           },
         },
+        branch: {
+          connect: {
+            id: assetApplication.branchId,
+          },
+        },
       },
     });
   }
 
-  async findAll(take: number, skip: number, search?: string) {
+  async findAll(branchId: string, take: number, skip: number, search?: string) {
     return this.prisma.asset.findMany({
-      where: search
-        ? {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          }
-        : undefined,
+      where: {
+        branchId,
+        ...(search
+          ? {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            }
+          : {}),
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -67,16 +80,19 @@ export class AssetRepository {
     });
   }
 
-  count(take: number, skip: number, search?: string): Promise<number> {
+  count(branchId: string, take: number, skip: number, search?: string): Promise<number> {
     return this.prisma.asset.count({
-      where: search
-        ? {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          }
-        : undefined,
+      where: {
+        branchId,
+        ...(search
+          ? {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            }
+          : {}),
+      },
       skip,
       take,
     });

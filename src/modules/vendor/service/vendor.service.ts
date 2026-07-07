@@ -16,9 +16,9 @@ export class VendorService {
    * @param request CreateVendorRequest
    * @returns VendorResponse
    */
-  async create(request: CreateVendorRequest): Promise<VendorResponse> {
+  async create(request: CreateVendorRequest, branchId: string): Promise<VendorResponse> {
     const newVendor = await this.vendorRepository.create(
-      CreateVendorRequest.toEntity(request),
+      CreateVendorRequest.toEntity(request, branchId),
     );
     const response = VendorResponse.fromEntity(newVendor);
     return response;
@@ -30,6 +30,7 @@ export class VendorService {
    * @returns PaginatedVendorResponse
    */
   async findAll(
+    branchId: string,
     request: PaginatedVendorRequest,
   ): Promise<PaginatedVendorResponse> {
     const { page = 1, limit } = request;
@@ -37,8 +38,8 @@ export class VendorService {
     const skip = page && take ? (page - 1) * take : 0;
 
     const [vendors, total] = await Promise.all([
-      this.vendorRepository.findAll(take, skip),
-      this.vendorRepository.count(take, skip),
+      this.vendorRepository.findAll(branchId, take, skip),
+      this.vendorRepository.count(branchId, take, skip),
     ]);
     const response = PaginatedVendorResponse.fromEntity(page, total, vendors);
     return response;

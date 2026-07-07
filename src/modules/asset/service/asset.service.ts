@@ -8,6 +8,7 @@ export class AssetService {
   constructor(private readonly assetRepository: AssetRepository) {}
 
   async findAll(
+    branchId: string,
     request: PaginatedAssetApplicationRequest,
   ): Promise<PaginatedAssetResponse> {
     const { page, limit, search } = request;
@@ -15,8 +16,8 @@ export class AssetService {
     const skip = page && take ? (page - 1) * take : 0;
 
     const [assets, total] = await Promise.all([
-      this.assetRepository.findAll(take, skip, search),
-      this.assetRepository.count(take, skip),
+      this.assetRepository.findAll(branchId, take, skip, search),
+      this.assetRepository.count(branchId, take, skip, search),
     ]);
     const response = PaginatedAssetResponse.fromEntity(
       page,

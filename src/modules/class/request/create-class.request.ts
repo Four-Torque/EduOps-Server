@@ -45,7 +45,7 @@ export class CreateClassRequest {
   @IsDate()
   endDate: Date;
 
-  static toEntity(request: CreateClassRequest): Prisma.ClassCreateInput {
+  static toEntity(request: CreateClassRequest, branchId?: string): Prisma.ClassCreateInput {
     return {
       teacher: { connect: { id: request.teacherId } },
       name: request.name,
@@ -53,6 +53,7 @@ export class CreateClassRequest {
       capacity: request.capacity,
       startDate: request.startDate,
       endDate: request.endDate,
-    };
+      ...(branchId && { branch: { connect: { id: branchId } } }),
+    } as Prisma.ClassCreateInput;
   }
 }
