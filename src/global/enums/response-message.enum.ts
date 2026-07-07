@@ -59,4 +59,12 @@ export enum ResponseMessage {
   SCHEDULE_CREATED = '시간표가 성공적으로 등록되었습니다.',
   SCHEDULE_FETCHED = '시간표가 성공적으로 조회되었습니다.',
   SCHEDULE_DELETED = '시간표가 성공적으로 삭제되었습니다.',
+
+  // 시험 관련
+  EXAM_CREATED = '시험이 성공적으로 생성되었습니다.',
+  EXAM_FETCHED = '시험이 성공적으로 조회되었습니다.',
+  EXAM_UPDATED = '시험이 성공적으로 수정되었습니다.',
+  EXAM_DELETED = '시험이 성공적으로 삭제되었습니다.',
+  EXAM_RESULT_SAVED = '시험 점수가 성공적으로 등록/수정되었습니다.',
+  EXAM_RESULT_FETCHED = '시험 점수 목록이 성공적으로 조회되었습니다.',
 }

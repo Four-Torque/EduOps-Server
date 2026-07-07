@@ -16,6 +16,7 @@ import { JwtGuard } from './modules/auth/guards/jwt.guard';
 import { APP_GUARD } from '@nestjs/core/constants';
 import { StudentModule } from './modules/student/student.module';
 import { VendorModule } from './modules/vendor/vendor.module';
+import { ExamModule } from './modules/exam/exam.module';
 import { ClassModule } from './modules/class/class.module';
 import { CategoryModule } from './modules/category/category.module';
 import { PaymentModule } from './modules/payment/payment.module';
@@ -33,6 +34,7 @@ import { ScheduleModule } from './modules/schedule/schedule.module';
     StaffAttendanceModule,
     StudentModule,
     VendorModule,
+    ExamModule,
     ClassModule,
     CategoryModule,
     PaymentModule,

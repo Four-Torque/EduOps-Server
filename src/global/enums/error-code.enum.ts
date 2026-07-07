@@ -52,6 +52,9 @@ export enum ErrorCode {
   SCHEDULE_NOT_FOUND = 'SCHEDULE_001',
   TEACHER_SCHEDULE_CONFLICT = 'SCHEDULE_002',
   ROOM_SCHEDULE_CONFLICT = 'SCHEDULE_003',
+
+  // 시험 관련 에러
+  EXAM_NOT_FOUND = 'EXAM_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -192,5 +195,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.ROOM_SCHEDULE_CONFLICT]: {
     status: HttpStatus.CONFLICT,
     message: '해당 강의실이 이미 다른 강좌에 의해 사용 중입니다.',
+  },
+
+  // 시험 관련 에러
+  [ErrorCode.EXAM_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '해당 시험을 찾을 수 없습니다.',
   },
 };
