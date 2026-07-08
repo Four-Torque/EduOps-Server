@@ -35,6 +35,7 @@ export enum ErrorCode {
 
   // 구매처 관련 에러
   VENDOR_NOT_FOUND = 'VENDOR_001',
+  VENDOR_ALREADY_IN_USE = 'VENDOR_002',
 
   // 강좌 관련 에러
   CLASS_NOT_FOUND = 'CLASS_001',
@@ -169,6 +170,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.VENDOR_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 구매처를 찾을 수 없습니다.',
+  },
+  [ErrorCode.VENDOR_ALREADY_IN_USE]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이미 해당 구매처를 포함한 자재요청이 존재합니다.',
   },
 
   // 강좌 관런 에러

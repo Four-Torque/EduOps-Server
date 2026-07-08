@@ -8,4 +8,7 @@ export class PaginatedVendorRequest {
   @IsOptional()
   @IsNumber()
   limit?: number;
+
+  @IsOptional()
+  search?: string;
 }
