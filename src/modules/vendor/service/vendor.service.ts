@@ -32,13 +32,13 @@ export class VendorService {
   async findAll(
     request: PaginatedVendorRequest,
   ): Promise<PaginatedVendorResponse> {
-    const { page = 1, limit } = request;
+    const { page = 1, limit, search } = request;
     const take = limit ?? 10;
     const skip = page && take ? (page - 1) * take : 0;
 
     const [vendors, total] = await Promise.all([
-      this.vendorRepository.findAll(take, skip),
-      this.vendorRepository.count(take, skip),
+      this.vendorRepository.findAll(take, skip, search),
+      this.vendorRepository.count(take, skip, search),
     ]);
     const response = PaginatedVendorResponse.fromEntity(page, total, vendors);
     return response;
@@ -86,10 +86,16 @@ export class VendorService {
    * @returns void
    */
   async delete(ids: string[]): Promise<void> {
-    const vendors = await Promise.all(ids.map((id) => this.findById(id)));
+    const vendors = await this.vendorRepository.findByIds(ids);
     if (vendors.length !== ids.length) {
       throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
     }
-    await this.vendorRepository.delete(ids);
+    try {
+      await this.vendorRepository.delete(ids);
+    } catch (error: any) {
+      if (error.code === 'P2003') {
+        throw new ApiException(ErrorCode.VENDOR_ALREADY_IN_USE);
+      }
+    }
   }
 }

@@ -15,8 +15,18 @@ export class VendorRepository {
   async findAll(
     take: number,
     skip: number,
+    search?: string,
   ): Promise<Prisma.VendorGetPayload<{}>[]> {
+    const where: Prisma.VendorWhereInput = {};
+
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
     return this.prisma.vendor.findMany({
+      where,
       orderBy: {
         createdAt: 'desc',
       },
@@ -25,8 +35,16 @@ export class VendorRepository {
     });
   }
 
-  count(take: number, skip: number): Promise<number> {
+  count(take: number, skip: number, search?: string): Promise<number> {
+    const where: Prisma.VendorWhereInput = {};
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
     return this.prisma.vendor.count({
+      where,
       skip,
       take,
     });
@@ -47,6 +65,16 @@ export class VendorRepository {
 
   async delete(ids: string[]): Promise<Prisma.BatchPayload> {
     return this.prisma.vendor.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
+
+  async findByIds(ids: string[]): Promise<Vendor[]> {
+    return this.prisma.vendor.findMany({
       where: {
         id: {
           in: ids,
