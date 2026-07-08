@@ -22,6 +22,13 @@ export class ClassStudentAttendanceResponse {
   @IsString()
   studentName: string;
 
+  @ApiProperty({
+    description: '학생 연락처',
+    example: "010-0000-0000",
+  })
+  @IsString()
+  studentPhone: string;
+
   @ApiPropertyOptional({
     description: '출결 기록 ID (아직 출석 체크 전이면 null)',
     example: 'attendance-uuid',
@@ -58,6 +65,7 @@ export class ClassStudentAttendanceResponse {
       const response = new ClassStudentAttendanceResponse();
       response.studentId = studentId;
       response.studentName = enrollment.student.name;
+      response.studentPhone = enrollment.student.phone;
       response.attendanceId = attendance?.id || null;
       response.lectureDate = attendance?.lectureDate || null;
       response.status = attendance?.status || null;

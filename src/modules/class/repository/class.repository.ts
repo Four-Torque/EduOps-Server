@@ -86,11 +86,10 @@ export class ClassRepository {
       include: {
         student: true,
       },
-      orderBy: {
-        student: {
-          name: 'asc',
-        },
-      },
+      orderBy: [
+        { student: { name: 'asc' } },
+        { student: { phone: 'asc' } },
+      ],
     });
 
     const attendances = await this.prisma.studentAttendance.findMany({
