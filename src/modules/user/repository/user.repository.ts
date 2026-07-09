@@ -33,6 +33,7 @@ export class UserRepository {
   }
 
   async findList(
+    name: string,
     role: Role,
     status: UserStatus,
     skip: number,
@@ -40,6 +41,10 @@ export class UserRepository {
   ): Promise<User[]> {
     return this.prisma.user.findMany({
       where: {
+        ...(name && {name : {
+          contains: name,
+          mode: 'insensitive'
+        }}),
         ...(role && { role }),
         ...(status && { status }),
       },

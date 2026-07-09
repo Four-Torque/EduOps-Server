@@ -108,6 +108,7 @@ export class UserService {
    * @returns
    */
   async getList(
+    name: string,
     role: Role,
     status: UserStatus,
     page: number,
@@ -116,7 +117,7 @@ export class UserService {
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([
-      this.userRepository.findList(role, status, skip, limit),
+      this.userRepository.findList(name, role, status, skip, limit),
       this.userRepository.countList(role, status),
     ]);
 

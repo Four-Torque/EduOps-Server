@@ -20,7 +20,7 @@ import {
   Message,
   ResponseMessage,
 } from 'src/global';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
 import { Role, UserStatus } from '@prisma/client';
 import { PaginatedUserResponse } from '../response/user-list.response';
@@ -51,8 +51,14 @@ export class UserController {
   @ApiSuccessResponse(ResponseMessage.USER_LIST_FETCHED, PaginatedUserResponse)
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.USER_LIST_FETCHED)
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'role', required: false })
+  @ApiQuery({ name: 'status', required: false, enum: UserStatus })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
   @Get('/')
   async getUserList(
+    @Query('name') name?: string,
     @Query('role') role?: Role,
     @Query('status') status?: UserStatus,
     @Query('page') page?: number,
@@ -62,6 +68,7 @@ export class UserController {
     const limitNum = Number(limit) || 20;
 
     const response: PaginatedUserResponse = await this.userService.getList(
+      name,
       role,
       status,
       pageNum,
