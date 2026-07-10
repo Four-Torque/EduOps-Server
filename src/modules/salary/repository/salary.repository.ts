@@ -35,4 +35,11 @@ export class SalaryRepository {
       data: { status: SalaryStatus.COMPLETED },
     });
   }
+
+  updateSalaryById(id: string, data: Prisma.SalaryUpdateInput): Promise<Salary> {
+    return this.prisma.salary.update({
+      where: { id },
+      data,
+    });
+  }
 }
