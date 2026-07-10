@@ -16,10 +16,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ClassFileService } from '../service/class-file.service';
 import { UploadClassFileRequest } from '../request/upload-class-file.request';
 import { ClassFileResponse } from '../response/class-file.response';
+import { PaginatedClassFileResponse } from '../response/class-file-list.response';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
+  CurrentUser,
   ErrorCode,
+  JwtPayload,
   Message,
   ResponseMessage,
 } from 'src/global';
@@ -27,7 +30,7 @@ import { Response } from 'express';
 import * as fs from 'fs';
 
 @ApiTags('수업 파일')
-@Controller('api/class-file')
+@Controller('class-file')
 export class ClassFileController {
   constructor(private readonly classFileService: ClassFileService) {}
 
@@ -41,31 +44,47 @@ export class ClassFileController {
   @ApiErrorResponse(ErrorCode.BAD_REQUEST, ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.CLASS_FILE_UPLOADED)
   @Post()
-  @UseInterceptors(FileInterceptor('file')) // Multer가 설정한 옵션에 따라 동작
+  @UseInterceptors(FileInterceptor('file')) 
   async uploadFile(
+    @CurrentUser() user: JwtPayload,
     @Body() request: UploadClassFileRequest,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<ClassFileResponse> {
-    return this.classFileService.uploadFile(request, file);
+    return this.classFileService.uploadFile(user.id, request, file);
   }
 
   @ApiOperation({
-    summary: '특정 강좌의 파일 목록 조회',
-    description: '해당 강좌에 업로드된 수업 자료(파일) 목록을 조회합니다.',
+    summary: '파일 목록 조회',
+    description: '업로드된 수업 자료(파일) 목록을 조회합니다.',
   })
   @ApiSuccessResponse(
     ResponseMessage.CLASS_FILE_FETCHED,
-    ClassFileResponse,
-    true,
+    PaginatedClassFileResponse,
   )
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.CLASS_FILE_FETCHED)
-  @ApiQuery({ name: 'classId', required: true })
+  @ApiQuery({ name: 'classId', required: false })
+  @ApiQuery({ name: 'fileName', required: false })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
   @Get()
   async getFilesByClassId(
-    @Query('classId') classId: string,
-  ): Promise<ClassFileResponse[]> {
-    return this.classFileService.getFilesByClassId(classId);
+    @CurrentUser() user: JwtPayload,
+    @Query('classId') classId?: string,
+    @Query('fileName') fileName?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ): Promise<PaginatedClassFileResponse> {
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+
+    return this.classFileService.getFilesByClassId(
+      user.id,
+      classId,
+      fileName,
+      pageNum,
+      limitNum,
+    );
   }
 
   @ApiOperation({

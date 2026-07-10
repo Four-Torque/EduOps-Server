@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ClassFileRepository } from '../repository/class-file.repository';
 import { UploadClassFileRequest } from '../request/upload-class-file.request';
 import { ClassFileResponse } from '../response/class-file.response';
+import { PaginatedClassFileResponse } from '../response/class-file-list.response';
 import { ApiException, ErrorCode } from 'src/global';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,6 +19,7 @@ export class ClassFileService {
    * @returns Promise<ClassFileResponse> - 저장된 파일 객체를 반환합니다.
    */
   async uploadFile(
+    userId: string,
     request: UploadClassFileRequest,
     file: Express.Multer.File,
   ): Promise<ClassFileResponse> {
@@ -28,21 +30,38 @@ export class ClassFileService {
     const entity = await this.classFileRepository.create({
       fileName: file.originalname,
       filePath: file.path, // Multer에 의해 지정된 로컬 경로 (예: uploads/class-files/xxx.pdf)
+      fileSize: file.size,
       class: { connect: { id: request.classId } },
-      uploader: { connect: { id: request.uploaderId } },
+      uploader: { connect: { id: userId } },
     });
 
     return ClassFileResponse.fromEntity(entity);
   }
 
   /**
-   * getFilesByClassId 메서드는 특정 강좌에 등록된 모든 파일 목록을 조회합니다.
+   * getFilesByClassId 메서드는 특정 강좌에 등록된 파일 목록을 조회합니다.
    * @param classId - 강좌 ID
-   * @returns Promise<ClassFileResponse[]>
+   * @returns Promise<PaginatedClassFileResponse>
    */
-  async getFilesByClassId(classId: string): Promise<ClassFileResponse[]> {
-    const files = await this.classFileRepository.findByClassId(classId);
-    return files.map((file) => ClassFileResponse.fromEntity(file));
+  async getFilesByClassId(
+    userId: string,
+    classId?: string,
+    fileName?: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<PaginatedClassFileResponse> {
+    const { files, total } = await this.classFileRepository.findClassFiles(
+      userId,
+      classId,
+      fileName,
+      page,
+      limit,
+    );
+    return {
+      total,
+      page,
+      data: files.map((file) => ClassFileResponse.fromEntity(file)),
+    };
   }
 
   /**

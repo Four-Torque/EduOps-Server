@@ -12,6 +12,10 @@ import { ClassFileRepository } from './repository/class-file.repository';
       storage: diskStorage({
         destination: './uploads/class-files',
         filename: (req, file, cb) => {
+          // 한글 파일명 깨짐 방지 (multer가 latin1로 처리하는 문제 해결)
+          file.originalname = Buffer.from(file.originalname, 'latin1').toString(
+            'utf8',
+          );
           // 파일명 중복을 피하기 위해 타임스탬프와 랜덤 문자열을 원본 파일명 앞에 붙입니다.
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);

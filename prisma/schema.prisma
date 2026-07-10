@@ -83,6 +83,7 @@ model ClassFile {
   uploaderId String   @db.Uuid
   fileName   String   @db.VarChar(100)
   filePath   String   @db.VarChar(200)
+  fileSize   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

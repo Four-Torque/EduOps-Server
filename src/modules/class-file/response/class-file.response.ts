@@ -21,6 +21,12 @@ export class ClassFileResponse {
   fileName: string;
 
   @ApiProperty({
+    description: '원본 파일 사이즈(byte)',
+    example: '15000',
+  })
+  fileSize: number;
+
+  @ApiProperty({
     description: '업로더 ID',
     example: 'user-uuid-1234',
   })
@@ -45,6 +51,7 @@ export class ClassFileResponse {
     response.id = entity.id;
     response.classId = entity.classId;
     response.fileName = entity.fileName;
+    response.fileSize  = entity.fileSize;
     response.uploaderId = entity.uploaderId;
     if (entity.uploader) {
       response.uploaderName = entity.uploader.name;
