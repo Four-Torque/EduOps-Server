@@ -23,6 +23,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { EnrollmentModule } from './modules/enrollment/enrollment.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
+import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 import { AssetModule } from './modules/asset/asset.module';
 import { ClassSyllabusModule } from './modules/class-syllabus/class-syllabus.module';
 import { MessageModule } from './modules/message/message.module';
@@ -46,6 +47,7 @@ import { MessageModule } from './modules/message/message.module';
     PaymentModule,
     EnrollmentModule,
     ScheduleModule,
+    NestScheduleModule.forRoot(),
     ClassSyllabusModule,
     MessageModule,
   ],

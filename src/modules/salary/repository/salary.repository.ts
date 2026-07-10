@@ -42,4 +42,24 @@ export class SalaryRepository {
       data,
     });
   }
+
+  findLatestByUserId(userId: string): Promise<Salary | null> {
+    return this.prisma.salary.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findSalariesByMonthRange(userIds: string[], startDate: Date, endDate: Date): Promise<Salary[]> {
+    return this.prisma.salary.findMany({
+      where: {
+        userId: { in: userIds },
+        paymentDate: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

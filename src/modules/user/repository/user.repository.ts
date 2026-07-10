@@ -74,4 +74,10 @@ export class UserRepository {
       where: { id },
     });
   }
+
+  async findActiveUsers(): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where: { status: UserStatus.ACTIVE },
+    });
+  }
 }
