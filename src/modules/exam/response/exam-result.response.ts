@@ -3,10 +3,11 @@ import { ExamResult } from '@prisma/client';
 
 export class ExamResultResponse {
   @ApiProperty({
-    description: '결과 ID',
+    description: '결과 ID (미응시인 경우 없음)',
     example: 'result-uuid-1234',
+    required: false,
   })
-  id: string;
+  id?: string;
 
   @ApiProperty({
     description: '학생 ID',
@@ -21,10 +22,11 @@ export class ExamResultResponse {
   studentName?: string;
 
   @ApiProperty({
-    description: '점수',
+    description: '점수 (미응시인 경우 없음)',
     example: 95,
+    required: false,
   })
-  score: number;
+  score?: number;
 
   static fromEntity(
     entity: ExamResult & { student?: { name: string } },

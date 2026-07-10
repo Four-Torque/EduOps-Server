@@ -18,13 +18,15 @@ import { ExamResultResponse } from '../response/exam-result.response';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
+  CurrentUser,
   ErrorCode,
+  JwtPayload,
   Message,
   ResponseMessage,
 } from 'src/global';
 
 @ApiTags('수업 테스트')
-@Controller('api/exam')
+@Controller('exam')
 export class ExamController {
   constructor(private readonly examService: ExamService) {}
 
@@ -41,18 +43,21 @@ export class ExamController {
   }
 
   @ApiOperation({
-    summary: '특정 강좌의 시험 목록 조회',
-    description: 'classId에 해당하는 강좌의 시험 목록을 조회합니다.',
+    summary: '시험 목록 조회',
+    description: '전체 강좌 또는 특정 강좌의 시험 목록을 조회합니다. 기간(period) 필터가 가능합니다.',
   })
   @ApiSuccessResponse(ResponseMessage.EXAM_FETCHED, ExamResponse, true)
   @ApiErrorResponse(ErrorCode.CLASS_NOT_FOUND, ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.EXAM_FETCHED)
-  @ApiQuery({ name: 'classId', required: true })
+  @ApiQuery({ name: 'classId', required: false })
+  @ApiQuery({ name: 'period', required: false, description: '1m, 3m, 6m, all' })
   @Get()
-  async getExamsByClassId(
-    @Query('classId') classId: string,
+  async getExams(
+    @CurrentUser() user: JwtPayload,
+    @Query('classId') classId?: string,
+    @Query('period') period?: string,
   ): Promise<ExamResponse[]> {
-    return this.examService.getExamsByClassId(classId);
+    return this.examService.getExams(user.id, classId, period);
   }
 
   @ApiOperation({
@@ -114,5 +119,22 @@ export class ExamController {
   @Get(':id/result')
   async getExamResults(@Param('id') id: string): Promise<ExamResultResponse[]> {
     return this.examService.getExamResults(id);
+  }
+
+  @ApiOperation({
+    summary: '특정 시험의 반 전체 학생 점수 현황 조회',
+    description:
+      '해당 시험이 배정된 반의 전체 학생 명단과 점수(미응시 포함)를 반환합니다.',
+  })
+  @ApiSuccessResponse(
+    ResponseMessage.EXAM_RESULT_FETCHED,
+    ExamResultResponse,
+    true,
+  )
+  @ApiErrorResponse(ErrorCode.EXAM_NOT_FOUND, ErrorCode.INTERNAL_SERVER_ERROR)
+  @Message(ResponseMessage.EXAM_RESULT_FETCHED)
+  @Get(':id/students-results')
+  async getExamStudentsResults(@Param('id') id: string): Promise<ExamResultResponse[]> {
+    return this.examService.getExamStudentsResults(id);
   }
 }

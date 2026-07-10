@@ -40,12 +40,14 @@ export class StudentController {
   @Message(ResponseMessage.STUDENT_LIST_FETCHED)
   @ApiQuery({ name: 'status', required: false, enum: StudentStatus })
   @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'phone', required: false })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 20 })
   @Get('/')
   async getStudentList(
     @Query('status') status?: StudentStatus,
     @Query('name') name?: string,
+    @Query('phone') phone?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ): Promise<PaginatedStudentResponse> {
@@ -53,7 +55,7 @@ export class StudentController {
     const limitNum = Number(limit) || 20;
 
     const response: PaginatedStudentResponse =
-      await this.studentService.getList(status, name, pageNum, limitNum);
+      await this.studentService.getList(status, name, phone, pageNum, limitNum);
     return response;
   }
 
@@ -81,7 +83,6 @@ export class StudentController {
   async createStudent(
     @Body() request: CreateStudentRequest,
   ): Promise<StudentResponse> {
-    console.log(request);
     const response: StudentResponse = await this.studentService.create(request);
     return response;
   }

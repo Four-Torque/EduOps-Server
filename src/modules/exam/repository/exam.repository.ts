@@ -16,9 +16,39 @@ export class ExamRepository {
     });
   }
 
-  async findByClassId(classId: string): Promise<Exam[]> {
+  async findAll(teacherId?: string, classId?: string, period?: string): Promise<Exam[]> {
+    const where: Prisma.ExamWhereInput = {};
+    if (classId) {
+      where.classId = classId;
+    } else if (teacherId) {
+      where.class = {
+        teacherId: teacherId,
+      };
+    }
+
+    if (period && period !== 'all') {
+      const now = new Date();
+      let startDate = new Date();
+      if (period === '1m') {
+        startDate.setMonth(now.getMonth() - 1);
+      } else if (period === '3m') {
+        startDate.setMonth(now.getMonth() - 3);
+      } else if (period === '6m') {
+        startDate.setMonth(now.getMonth() - 6);
+      }
+      where.examDate = { gte: startDate };
+    }
+
     return this.prisma.exam.findMany({
-      where: { classId },
+      where,
+      include: {
+        class: {
+          include: {
+            enrollments: true,
+          },
+        },
+        examResults: true,
+      },
       orderBy: { examDate: 'desc' },
     });
   }

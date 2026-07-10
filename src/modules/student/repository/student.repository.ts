@@ -9,6 +9,7 @@ export class StudentRepository {
   findList(
     status: StudentStatus,
     name: string,
+    phone: string,
     skip: number,
     take: number,
   ): Promise<Student[]> {
@@ -16,17 +17,19 @@ export class StudentRepository {
       where: {
         ...(status && { status }),
         ...(name && { name: { contains: name } }),
+        ...(phone && { phone : {contains: phone}}),
       },
       skip,
       take,
     });
   }
 
-  countList(status: StudentStatus, name: string): Promise<number> {
+  countList(status: StudentStatus, name: string, phone?: string): Promise<number> {
     return this.prisma.student.count({
       where: {
         ...(status && { status }),
         ...(name && { name: { contains: name } }),
+        ...(phone && { phone: { contains: phone } }),
       },
     });
   }

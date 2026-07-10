@@ -38,18 +38,21 @@ export class ExamService {
   }
 
   /**
-   * getExamsByClassId 메서드는 특정 강좌의 모든 시험 목록을 조회합니다.
-   * @param classId - 조회할 강좌의 ID
-   * @returns Promise<ExamResponse[]> - 해당 강좌의 시험 목록을 반환합니다.
-   * @throws ApiException - 강좌가 존재하지 않을 경우 CLASS_NOT_FOUND 에러 발생
+   * getExams 메서드는 전체 강좌 또는 특정 강좌의 시험 목록을 조회합니다.
+   * @param teacherId - 조회할 강사의 ID (classId가 없을 경우 사용)
+   * @param classId - 조회할 강좌의 ID (선택)
+   * @param period - 조회할 기간 (1m, 3m, 6m, all)
+   * @returns Promise<ExamResponse[]> - 시험 목록을 반환합니다.
    */
-  async getExamsByClassId(classId: string): Promise<ExamResponse[]> {
-    const cls = await this.classRepository.findById(classId);
-    if (!cls) {
-      throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+  async getExams(teacherId: string, classId?: string, period?: string): Promise<ExamResponse[]> {
+    if (classId) {
+      const cls = await this.classRepository.findById(classId);
+      if (!cls) {
+        throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+      }
     }
 
-    const exams = await this.examRepository.findByClassId(classId);
+    const exams = await this.examRepository.findAll(teacherId, classId, period);
     return exams.map((exam) => ExamResponse.fromEntity(exam));
   }
 
@@ -135,5 +138,30 @@ export class ExamService {
 
     const results = await this.examResultRepository.findByExamId(examId);
     return results.map((r) => ExamResultResponse.fromEntity(r));
+  }
+
+  /**
+   * getExamStudentsResults 메서드는 반 전체 학생을 기준으로 점수 데이터를 매핑하여 반환합니다.
+   * 점수가 없는 학생도 포함됩니다.
+   */
+  async getExamStudentsResults(examId: string): Promise<ExamResultResponse[]> {
+    const exam = await this.examRepository.findById(examId);
+    if (!exam) {
+      throw new ApiException(ErrorCode.EXAM_NOT_FOUND);
+    }
+
+    const { enrollments, examResults } = await this.examResultRepository.findStudentsWithExamResults(examId, exam.classId);
+
+    return enrollments.map(enrollment => {
+      const result = examResults.find(r => r.studentId === enrollment.studentId);
+      
+      const response = new ExamResultResponse();
+      response.id = result?.id;
+      response.studentId = enrollment.studentId;
+      response.studentName = enrollment.student.name;
+      response.score = result?.score;
+
+      return response;
+    });
   }
 }

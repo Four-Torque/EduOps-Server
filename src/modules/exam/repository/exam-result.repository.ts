@@ -49,4 +49,23 @@ export class ExamResultRepository {
     });
     return result.count;
   }
+
+  async findStudentsWithExamResults(examId: string, classId: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { classId },
+      include: {
+        student: true,
+      },
+      orderBy: [
+        { student: { name: 'asc' } },
+        { student: { phone: 'asc' } },
+      ],
+    });
+
+    const examResults = await this.prisma.examResult.findMany({
+      where: { examId },
+    });
+
+    return { enrollments, examResults };
+  }
 }

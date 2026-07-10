@@ -15,6 +15,7 @@ export class StudentService {
    * getList 메서드는 학생 목록을 조회합니다
    * @param status
    * @param name
+   * @Param phone
    * @param page
    * @param limit
    * @returns
@@ -22,14 +23,15 @@ export class StudentService {
   async getList(
     status: StudentStatus,
     name: string,
+    phone: string,
     page: number,
     limit: number,
   ): Promise<PaginatedStudentResponse> {
     const skip = (page - 1) * limit;
 
     const [students, total] = await Promise.all([
-      this.studentRepository.findList(status, name, skip, limit),
-      this.studentRepository.countList(status, name),
+      this.studentRepository.findList(status, name, phone, skip, limit),
+      this.studentRepository.countList(status, name, phone),
     ]);
 
     return {
