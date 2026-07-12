@@ -19,7 +19,8 @@ model User {
   joinedAt         DateTime?        @db.Date
   resignedAt       DateTime?        @db.Date
   createdAt        DateTime         @default(now())
-  approvedAt      DateTime?
+  isApproved       Boolean          @default(false)
+  approvedAt       DateTime?
   updatedAt        DateTime         @updatedAt
 
   salaries           Salary[]
@@ -158,7 +159,7 @@ model Vendor {
 model Student {
   id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String        @db.VarChar(50)
-  phone     String        @db.VarChar(20) @unique
+  phone     String        @unique @db.VarChar(20)
   status    StudentStatus @default(ENROLLED)
   birth     String        @db.VarChar(20)
   address   String        @db.VarChar(50)

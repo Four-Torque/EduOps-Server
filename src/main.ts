@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
@@ -31,6 +31,13 @@ async function bootstrap() {
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
+      },
+      exceptionFactory: (validationErrors = []) => {
+        console.error(
+          '검증 에러 상세:',
+          JSON.stringify(validationErrors, null, 2),
+        );
+        return new BadRequestException(validationErrors);
       },
     }),
   );

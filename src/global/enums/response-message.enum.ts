@@ -21,6 +21,7 @@ export enum ResponseMessage {
   USER_CREATED = '유저가 성공적으로 생성되었습니다.',
   USER_UPDATED = '유저 정보가 성공적으로 업데이트되었습니다.',
   USER_DELETED = '유저가 성공적으로 삭제되었습니다.',
+  USER_APPROVED = '유저 계정이 성공적으로 승인되었습니다.',
 
   // 학생 관련
   STUDENT_LIST_FETCHED = '학생 목록이 성공적으로 조회되었습니다.',

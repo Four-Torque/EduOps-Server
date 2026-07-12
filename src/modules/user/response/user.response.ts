@@ -72,6 +72,20 @@ export class UserResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: '사용자 승인 여부',
+    example: true,
+  })
+  isApproved: boolean;
+
+  @ApiProperty({
+    description: '사용자 승인일',
+    example: '2026-06-25 16:27:23.356',
+    required: false,
+    nullable: true,
+  })
+  approvedAt: Date | null;
+
   static fromEntity(entity: Omit<User, 'password'>): UserResponse {
     const response = new UserResponse();
     response.id = entity.id;
@@ -85,6 +99,8 @@ export class UserResponse {
     response.resignedAt = entity.resignedAt;
     response.createdAt = entity.createdAt;
     response.updatedAt = entity.updatedAt;
+    response.isApproved = entity.isApproved;
+    response.approvedAt = entity.approvedAt;
     return response;
   }
 }

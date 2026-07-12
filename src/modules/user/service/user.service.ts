@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import { ApiException, ErrorCode } from 'src/global';
 import { UserResponse } from '../response/user.response';
-import { Role, User, UserStatus } from '@prisma/client';
+import { User } from '@prisma/client';
 import { CreateUserRequest } from '../request/create-user.request';
 import * as bcrypt from 'bcryptjs';
 import { ResetPasswordRequest } from 'src/modules/auth/request/reset-password.request';
 import { RedisKey, RedisService } from 'src/redis';
 import { PaginatedUserResponse } from '../response/user-list.response';
 import { UpdateUserRequest } from '../request/update-user.request';
+import { UserFilterRequest } from '../request/user-filter.request';
 
 @Injectable()
 export class UserService {
@@ -107,20 +108,20 @@ export class UserService {
    * @param limit
    * @returns
    */
-  async getList(
-    name: string,
-    role: Role,
-    status: UserStatus,
-    page: number,
-    limit: number,
-  ): Promise<PaginatedUserResponse> {
+  async getList(request: UserFilterRequest): Promise<PaginatedUserResponse> {
+    const { search, role, status, page, limit, isApproved } = request;
     const skip = (page - 1) * limit;
-
     const [users, total] = await Promise.all([
-      this.userRepository.findList(name, role, status, skip, limit),
-      this.userRepository.countList(role, status),
+      this.userRepository.findList(
+        search,
+        role,
+        status,
+        skip,
+        limit,
+        isApproved,
+      ),
+      this.userRepository.countList(search, role, status, isApproved),
     ]);
-
     return {
       total,
       page,
@@ -158,5 +159,20 @@ export class UserService {
     }
 
     await this.userRepository.delete(id);
+  }
+
+  async updateApprovedStatus(id: string): Promise<UserResponse> {
+    const existing = await this.userRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const updated = await this.userRepository.update(id, {
+      isApproved: true,
+      approvedAt: new Date(),
+      status: 'ACTIVE',
+    });
+    const response: UserResponse = UserResponse.fromEntity(updated);
+    return response;
   }
 }
