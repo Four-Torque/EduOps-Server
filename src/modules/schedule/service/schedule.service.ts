@@ -100,4 +100,28 @@ export class ScheduleService {
 
     await this.scheduleRepository.delete(id);
   }
+
+  async findAll(
+    classId?: string,
+    room?: string,
+    teacherName?: string,
+    subject?: string,
+  ): Promise<any[]> {
+    const schedules = await this.scheduleRepository.findAll(
+      classId,
+      room,
+      teacherName,
+      subject,
+    );
+    return schedules.map((s) => ({
+      id: s.id,
+      classId: s.classId,
+      className: s.class.name,
+      instructor: s.class.teacher?.name || '미지정',
+      dayOfWeek: s.dayOfWeek,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      room: s.room,
+    }));
+  }
 }

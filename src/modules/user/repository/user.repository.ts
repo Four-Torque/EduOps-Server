@@ -33,33 +33,55 @@ export class UserRepository {
   }
 
   async findList(
-    name: string,
+    search: string,
     role: Role,
     status: UserStatus,
     skip: number,
     take: number,
+    isApproved: string,
   ): Promise<User[]> {
-    return this.prisma.user.findMany({
-      where: {
-        ...(name && {name : {
-          contains: name,
-          mode: 'insensitive'
-        }}),
-        ...(role && { role }),
-        ...(status && { status }),
-      },
-      skip,
-      take,
-    });
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.name = { contains: search, mode: 'insensitive' };
+    }
+    if (role) {
+      where.role = role;
+    }
+    if (status) {
+      where.status = status;
+    }
+
+    if (isApproved !== undefined) {
+      where.isApproved = isApproved === 'true';
+    }
+
+    return this.prisma.user.findMany({ where, skip, take });
   }
 
-  async countList(role: Role, status: UserStatus): Promise<number> {
-    return this.prisma.user.count({
-      where: {
-        ...(role && { role }),
-        ...(status && { status }),
-      },
-    });
+  async countList(
+    search: string,
+    role: Role,
+    status: UserStatus,
+    isApproved: string,
+  ): Promise<number> {
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.name = { contains: search, mode: 'insensitive' };
+    }
+    if (role) {
+      where.role = role;
+    }
+    if (status) {
+      where.status = status;
+    }
+
+    if (isApproved !== undefined) {
+      where.isApproved = isApproved === 'true';
+    }
+
+    return this.prisma.user.count({ where });
   }
 
   async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {

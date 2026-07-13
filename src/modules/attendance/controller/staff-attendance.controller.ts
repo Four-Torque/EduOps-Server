@@ -18,6 +18,7 @@ import {
   JwtPayload,
   Message,
   ResponseMessage,
+  Role,
 } from 'src/global';
 import { CreateStaffAttendanceRequest } from '../request/create-staff-attendance.request';
 
@@ -27,6 +28,37 @@ export class StaffAttendanceController {
   constructor(
     private readonly staffAttendanceService: StaffAttendanceService,
   ) {}
+
+  @ApiOperation({
+    summary: '직원 주간 출석 요약 조회 (관리자용)',
+    description:
+      '모든 직원의 주간 출석 정보 및 오늘 출근/결근 현황 통계를 조회합니다.',
+  })
+  @ApiQuery({
+    name: 'weekStart',
+    required: false,
+    description: '주의 월요일 날짜 (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'department',
+    required: false,
+    description: '부서 필터 (강사, 관리자, 전체)',
+  })
+  @ApiQuery({ name: 'search', required: false, description: '직원명 검색어' })
+  @ApiSuccessResponse(ResponseMessage.ATTENDANCE_FETCHED, null)
+  @Message(ResponseMessage.ATTENDANCE_FETCHED)
+  @Get('/weekly')
+  async getWeeklySummary(
+    @Query('weekStart') weekStart?: string,
+    @Query('department') department?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.staffAttendanceService.getWeeklySummary(
+      weekStart,
+      department,
+      search,
+    );
+  }
 
   @ApiOperation({
     summary: '직원 출석 조회',
@@ -80,9 +112,12 @@ export class StaffAttendanceController {
     @Body() request: CreateStaffAttendanceRequest,
     @CurrentUser() user: JwtPayload,
   ): Promise<StaffAttendanceResponse> {
+    const isAdmin = user.role === 'MANAGER' || user.role === 'DIRECTOR';
+    const targetUserId = isAdmin && request.userId ? request.userId : user.id;
+
     const attendance = await this.staffAttendanceService.checkIn(
       request,
-      user.id,
+      targetUserId,
     );
     return attendance;
   }
@@ -103,6 +138,29 @@ export class StaffAttendanceController {
   @Patch('/:id/check-out')
   async checkOut(@Param('id') id: string): Promise<StaffAttendanceResponse> {
     const attendance = await this.staffAttendanceService.checkOut(id);
+    return attendance;
+  }
+
+  @Role('MANAGER', 'DIRECTOR')
+  @ApiOperation({
+    summary: '직원 출석 체크아웃 (By User ID)',
+    description: '직원의 출석 체크아웃을 수행합니다.',
+  })
+  @ApiSuccessResponse(
+    ResponseMessage.ATTENDANCE_UPDATED,
+    StaffAttendanceResponse,
+  )
+  @ApiErrorResponse(
+    ErrorCode.ATTENDANCE_NOT_FOUND,
+    ErrorCode.ATTENDANCE_ALREADY_CHECKED_OUT,
+  )
+  @Message(ResponseMessage.ATTENDANCE_UPDATED)
+  @Post('/check-out')
+  async checkOutByUser(
+    @Body() request: CreateStaffAttendanceRequest,
+  ): Promise<StaffAttendanceResponse> {
+    const attendance =
+      await this.staffAttendanceService.checkOutByUserId(request);
     return attendance;
   }
 }

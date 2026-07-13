@@ -31,12 +31,20 @@ export class UpdateStudentRequest {
   @IsString()
   address?: string;
 
+  @ApiProperty({
+    description: '생년월일',
+    example: '1950-01-01',
+  })
+  @IsString()
+  birth?: string;
+
   static toEntity(request: UpdateStudentRequest): Prisma.StudentUpdateInput {
     return {
       ...(request.name && { name: request.name }),
       ...(request.phone && { phone: request.phone }),
       ...(request.address && { address: request.address }),
       ...(request.status && { status: request.status }),
+      ...(request.birth && { birth: request.birth }),
     };
   }
 }

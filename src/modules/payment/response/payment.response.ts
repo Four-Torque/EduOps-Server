@@ -65,7 +65,6 @@ export class PaymentResponse {
   })
   updatedAt: Date;
 
-  // 선택적으로 Class와 Student 객체를 포함해서 응답할 수 있도록 추가
   @ApiProperty({
     description: '학생 이름',
     example: '홍길동',
