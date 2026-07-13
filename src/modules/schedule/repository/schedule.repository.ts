@@ -72,4 +72,39 @@ export class ScheduleRepository {
       },
     });
   }
+
+  async getStudentIdsByClassId(classId: string): Promise<string[]> {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { classId },
+      select: { studentId: true },
+    });
+    return enrollments.map((e) => e.studentId);
+  }
+
+  async findOverlappingForStudents(
+    classId: string,
+    studentIds: string[],
+    dayOfWeek: number,
+    startTime: string,
+    endTime: string,
+  ): Promise<Schedule | null> {
+    if (studentIds.length === 0) return null;
+
+    // 다른강좌이면서 학생포함되면서 요일도 같아야하고 시간이 1분이라도 겹쳐야한다
+    return this.prisma.schedule.findFirst({
+      where: {
+        classId: { not: classId },
+        class: {
+          enrollments: {
+            some: {
+              studentId: { in: studentIds },
+            },
+          },
+        },
+        dayOfWeek,
+        startTime: { lt: endTime },
+        endTime: { gt: startTime },
+      },
+    });
+  }
 }

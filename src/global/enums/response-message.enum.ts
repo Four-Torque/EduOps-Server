@@ -38,6 +38,7 @@ export enum ResponseMessage {
   CLASS_CREATED = '강좌가 성공적으로 생성되었습니다.',
   CLASS_FETCHED = '강좌가 성공적으로 조회되었습니다.',
   CLASS_UPDATED = '강좌가 성공적으로 업데이트되었습니다.',
+  CLASS_DELETED = '강좌가 성공적으로 삭제되었습니다.',
 
   // 카테고리 관련
   CATEGORY_CREATED = '카테고리가 성공적으로 생성되었습니다.',

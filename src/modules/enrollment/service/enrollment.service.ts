@@ -22,7 +22,7 @@ export class EnrollmentService {
    * @returns
    */
   async create(request: CreateEnrollmentRequest): Promise<EnrollmentResponse> {
-    // 1. 중복 수강 등록 확인
+    // 중복 수강 등록 확인
     const existingEnrollment =
       await this.enrollmentRepository.findByStudentAndClass(
         request.studentId,
@@ -32,24 +32,51 @@ export class EnrollmentService {
       throw new ApiException(ErrorCode.STUDENT_ALREADY_ENROLLED);
     }
 
-    // 1.5. 학생 존재 여부 확인
+    // 학생 존재 여부 확인
     const student = await this.studentRepository.findById(request.studentId);
     if (!student) {
       throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
     }
 
-    // 2. 강좌 정보 조회 (정가 확인용)
+    // 강좌 정보 조회 (정가 및 시간표 확인용)
     const cls = await this.classRepository.findById(request.classId);
     if (!cls) {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
 
-    // 3. 수강 데이터 생성
+    // 정원 초과 확인 (capacity가 0보다 클 때만 정원이 있는 것으로 간주)
+    if (cls.capacity > 0) {
+      const currentEnrollments = (cls as any)._count?.enrollments || 0;
+      if (currentEnrollments >= cls.capacity) {
+        throw new ApiException(ErrorCode.CLASS_CAPACITY_EXCEEDED);
+      }
+    }
+
+
+
+    // 학생 시간표 충돌 확인
+    const schedules: any[] = (cls as any).schedules || [];
+    if (schedules.length > 0) {
+      const existingSchedules = await this.enrollmentRepository.findSchedulesByStudentId(request.studentId);
+      
+      for (const newSchedule of schedules) {
+        for (const existingSchedule of existingSchedules) {
+          if (newSchedule.dayOfWeek === existingSchedule.dayOfWeek) {
+            // 시간 겹침 유효성 검사: (새 시작시간 < 기존 종료시간) && (새 종료시간 > 기존 시작시간)
+            if (newSchedule.startTime < existingSchedule.endTime && newSchedule.endTime > existingSchedule.startTime) {
+              throw new ApiException(ErrorCode.STUDENT_SCHEDULE_CONFLICT);
+            }
+          }
+        }
+      }
+    }
+
+    // 수강 데이터 생성
     const enrollmentData = CreateEnrollmentRequest.toEntity(request);
     const createdEnrollment =
       await this.enrollmentRepository.create(enrollmentData);
 
-    // 4. 첫 결제(청구서) 자동 생성 로직
+    // 첫 결제(청구서) 자동 생성 로직
     // 클라이언트가 넘겨준 값이 있으면 그것을 사용, 없으면 강좌 정가 사용
     const billingAmount =
       request.initialAmount !== undefined ? request.initialAmount : cls.fee;

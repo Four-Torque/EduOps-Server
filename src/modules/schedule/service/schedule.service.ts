@@ -22,6 +22,7 @@ export class ScheduleService {
     if (!cls) {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
+    const studentIds = await this.scheduleRepository.getStudentIdsByClassId(request.classId);
 
     // 2. 유효성 검사 및 중복 검사
     for (const schedule of request.schedules) {
@@ -50,6 +51,20 @@ export class ScheduleService {
       );
       if (roomOverlap) {
         throw new ApiException(ErrorCode.ROOM_SCHEDULE_CONFLICT);
+      }
+
+      // 학생 중복 검사
+      if (studentIds.length > 0) {
+        const studentOverlap = await this.scheduleRepository.findOverlappingForStudents(
+          request.classId,
+          studentIds,
+          schedule.dayOfWeek,
+          schedule.startTime,
+          schedule.endTime,
+        );
+        if (studentOverlap) {
+          throw new ApiException(ErrorCode.STUDENT_SCHEDULE_CONFLICT);
+        }
       }
     }
 
