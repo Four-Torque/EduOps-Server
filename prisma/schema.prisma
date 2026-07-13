@@ -162,7 +162,7 @@ model Student {
   phone     String        @unique @db.VarChar(20)
   status    StudentStatus @default(ENROLLED)
   birth     String        @db.VarChar(20)
-  address   String        @db.VarChar(50)
+  address   String        @db.Text
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
@@ -264,6 +264,17 @@ model Message {
   deletedByReceiver Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+model AcademyInfo {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  academyName         String   @db.VarChar(100)
+  representativeName  String   @db.VarChar(100)
+  representativePhone String   @unique @db.VarChar(50)
+  businessNumber      String   @unique @db.VarChar(50)
+  address             String   @db.Text
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 enum Role {

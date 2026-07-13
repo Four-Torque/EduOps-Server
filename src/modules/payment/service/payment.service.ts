@@ -3,7 +3,6 @@ import { PaymentRepository } from '../repository/payment.repository';
 import { CreatePaymentRequest } from '../request/create-payment.request';
 import { UpdatePaymentRequest } from '../request/update-payment.request';
 import { PaymentResponse } from '../response/payment.response';
-import { PaginatedPaymentResponse } from '../response/paginated-payment.response';
 import { PaymentType, Prisma } from '@prisma/client';
 import { ApiException, ErrorCode } from 'src/global';
 
@@ -50,31 +49,29 @@ export class PaymentService {
     studentId?: string,
     classId?: string,
     paymentType?: PaymentType,
+    search?: string,
+    type?: 'all' | 'INCOME' | 'EXPENSE',
     page?: number,
     limit?: number,
-  ): Promise<PaginatedPaymentResponse> {
+  ): Promise<any> {
     const skip = page && limit ? (page - 1) * limit : undefined;
     const take = limit ? Number(limit) : undefined;
 
-    const [data, total] = await Promise.all([
-      this.paymentRepository.findAll(
-        studentId,
-        classId,
-        paymentType,
-        skip,
-        take,
-      ),
-      this.paymentRepository.count(studentId, classId, paymentType),
-    ]);
-
-    const mappedData = data.map((payment) =>
-      PaymentResponse.fromEntity(payment as any),
-    );
+    const { data, total } = await this.paymentRepository.findAllUnified({
+      studentId,
+      classId,
+      paymentType,
+      type,
+      search,
+      skip,
+      take,
+    });
 
     return {
       page: page || 1,
       total,
-      data: mappedData,
+      totalPages: limit ? Math.ceil(total / limit) : 1,
+      data,
     };
   }
 
@@ -129,5 +126,13 @@ export class PaymentService {
     classId: string,
   ): Promise<void> {
     await this.paymentRepository.deleteUnpaidPayments(studentId, classId);
+  }
+
+  async getStats() {
+    return this.paymentRepository.getStats();
+  }
+
+  async getMonthlyTrends() {
+    return this.paymentRepository.getMonthlyTrends();
   }
 }

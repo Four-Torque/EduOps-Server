@@ -109,8 +109,11 @@ export class UserService {
    * @returns
    */
   async getList(request: UserFilterRequest): Promise<PaginatedUserResponse> {
-    const { search, role, status, page, limit, isApproved } = request;
+    const { search, role, status, isApproved } = request;
+    const page = request.page ? Number(request.page) : 1;
+    const limit = request.limit ? Number(request.limit) : 10;
     const skip = (page - 1) * limit;
+
     const [users, total] = await Promise.all([
       this.userRepository.findList(
         search,

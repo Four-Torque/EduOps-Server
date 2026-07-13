@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
-import { IsString } from 'class-validator';
+import { Prisma, StudentStatus } from '@prisma/client';
+import { IsEnum, IsString } from 'class-validator';
 
 export class CreateStudentRequest {
   @ApiProperty({
@@ -31,12 +31,20 @@ export class CreateStudentRequest {
   @IsString()
   address: string;
 
+  @ApiProperty({
+    description: '상태',
+    example: StudentStatus.ENROLLED,
+  })
+  @IsEnum(StudentStatus)
+  status: StudentStatus;
+
   static toEntity(request: CreateStudentRequest): Prisma.StudentCreateInput {
     return {
       name: request.name,
       phone: request.phone,
       birth: request.birth,
       address: request.address,
+      status: request.status,
     };
   }
 }

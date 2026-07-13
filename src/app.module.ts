@@ -27,6 +27,7 @@ import { ScheduleModule as NestScheduleModule } from '@nestjs/schedule';
 import { AssetModule } from './modules/asset/asset.module';
 import { ClassSyllabusModule } from './modules/class-syllabus/class-syllabus.module';
 import { MessageModule } from './modules/message/message.module';
+import { AcademyModule } from './modules/academy/academy.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { MessageModule } from './modules/message/message.module';
     NestScheduleModule.forRoot(),
     ClassSyllabusModule,
     MessageModule,
+    AcademyModule,
   ],
 
   providers: [

@@ -80,4 +80,16 @@ export class StudentService {
     const response: StudentResponse = StudentResponse.fromEntity(updated);
     return response;
   }
+
+  async delete(id: string): Promise<void> {
+    const existing = await this.studentRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
+    }
+    await this.studentRepository.delete(id);
+  }
+
+  async getStats() {
+    return this.studentRepository.getStats();
+  }
 }
