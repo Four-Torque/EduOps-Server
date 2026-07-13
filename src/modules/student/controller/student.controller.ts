@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { StudentService } from '../service/student.service';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -60,6 +61,15 @@ export class StudentController {
   }
 
   @ApiOperation({
+    summary: '학생 통계 조회',
+    description: '전체 학생 통계(총 원생 수, 신규 등록 등)를 조회합니다.',
+  })
+  @Get('/stats')
+  async getStudentStats(): Promise<any> {
+    return this.studentService.getStats();
+  }
+
+  @ApiOperation({
     summary: '학생 상세 조회',
     description: '학생의 상세 정보를 조회합니다',
   })
@@ -104,5 +114,16 @@ export class StudentController {
       request,
     );
     return response;
+  }
+
+  @ApiOperation({
+    summary: '학생 삭제',
+    description: '학생의 정보를 삭제합니다',
+  })
+  @ApiErrorResponse(ErrorCode.STUDENT_NOT_FOUND)
+  @Message(ResponseMessage.STUDENT_DELETED)
+  @Delete('/:id')
+  async deleteStudent(@Param('id') id: string): Promise<void> {
+    await this.studentService.delete(id);
   }
 }

@@ -15,6 +15,12 @@ export class PaginatedPaymentResponse {
   total: number;
 
   @ApiProperty({
+    description: '전체 페이지 수',
+    example: 10,
+  })
+  totalPages: number;
+
+  @ApiProperty({
     description: '결제/청구 내역 목록',
     type: [PaymentResponse],
   })

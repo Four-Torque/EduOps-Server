@@ -6,8 +6,8 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { UserResponse } from '../response/user.response';
@@ -20,12 +20,11 @@ import {
   Message,
   ResponseMessage,
 } from 'src/global';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
-import { Role, UserStatus } from '@prisma/client';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaginatedUserResponse } from '../response/user-list.response';
 import { CreateUserRequest } from '../request/create-user.request';
 import { UpdateUserRequest } from '../request/update-user.request';
+import { UserFilterRequest } from '../request/user-filter.request';
 
 @ApiTags('유저')
 @Controller('user')
@@ -51,29 +50,12 @@ export class UserController {
   @ApiSuccessResponse(ResponseMessage.USER_LIST_FETCHED, PaginatedUserResponse)
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.USER_LIST_FETCHED)
-  @ApiQuery({ name: 'name', required: false })
-  @ApiQuery({ name: 'role', required: false })
-  @ApiQuery({ name: 'status', required: false, enum: UserStatus })
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 20 })
-  @Get('/')
+  @Get()
   async getUserList(
-    @Query('name') name?: string,
-    @Query('role') role?: Role,
-    @Query('status') status?: UserStatus,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
+    @Query() request: UserFilterRequest,
   ): Promise<PaginatedUserResponse> {
-    const pageNum = Number(page) || 1;
-    const limitNum = Number(limit) || 20;
-
-    const response: PaginatedUserResponse = await this.userService.getList(
-      name,
-      role,
-      status,
-      pageNum,
-      limitNum,
-    );
+    const response: PaginatedUserResponse =
+      await this.userService.getList(request);
     return response;
   }
 
@@ -131,5 +113,19 @@ export class UserController {
   @Delete('/:id')
   async deleteUser(@Param('id') id: string): Promise<void> {
     await this.userService.delete(id);
+  }
+
+  @ApiOperation({
+    summary: '사용자 승인',
+    description: '특정 사용자의 계정을 승인합니다',
+  })
+  @ApiSuccessResponse(ResponseMessage.USER_APPROVED, UserResponse)
+  @ApiErrorResponse(ErrorCode.USER_NOT_FOUND)
+  @Message(ResponseMessage.USER_APPROVED)
+  @Put('/:id/approve')
+  async approveUser(@Param('id') id: string): Promise<UserResponse> {
+    const response: UserResponse =
+      await this.userService.updateApprovedStatus(id);
+    return response;
   }
 }

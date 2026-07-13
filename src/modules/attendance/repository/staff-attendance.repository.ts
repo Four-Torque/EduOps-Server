@@ -38,4 +38,33 @@ export class StaffAttendanceRepository {
       data: { checkOutTime: new Date() },
     });
   }
+
+  async findWeeklyAttendance(
+    department?: string,
+    search?: string,
+    dates?: string[],
+  ): Promise<{ users: any[]; attendances: StaffAttendance[] }> {
+    const roleFilter: any = {};
+    if (department === '강사') {
+      roleFilter.role = 'TEACHER';
+    } else if (department === '관리자') {
+      roleFilter.role = { in: ['MANAGER', 'DIRECTOR'] };
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        ...roleFilter,
+        ...(search && { name: { contains: search, mode: 'insensitive' } }),
+      },
+    });
+
+    const attendances = await this.prisma.staffAttendance.findMany({
+      where: {
+        userId: { in: users.map((u) => u.id) },
+        ...(dates && { workDate: { in: dates } }),
+      },
+    });
+
+    return { users, attendances };
+  }
 }

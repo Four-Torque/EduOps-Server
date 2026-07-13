@@ -37,18 +37,27 @@ export class ScheduleController {
   }
 
   @ApiOperation({
-    summary: '강좌별 시간표 조회',
-    description: '특정 강좌의 전체 시간표를 조회합니다.',
+    summary: '시간표 조회',
+    description: '시간표 목록을 조회합니다. classId가 주어지면 특정 강좌의 시간표를 조회하고, 없으면 전체 시간표를 조회합니다.',
   })
   @ApiSuccessResponse(ResponseMessage.SCHEDULE_FETCHED, ScheduleResponse, true)
   @ApiErrorResponse(ErrorCode.CLASS_NOT_FOUND)
   @Message(ResponseMessage.SCHEDULE_FETCHED)
-  @ApiQuery({ name: 'classId', required: true, description: '조회할 강좌 ID' })
+  @ApiQuery({ name: 'classId', required: false, description: '조회할 강좌 ID' })
+  @ApiQuery({ name: 'room', required: false, description: '강의실 필터' })
+  @ApiQuery({ name: 'teacherName', required: false, description: '담당 강사명 필터' })
+  @ApiQuery({ name: 'subject', required: false, description: '과목 필터 (math, english, korean 등)' })
   @Get('/')
-  async findAllByClassId(
-    @Query('classId') classId: string,
-  ): Promise<ScheduleResponse[]> {
-    return this.scheduleService.findAllByClassId(classId);
+  async getSchedules(
+    @Query('classId') classId?: string,
+    @Query('room') room?: string,
+    @Query('teacherName') teacherName?: string,
+    @Query('subject') subject?: string,
+  ): Promise<any[]> {
+    if (classId) {
+      return this.scheduleService.findAllByClassId(classId);
+    }
+    return this.scheduleService.findAll(undefined, room, teacherName, subject);
   }
 
   @ApiOperation({

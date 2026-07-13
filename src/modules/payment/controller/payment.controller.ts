@@ -52,6 +52,12 @@ export class PaymentController {
   @ApiQuery({ name: 'studentId', required: false })
   @ApiQuery({ name: 'classId', required: false })
   @ApiQuery({ name: 'paymentType', enum: PaymentType, required: false })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['all', 'INCOME', 'EXPENSE'],
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @Get('/')
@@ -59,17 +65,41 @@ export class PaymentController {
     @Query('studentId') studentId?: string,
     @Query('classId') classId?: string,
     @Query('paymentType') paymentType?: PaymentType,
+    @Query('search') search?: string,
+    @Query('type') type?: 'all' | 'INCOME' | 'EXPENSE',
     @Query('page') page?: number,
     @Query('limit') limit?: number,
-  ): Promise<PaginatedPaymentResponse> {
+  ): Promise<any> {
     const response = await this.paymentService.findAll(
       studentId,
       classId,
       paymentType,
+      search,
+      type,
       page,
       limit,
     );
     return response;
+  }
+
+  @ApiOperation({
+    summary: '결제 통계 조회',
+    description: '결제 매출 및 지출 통계를 조회합니다.',
+  })
+  @Get('/stats')
+  async getStats() {
+    const response = await this.paymentService.getStats();
+    console.log('getStats response:', response);
+    return response;
+  }
+
+  @ApiOperation({
+    summary: '월별 수입/지출 추이 조회',
+    description: '최근 6개월 간의 월별 수입 및 지출 추이를 조회합니다.',
+  })
+  @Get('/monthly-trends')
+  async getMonthlyTrends() {
+    return this.paymentService.getMonthlyTrends();
   }
 
   @ApiOperation({

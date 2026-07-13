@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateStaffAttendanceRequest {
   @ApiProperty({
@@ -16,6 +16,14 @@ export class CreateStaffAttendanceRequest {
   })
   @IsOptional()
   checkInTime?: Date;
+
+  @ApiProperty({
+    description: '직원 User ID',
+    example: 'user-uuid',
+  })
+  @IsOptional()
+  @IsString()
+  userId?: string;
 
   static toEntity(
     userId: string,
