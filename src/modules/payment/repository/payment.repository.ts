@@ -105,6 +105,7 @@ export class PaymentRepository {
               id: p.id,
               type: 'INCOME',
               date: p.paymentDate ?? p.createdAt,
+              dueDate: p.dueDate,
               itemTitle: p.title,
               itemSub: p.class?.name || '일반 청구',
               studentName: p.student?.name || '알 수 없음',
