@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { MessageRepository, ConversationItem } from '../repository/message.repository';
+import { MessageRepository} from '../repository/message.repository';
 import { CreateMessageRequest } from '../request/create-message.request';
 import { MessageResponse } from '../response/message.response';
 import { PaginatedMessageResponse } from '../response/paginated-message.response';
-import { ConversationResponse } from '../response/conversation.response';
+import { ConversationResponse, ConversationUser } from '../response/conversation.response';
 import { ApiException, ErrorCode } from 'src/global';
 import { Transactional } from 'src/global/decorators/transactional.decorator';
 
@@ -32,17 +32,19 @@ export class MessageService {
       return '';
     };
 
-    return rawConversations.map((row: ConversationItem) => ({
+    const response: ConversationResponse[] = rawConversations.map((row: ConversationResponse) => ({
       otherUser: {
-        id: row.userId,
-        name: `${getKoreanRoleName(row.userRole)} ${row.userName}`,
-        role: row.userRole,
+        id: row.otherUser.id,
+        name: `${getKoreanRoleName(row.otherUser.role)} ${row.otherUser.name}`,
+        role: row.otherUser.role,
       },
       lastMessageId: row.lastMessageId,
       lastMessageContent: row.lastMessageContent,
-      lastMessageCreatedAt: row.lastMessageCreatedAt,
+      lastMessageUpdatedAt: row.lastMessageUpdatedAt,
       unreadCount: Number(row.unreadCount),
     }));
+
+    return response;
   }
 
   @Transactional()
