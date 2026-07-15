@@ -6,6 +6,7 @@ import {
   Post,
   Get,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { ClassService } from '../service/class.service';
@@ -120,5 +121,17 @@ export class ClassController {
       lectureDate,
     );
     return response;
+  }
+
+  @ApiOperation({
+    summary: '강좌 삭제',
+    description: '강좌를 삭제합니다.',
+  })
+  @ApiSuccessResponse(ResponseMessage.CLASS_DELETED)
+  @ApiErrorResponse(ErrorCode.CLASS_NOT_FOUND)
+  @Message(ResponseMessage.CLASS_DELETED)
+  @Delete('/:id')
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.classService.delete(id);
   }
 }

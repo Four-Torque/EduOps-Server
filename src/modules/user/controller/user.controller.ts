@@ -20,11 +20,12 @@ import {
   Message,
   ResponseMessage,
 } from 'src/global';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { PaginatedUserResponse } from '../response/user-list.response';
 import { CreateUserRequest } from '../request/create-user.request';
 import { UpdateUserRequest } from '../request/update-user.request';
 import { UserFilterRequest } from '../request/user-filter.request';
+import { UserGroupedResponse } from '../response/user-grouped.response';
 
 @ApiTags('유저')
 @Controller('user')
@@ -57,6 +58,25 @@ export class UserController {
     const response: PaginatedUserResponse =
       await this.userService.getList(request);
     return response;
+  }
+
+  @ApiOperation({
+    summary: '사용자 목록 그룹 조회',
+    description: '본인을 제외한 현재 활동 중인 사용자를 역할(Role)별로 그룹화하여 조회하며 이름으로 검색할 수 있습니다.',
+  })
+  @ApiSuccessResponse(ResponseMessage.USER_LIST_FETCHED, UserGroupedResponse)
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    description: '유저 이름',
+  })
+  @Message(ResponseMessage.USER_LIST_FETCHED)
+  @Get('grouped-by-role')
+  async getGroupedUsers(
+    @CurrentUser() user: JwtPayload,
+    @Query('name') name?: string,
+  ): Promise<UserGroupedResponse> {
+    return this.userService.getGroupedList(user.id, name);
   }
 
   @ApiOperation({

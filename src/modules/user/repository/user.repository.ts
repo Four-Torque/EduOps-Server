@@ -102,4 +102,20 @@ export class UserRepository {
       where: { status: UserStatus.ACTIVE },
     });
   }
+
+  async findActiveUsersExcludingId(excludeId: string, name?: string): Promise<User[]> {
+    const where: Prisma.UserWhereInput = {
+      id: { not: excludeId },
+      status: UserStatus.ACTIVE,
+    };
+
+    if (name) {
+      where.name = { contains: name, mode: 'insensitive' };
+    }
+
+    return this.prisma.user.findMany({
+      where,
+      orderBy: { name: 'asc' },
+    });
+  }
 }

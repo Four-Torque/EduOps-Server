@@ -18,6 +18,7 @@ export class ClassRepository {
         id,
       },
       include: {
+        teacher: { select: { name: true } },
         schedules: {
           orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
         },
@@ -53,6 +54,7 @@ export class ClassRepository {
       skip,
       take,
       include: {
+        teacher: { select: { name: true } },
         schedules: {
           orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
         },
@@ -100,5 +102,11 @@ export class ClassRepository {
     });
 
     return { enrollments, attendances };
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.class.delete({
+      where: { id },
+    });
   }
 }

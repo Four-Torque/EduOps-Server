@@ -113,4 +113,16 @@ export class ClassService {
       attendances,
     );
   }
+
+  /**
+   * delete 메서드는 강좌를 삭제합니다.
+   * @param id
+   */
+  async delete(id: string): Promise<void> {
+    const existing = await this.classRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+    }
+    await this.classRepository.delete(id);
+  }
 }

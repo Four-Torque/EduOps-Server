@@ -18,6 +18,13 @@ export class ClassResponse {
   teacherId: string;
 
   @ApiProperty({
+    description: '교사 이름',
+    example: '루돌프',
+  })
+  @IsString()
+  teacherName: string
+
+  @ApiProperty({
     description: '강좌 명',
     example: '수학영재반',
   })
@@ -88,11 +95,12 @@ export class ClassResponse {
   schedules?: any[];
 
   static fromEntity(
-    entity: Class & { schedules?: any[]; _count?: { enrollments: number } },
+    entity: Class & { schedules?: any[]; _count?: { enrollments: number }; teacher?: { name: string } },
   ): ClassResponse {
     const response = new ClassResponse();
     response.id = entity.id;
     response.teacherId = entity.teacherId;
+    response.teacherName = entity.teacher?.name || '';
     response.name = entity.name;
     response.fee = entity.fee;
     response.capacity = entity.capacity;

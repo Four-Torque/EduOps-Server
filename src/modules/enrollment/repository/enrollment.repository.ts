@@ -54,4 +54,19 @@ export class EnrollmentRepository {
       where: { id },
     });
   }
+
+  async findSchedulesByStudentId(studentId: string) {
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { studentId },
+      include: {
+        class: {
+          include: {
+            schedules: true,
+          },
+        },
+      },
+    });
+
+    return enrollments.flatMap((enrollment) => enrollment.class.schedules);
+  }
 }

@@ -46,6 +46,13 @@ export class EnrollmentResponse {
   studentName?: string;
 
   @ApiProperty({
+    description: '학생 연락저',
+    example: '010-0000-0000',
+    required: false,
+  })
+  studentPhone?: string;
+
+  @ApiProperty({
     description: '강좌 이름',
     example: '수학영재반',
     required: false,
@@ -54,7 +61,7 @@ export class EnrollmentResponse {
 
   static fromEntity(
     entity: Enrollment & {
-      student?: { name: string };
+      student?: { name: string, phone: string };
       class?: { name: string };
     },
   ): EnrollmentResponse {
@@ -68,6 +75,7 @@ export class EnrollmentResponse {
 
     if (entity.student) {
       response.studentName = entity.student.name;
+      response.studentPhone = entity.student.phone;
     }
     if (entity.class) {
       response.className = entity.class.name;

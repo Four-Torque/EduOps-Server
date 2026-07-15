@@ -22,7 +22,7 @@ export class ConversationResponse {
   lastMessageContent: string;
 
   @ApiProperty({ description: '마지막 쪽지 시간', example: '2026-07-07T10:48:00Z' })
-  lastMessageCreatedAt: Date;
+  lastMessageUpdatedAt: Date;
 
   @ApiProperty({ description: '해당 대화방의 안 읽은 쪽지 총 개수', example: 3 })
   unreadCount: number;

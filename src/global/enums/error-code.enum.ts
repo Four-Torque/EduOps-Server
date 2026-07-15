@@ -39,6 +39,7 @@ export enum ErrorCode {
 
   // 강좌 관련 에러
   CLASS_NOT_FOUND = 'CLASS_001',
+  CLASS_CAPACITY_EXCEEDED = 'CLASS_002',
 
   // 카테고리 관련 에러
   CATEGORY_NOT_FOUND = 'CATEGORY_001',
@@ -56,6 +57,7 @@ export enum ErrorCode {
   SCHEDULE_NOT_FOUND = 'SCHEDULE_001',
   TEACHER_SCHEDULE_CONFLICT = 'SCHEDULE_002',
   ROOM_SCHEDULE_CONFLICT = 'SCHEDULE_003',
+  STUDENT_SCHEDULE_CONFLICT = 'SCHEDULE_004',
 
   // 시험 관련 에러
   EXAM_NOT_FOUND = 'EXAM_001',
@@ -184,6 +186,10 @@ export const ErrorCodeMap: Record<
     status: HttpStatus.NOT_FOUND,
     message: '해당 강좌를 찾을 수 없습니다.',
   },
+  [ErrorCode.CLASS_CAPACITY_EXCEEDED]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '해당 강좌의 정원이 초과되었습니다.',
+  },
 
   // 카테고리 관련 에러
   [ErrorCode.CATEGORY_NOT_FOUND]: {
@@ -224,6 +230,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.ROOM_SCHEDULE_CONFLICT]: {
     status: HttpStatus.CONFLICT,
     message: '해당 강의실이 이미 다른 강좌에 의해 사용 중입니다.',
+  },
+  [ErrorCode.STUDENT_SCHEDULE_CONFLICT]: {
+    status: HttpStatus.CONFLICT,
+    message: '해당 학생의 다른 수강 시간표와 겹칩니다.',
   },
 
   // 시험 관련 에러
