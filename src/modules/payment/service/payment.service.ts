@@ -6,7 +6,6 @@ import { PaymentResponse } from '../response/payment.response';
 import { PaymentType, Prisma } from '@prisma/client';
 import { ApiException, ErrorCode } from 'src/global';
 import { PaymentFilterRequest } from '../request/payment-filter.request';
-import { UnifiedFinancialResponse } from '../response/unified-financial.response';
 
 @Injectable()
 export class PaymentService {
@@ -25,126 +24,55 @@ export class PaymentService {
     return response;
   }
 
-  /**
-   * findById 메서드는 아이디로 결제 정보를 조회합니다.
-   * @param id
-   * @returns
-   */
-  async findById(id: string): Promise<PaymentResponse> {
-    const payment = await this.paymentRepository.findById(id);
-    if (!payment) {
-      throw new ApiException(ErrorCode.PAYMENT_NOT_FOUND);
-    }
-    const response = PaymentResponse.fromEntity(payment);
-    return response;
-  }
+  // 원생 결제 관리 목록(findAll)만 쓰는 걸로 정리하면서 주석 처리.
+  // 실제로 부르는 프론트/다른 서버 코드가 없어 안전하게 비활성화함.
+  // /**
+  //  * findById 메서드는 아이디로 결제 정보를 조회합니다.
+  //  * @param id
+  //  * @returns
+  //  */
+  // async findById(id: string): Promise<PaymentResponse> {
+  //   const payment = await this.paymentRepository.findById(id);
+  //   if (!payment) {
+  //     throw new ApiException(ErrorCode.PAYMENT_NOT_FOUND);
+  //   }
+  //   const response = PaymentResponse.fromEntity(payment);
+  //   return response;
+  // }
 
   /**
-   * findAll 메서드는 필터 쿼리로 데이터 리스트를 조회합니다.
+   * findAll 메서드는 원생 결제 목록을 조회합니다.
+   * (급여/자재 등 지출 항목을 섞어 보여주던 통합 조회 로직은 원생 결제 관리 범위 밖이라 제거함)
    * @param request
    * @returns
    */
   async findAll(request: PaymentFilterRequest) {
-    const {
-      studentId,
-      classId,
-      paymentType,
-      search,
-      type = 'all',
-      page = 1,
-      limit = 10,
-    } = request;
+    const { studentId, classId, paymentType, search, page = 1, limit = 10 } =
+      request;
 
     const take = Number(limit);
     const skip = (Number(page) - 1) * take;
 
-    if (type === 'INCOME') {
-      const [dbPayments, total] = await Promise.all([
-        this.paymentRepository.findAll(
-          studentId,
-          classId,
-          paymentType,
-          search,
-          skip,
-          take,
-        ),
-        this.paymentRepository.count(studentId, classId, paymentType, search),
-      ]);
-
-      const data = dbPayments.map((payment) =>
-        UnifiedFinancialResponse.fromPaymentEntity(payment),
-      );
-      const response = UnifiedFinancialResponse.toPaginated(
-        page,
-        total,
-        Math.ceil(total / take),
-        data,
-      );
-      return response;
-    }
-
-    const maxTake = type === 'all' ? skip + take : take;
-    const incomes = [];
-    const expenses = [];
-
-    if (type === 'all') {
-      const dbPayments = await this.paymentRepository.findAll(
+    const [dbPayments, total] = await Promise.all([
+      this.paymentRepository.findAll(
         studentId,
         classId,
         paymentType,
         search,
-        undefined,
-        maxTake,
-      );
-      const mappedIncomes = dbPayments.map((payment) =>
-        UnifiedFinancialResponse.fromPaymentEntity(payment),
-      );
-      incomes.push(...mappedIncomes);
-    }
+        skip,
+        take,
+      ),
+      this.paymentRepository.count(studentId, classId, paymentType, search),
+    ]);
 
-    if (type === 'all' || type === 'EXPENSE') {
-      const salaryWhere = this.buildSalaryWhere(paymentType, search);
-      const assetWhere = this.buildAssetWhere(paymentType, search);
+    const data = dbPayments.map((payment) => PaymentResponse.fromEntity(payment));
 
-      const includeExpenseSources =
-        !paymentType || paymentType === 'PAID' || paymentType === 'UNPAID';
-
-      let dbSalaries = [];
-      let dbAssetsApplications = [];
-
-      if (includeExpenseSources) {
-        [dbSalaries, dbAssetsApplications] = await Promise.all([
-          this.paymentRepository.findSalaries(salaryWhere, maxTake),
-          this.paymentRepository.findAssetsApplications(assetWhere, maxTake),
-        ]);
-
-        const mappedSalaries = dbSalaries.map((salary) =>
-          UnifiedFinancialResponse.fromSalaryEntity(salary),
-        );
-        const mappedAssetsApplications = dbAssetsApplications.map(
-          (assetsApplication) =>
-            UnifiedFinancialResponse.fromAssetEntity(assetsApplication),
-        );
-
-        expenses.push(...mappedSalaries, ...mappedAssetsApplications);
-      }
-    }
-
-    const combined = [...incomes, ...expenses];
-    combined.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    );
-
-    const total = combined.length;
-    const data = combined.slice(skip, skip + take);
-
-    const response = UnifiedFinancialResponse.toPaginated(
-      page,
+    return {
+      page: Number(page),
       total,
-      Math.ceil(total / take) || 1,
+      totalPages: Math.ceil(total / take) || 1,
       data,
-    );
-    return response;
+    };
   }
 
   /**
@@ -199,139 +127,97 @@ export class PaymentService {
     await this.paymentRepository.deleteUnpaidPayments(studentId, classId);
   }
 
-  async getStats() {
-    const [paymentGroups, salaryAgg, assets] = await Promise.all([
-      this.paymentRepository.aggregateStats(),
-      this.paymentRepository.aggregateSalary(),
-      this.paymentRepository.findAcceptedAssets(),
-    ]);
+  // async getStats() {
+  //   const [paymentGroups, salaryAgg, assets] = await Promise.all([
+  //     this.paymentRepository.aggregateStats(),
+  //     this.paymentRepository.aggregateSalary(),
+  //     this.paymentRepository.findAcceptedAssets(),
+  //   ]);
+  //
+  //   let totalRevenue = 0;
+  //   let unpaidAmount = 0;
+  //   let unpaidCount = 0;
+  //   let refundAmount = 0;
+  //   let refundCount = 0;
+  //
+  //   paymentGroups.forEach((group) => {
+  //     const amount = group._sum.amount ?? 0;
+  //     const count = group._count.id;
+  //
+  //     if (group.paymentType === 'PAID') {
+  //       totalRevenue = amount;
+  //     } else if (group.paymentType === 'UNPAID') {
+  //       unpaidAmount = amount;
+  //       unpaidCount = count;
+  //     } else if (group.paymentType === 'REFUNDED') {
+  //       refundAmount = amount;
+  //       refundCount = count;
+  //     }
+  //   });
+  //
+  //   const salaryExpense =
+  //     (salaryAgg._sum.baseSalary ?? 0) + (salaryAgg._sum.bonus ?? 0);
+  //   const assetExpense = assets.reduce(
+  //     (sum, asset) => sum + asset.price * asset.quantity,
+  //     0,
+  //   );
+  //   const totalExpense = salaryExpense + assetExpense;
+  //
+  //   return {
+  //     totalRevenue,
+  //     totalExpense,
+  //     netProfit: totalRevenue - totalExpense,
+  //     unpaidAmount,
+  //     unpaidCount,
+  //     refundCount,
+  //     refundAmount,
+  //   };
+  // }
 
-    let totalRevenue = 0;
-    let unpaidAmount = 0;
-    let unpaidCount = 0;
-    let refundAmount = 0;
-    let refundCount = 0;
-
-    paymentGroups.forEach((group) => {
-      const amount = group._sum.amount ?? 0;
-      const count = group._count.id;
-
-      if (group.paymentType === 'PAID') {
-        totalRevenue = amount;
-      } else if (group.paymentType === 'UNPAID') {
-        unpaidAmount = amount;
-        unpaidCount = count;
-      } else if (group.paymentType === 'REFUNDED') {
-        refundAmount = amount;
-        refundCount = count;
-      }
-    });
-
-    const salaryExpense =
-      (salaryAgg._sum.baseSalary ?? 0) + (salaryAgg._sum.bonus ?? 0);
-    const assetExpense = assets.reduce(
-      (sum, asset) => sum + asset.price * asset.quantity,
-      0,
-    );
-    const totalExpense = salaryExpense + assetExpense;
-
-    return {
-      totalRevenue,
-      totalExpense,
-      netProfit: totalRevenue - totalExpense,
-      unpaidAmount,
-      unpaidCount,
-      refundCount,
-      refundAmount,
-    };
-  }
-
-  async getMonthlyTrends() {
-    const now = new Date();
-    const preFirstMonthDate = new Date(
-      now.getFullYear(),
-      now.getMonth() - 6,
-      1,
-    );
-    const payments =
-      await this.paymentRepository.findRecentPaidPayments(preFirstMonthDate);
-
-    const getMonthKey = (date: Date) =>
-      `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-    const monthKeys = Array.from({ length: 6 }, (_, i) =>
-      getMonthKey(new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)),
-    );
-
-    const preFirstMonthKey = getMonthKey(preFirstMonthDate);
-    const monthlyRevenue: Record<string, number> = {
-      [preFirstMonthKey]: 0,
-      ...Object.fromEntries(monthKeys.map((key) => [key, 0])),
-    };
-
-    payments.forEach((payment) => {
-      const key = getMonthKey(
-        new Date(payment.paymentDate ?? payment.createdAt),
-      );
-      if (key in monthlyRevenue) {
-        monthlyRevenue[key] += payment.amount;
-      }
-    });
-
-    const response = monthKeys.map((key, idx) => {
-      const prevKey = idx === 0 ? preFirstMonthKey : monthKeys[idx - 1];
-      return {
-        month: `${parseInt(key.split('-')[1])}월`,
-        current: monthlyRevenue[key],
-        previous: monthlyRevenue[prevKey],
-      };
-    });
-
-    return response;
-  }
-
-  private buildSalaryWhere(
-    paymentType?: string,
-    search?: string,
-  ): Prisma.SalaryWhereInput {
-    const statusCondition = paymentType
-      ? paymentType === 'PAID'
-        ? 'COMPLETED'
-        : paymentType === 'UNPAID'
-          ? 'PENDING'
-          : undefined
-      : undefined;
-
-    return {
-      ...(statusCondition !== undefined && { status: statusCondition }),
-      ...(search && {
-        OR: [{ user: { name: { contains: search, mode: 'insensitive' } } }],
-      }),
-    };
-  }
-
-  private buildAssetWhere(
-    paymentType?: string,
-    search?: string,
-  ): Prisma.AssetsApplicationWhereInput {
-    let statusCondition: any;
-    if (!paymentType) {
-      statusCondition = { not: 'REJECTED' };
-    } else if (paymentType === 'PAID') {
-      statusCondition = 'ACCEPTED';
-    } else if (paymentType === 'UNPAID') {
-      statusCondition = 'PENDING';
-    } else {
-      statusCondition = { not: 'REJECTED' };
-    }
-
-    return {
-      status: statusCondition,
-      ...(search && {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { user: { name: { contains: search, mode: 'insensitive' } } },
-        ],
-      }),
-    };
-  }
+  // findAll이 급여/자재 지출 조회를 더 이상 안 해서 같이 주석 처리.
+  // private buildSalaryWhere(
+  //   paymentType?: string,
+  //   search?: string,
+  // ): Prisma.SalaryWhereInput {
+  //   const statusCondition = paymentType
+  //     ? paymentType === 'PAID'
+  //       ? 'COMPLETED'
+  //       : paymentType === 'UNPAID'
+  //         ? 'PENDING'
+  //         : undefined
+  //     : undefined;
+  //
+  //   return {
+  //     ...(statusCondition !== undefined && { status: statusCondition }),
+  //     ...(search && {
+  //       OR: [{ user: { name: { contains: search, mode: 'insensitive' } } }],
+  //     }),
+  //   };
+  // }
+  //
+  // private buildAssetWhere(
+  //   paymentType?: string,
+  //   search?: string,
+  // ): Prisma.AssetsApplicationWhereInput {
+  //   let statusCondition: any;
+  //   if (!paymentType) {
+  //     statusCondition = { not: 'REJECTED' };
+  //   } else if (paymentType === 'PAID') {
+  //     statusCondition = 'ACCEPTED';
+  //   } else if (paymentType === 'UNPAID') {
+  //     statusCondition = 'PENDING';
+  //   } else {
+  //     statusCondition = { not: 'REJECTED' };
+  //   }
+  //
+  //   return {
+  //     status: statusCondition,
+  //     ...(search && {
+  //       OR: [
+  //         { name: { contains: search, mode: 'insensitive' } },
+  //         { user: { name: { contains: search, mode: 'insensitive' } } },
+  //       ],
+  //     }),
+  //   };
+  // }
 }

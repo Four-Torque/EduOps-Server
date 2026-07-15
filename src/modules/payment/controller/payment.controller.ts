@@ -55,38 +55,40 @@ export class PaymentController {
     return response;
   }
 
-  @ApiOperation({
-    summary: '결제 통계 조회',
-    description: '결제 매출 및 지출 통계를 조회합니다.',
-  })
-  @Get('/stats')
-  async getStats() {
-    const response = await this.paymentService.getStats();
-    return response;
-  }
+  // 원생 결제 관리 목록(findAll)만 쓰는 걸로 정리하면서 주석 처리.
+  // (getMonthlyTrends는 서비스에 대응 메서드가 이미 없어 컴파일 에러 상태였음)
+  // @ApiOperation({
+  //   summary: '결제 통계 조회',
+  //   description: '결제 매출 및 지출 통계를 조회합니다.',
+  // })
+  // @Get('/stats')
+  // async getStats() {
+  //   const response = await this.paymentService.getStats();
+  //   return response;
+  // }
 
-  @ApiOperation({
-    summary: '월별 수입/지출 추이 조회',
-    description: '최근 6개월 간의 월별 수입 및 지출 추이를 조회합니다.',
-  })
-  @Get('/monthly-trends')
-  async getMonthlyTrends() {
-    const response = await this.paymentService.getMonthlyTrends();
-    return response;
-  }
+  // @ApiOperation({
+  //   summary: '월별 수입/지출 추이 조회',
+  //   description: '최근 6개월 간의 월별 수입 및 지출 추이를 조회합니다.',
+  // })
+  // @Get('/monthly-trends')
+  // async getMonthlyTrends() {
+  //   const response = await this.paymentService.getMonthlyTrends();
+  //   return response;
+  // }
 
-  @ApiOperation({
-    summary: '결제 상세 조회',
-    description: '결제 내역을 상세 조회합니다.',
-  })
-  @ApiSuccessResponse(ResponseMessage.PAYMENT_FETCHED, PaymentResponse)
-  @ApiErrorResponse(ErrorCode.PAYMENT_NOT_FOUND)
-  @Message(ResponseMessage.PAYMENT_FETCHED)
-  @Get('/:id')
-  async findById(@Param('id') id: string): Promise<PaymentResponse> {
-    const response = await this.paymentService.findById(id);
-    return response;
-  }
+  // @ApiOperation({
+  //   summary: '결제 상세 조회',
+  //   description: '결제 내역을 상세 조회합니다.',
+  // })
+  // @ApiSuccessResponse(ResponseMessage.PAYMENT_FETCHED, PaymentResponse)
+  // @ApiErrorResponse(ErrorCode.PAYMENT_NOT_FOUND)
+  // @Message(ResponseMessage.PAYMENT_FETCHED)
+  // @Get('/:id')
+  // async findById(@Param('id') id: string): Promise<PaymentResponse> {
+  //   const response = await this.paymentService.findById(id);
+  //   return response;
+  // }
 
   @ApiOperation({
     summary: '결제 상태 및 정보 변경',
