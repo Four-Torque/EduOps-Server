@@ -28,6 +28,7 @@ import { AssetModule } from './modules/asset/asset.module';
 import { ClassSyllabusModule } from './modules/class-syllabus/class-syllabus.module';
 import { MessageModule } from './modules/message/message.module';
 import { AcademyModule } from './modules/academy/academy.module';
+import { FinanceModule } from './modules/finance/finance.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AcademyModule } from './modules/academy/academy.module';
     ClassSyllabusModule,
     MessageModule,
     AcademyModule,
+    FinanceModule,
   ],
 
   providers: [
