@@ -36,7 +36,10 @@ export class SalaryRepository {
     });
   }
 
-  updateSalaryById(id: string, data: Prisma.SalaryUpdateInput): Promise<Salary> {
+  updateSalaryById(
+    id: string,
+    data: Prisma.SalaryUpdateInput,
+  ): Promise<Salary> {
     return this.prisma.salary.update({
       where: { id },
       data,
@@ -50,7 +53,11 @@ export class SalaryRepository {
     });
   }
 
-  findSalariesByMonthRange(userIds: string[], startDate: Date, endDate: Date): Promise<Salary[]> {
+  findSalariesByMonthRange(
+    userIds: string[],
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Salary[]> {
     return this.prisma.salary.findMany({
       where: {
         userId: { in: userIds },
@@ -60,6 +67,15 @@ export class SalaryRepository {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getSalariesByStartDateAndEndDate(startDate: string, endDate: string) {
+    return this.prisma.salary.findMany({
+      where: {
+        paymentDate: { gte: new Date(startDate), lte: new Date(endDate) },
+      },
+      include: { user: true },
     });
   }
 }

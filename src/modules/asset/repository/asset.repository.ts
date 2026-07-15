@@ -105,4 +105,19 @@ export class AssetRepository {
       skip,
     });
   }
+
+  async getAssetApplicationsByStartDateAndEndDate(
+    startDate: string,
+    endDate: string,
+  ) {
+    return this.prisma.assetsApplication.findMany({
+      where: {
+        status: {
+          not: 'REJECTED',
+        },
+        processedAt: { gte: new Date(startDate), lte: new Date(endDate) },
+      },
+      include: { user: true, category: true },
+    });
+  }
 }

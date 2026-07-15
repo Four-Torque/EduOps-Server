@@ -7,13 +7,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PaymentService } from '../service/payment.service';
 import { CreatePaymentRequest } from '../request/create-payment.request';
 import { UpdatePaymentRequest } from '../request/update-payment.request';
 import { PaymentResponse } from '../response/payment.response';
 import { PaginatedPaymentResponse } from '../response/paginated-payment.response';
-import { PaymentType } from '@prisma/client';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
@@ -21,6 +20,7 @@ import {
   ResponseMessage,
 } from 'src/global';
 import { ErrorCode } from 'src/global';
+import { PaymentFilterRequest } from '../request/payment-filter.request';
 
 @ApiTags('결제')
 @Controller('payment')
@@ -49,36 +49,9 @@ export class PaymentController {
   @ApiSuccessResponse(ResponseMessage.PAYMENT_FETCHED, PaginatedPaymentResponse)
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.PAYMENT_FETCHED)
-  @ApiQuery({ name: 'studentId', required: false })
-  @ApiQuery({ name: 'classId', required: false })
-  @ApiQuery({ name: 'paymentType', enum: PaymentType, required: false })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({
-    name: 'type',
-    required: false,
-    enum: ['all', 'INCOME', 'EXPENSE'],
-  })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
   @Get('/')
-  async findAll(
-    @Query('studentId') studentId?: string,
-    @Query('classId') classId?: string,
-    @Query('paymentType') paymentType?: PaymentType,
-    @Query('search') search?: string,
-    @Query('type') type?: 'all' | 'INCOME' | 'EXPENSE',
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
-  ): Promise<any> {
-    const response = await this.paymentService.findAll(
-      studentId,
-      classId,
-      paymentType,
-      search,
-      type,
-      page,
-      limit,
-    );
+  async findAll(@Query() request: PaymentFilterRequest) {
+    const response = await this.paymentService.findAll(request);
     return response;
   }
 
@@ -89,7 +62,6 @@ export class PaymentController {
   @Get('/stats')
   async getStats() {
     const response = await this.paymentService.getStats();
-    console.log('getStats response:', response);
     return response;
   }
 
@@ -99,7 +71,8 @@ export class PaymentController {
   })
   @Get('/monthly-trends')
   async getMonthlyTrends() {
-    return this.paymentService.getMonthlyTrends();
+    const response = await this.paymentService.getMonthlyTrends();
+    return response;
   }
 
   @ApiOperation({
