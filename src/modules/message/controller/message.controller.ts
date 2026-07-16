@@ -1,19 +1,10 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Put, Param } from '@nestjs/common';
 import { CurrentUser } from 'src/global/decorators/current-user.decorator';
 import { MessageService } from '../service/message.service';
 import { CreateMessageRequest } from '../request/create-message.request';
 import { MessageResponse } from '../response/message.response';
 import { PaginatedMessageResponse } from '../response/paginated-message.response';
-import { ConversationResponse } from '../response/conversation.response';
-import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
@@ -22,6 +13,7 @@ import {
   Message,
   ResponseMessage,
 } from 'src/global';
+import { MessageFilterRequest } from '../request/message-filter.request';
 
 @ApiTags('쪽지')
 @Controller('message')
@@ -40,91 +32,59 @@ export class MessageController {
     @CurrentUser() user: JwtPayload,
     @Body() request: CreateMessageRequest,
   ): Promise<MessageResponse> {
-    return await this.messageService.create(user.id, request);
+    const response = await this.messageService.create(user.id, request);
+    return response;
   }
 
   @ApiOperation({
-    summary: '대화방 목록 조회',
+    summary: '받은 쪽지 목록 조회',
     description:
-      '나의 모든 대화방(채팅방) 목록과 각 방의 안 읽은 쪽지 개수, 최신 메시지를 조회합니다.',
+      '내가 받은 쪽지 목록을 조회합니다. 페이지네이션이 적용되어 있으며, 기본적으로 10개씩 조회됩니다.',
   })
   @ApiSuccessResponse(
     ResponseMessage.CONVERSATION_LIST_FETCHED,
-    ConversationResponse,
+    PaginatedMessageResponse,
     true,
   )
   @Message(ResponseMessage.CONVERSATION_LIST_FETCHED)
-  @Get('/conversations')
-  async getConversations(
+  @Get('/received')
+  async findReceivedMessages(
+    @Query() request: MessageFilterRequest,
     @CurrentUser() user: JwtPayload,
-  ): Promise<ConversationResponse[]> {
-    return await this.messageService.getConversations(user.id);
-  }
-
-  @ApiOperation({
-    summary: '특정 유저와의 대화 상세 조회',
-    description:
-      '특정 유저와 나눈 대화 기록을 조회하며, 확인 시 자동으로 읽음 처리됩니다.',
-  })
-  @ApiSuccessResponse(ResponseMessage.MESSAGE_FETCHED, PaginatedMessageResponse)
-  @ApiQuery({ name: 'page', required: false, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, example: 20 })
-  @Message(ResponseMessage.MESSAGE_FETCHED)
-  @Get('/conversation/:userId')
-  async getConversationMessages(
-    @CurrentUser() user: JwtPayload,
-    @Param('userId') otherUserId: string,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
   ): Promise<PaginatedMessageResponse> {
-    return await this.messageService.getConversationMessages(
+    const response = await this.messageService.getReceivedMessages(
+      request,
       user.id,
-      otherUserId,
-      Number(page) || 1,
-      Number(limit) || 20,
     );
+    return response;
   }
 
   @ApiOperation({
-    summary: '안 읽은 쪽지 총 개수 조회',
-    description: '나를 수신자로 하는 안 읽은 쪽지의 총 개수를 반환합니다.',
-  })
-  @ApiSuccessResponse(ResponseMessage.UNREAD_COUNT_FETCHED)
-  @Message(ResponseMessage.UNREAD_COUNT_FETCHED)
-  @Get('/unread-count')
-  async getUnreadCount(
-    @CurrentUser() user: JwtPayload,
-  ): Promise<{ count: number }> {
-    return await this.messageService.getUnreadCount(user.id);
-  }
-
-  @ApiOperation({
-    summary: '단건 쪽지 삭제',
+    summary: '보낸 쪽지 목록 조회',
     description:
-      '내 채팅창에서 특정 쪽지만 지웁니다. 상대방에게는 지워지지 않습니다.',
+      '내가 보낸 쪽지 목록을 조회합니다. 페이지네이션이 적용되어 있으며, 기본적으로 10개씩 조회됩니다.',
   })
-  @ApiSuccessResponse(ResponseMessage.MESSAGE_DELETED)
-  @Message(ResponseMessage.MESSAGE_DELETED)
-  @Patch('/:id/delete')
-  async deleteMessage(
+  @Get('/sent')
+  async findSentMessages(
+    @Query() request: MessageFilterRequest,
     @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-  ): Promise<void> {
-    await this.messageService.deleteMessage(user.id, id);
+  ): Promise<PaginatedMessageResponse> {
+    const response = await this.messageService.getSentMessages(
+      request,
+      user.id,
+    );
+    return response;
   }
 
   @ApiOperation({
-    summary: '대화방 나가기 (전체 삭제)',
-    description:
-      '특정 유저와의 대화방을 나갑니다. 내 화면에서만 모든 기록이 삭제됩니다.',
+    summary: '쪽지 읽음 처리',
+    description: '특정 쪽지를 읽음 처리합니다.',
   })
-  @ApiSuccessResponse(ResponseMessage.CONVERSATION_DELETED)
-  @Message(ResponseMessage.CONVERSATION_DELETED)
-  @Patch('/conversation/:userId/delete')
-  async deleteConversation(
-    @CurrentUser() user: JwtPayload,
-    @Param('userId') otherUserId: string,
-  ): Promise<void> {
-    await this.messageService.deleteConversation(user.id, otherUserId);
+  @ApiSuccessResponse()
+  @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
+  @Put('/:id/read')
+  async markAsRead(@Param('id') id: string): Promise<void> {
+    const response = await this.messageService.markAsRead(id);
+    return response;
   }
 }

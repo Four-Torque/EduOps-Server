@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { MessageRepository} from '../repository/message.repository';
+import { MessageRepository } from '../repository/message.repository';
 import { CreateMessageRequest } from '../request/create-message.request';
 import { MessageResponse } from '../response/message.response';
 import { PaginatedMessageResponse } from '../response/paginated-message.response';
-import { ConversationResponse, ConversationUser } from '../response/conversation.response';
+import { MessageFilterRequest } from '../request/message-filter.request';
 import { ApiException, ErrorCode } from 'src/global';
-import { Transactional } from 'src/global/decorators/transactional.decorator';
 
 @Injectable()
 export class MessageService {
@@ -18,109 +17,48 @@ export class MessageService {
     const entity = await this.messageRepository.create(
       CreateMessageRequest.toEntity(senderId, request),
     );
-    return MessageResponse.fromEntity(entity);
-  }
-
-  async getConversations(userId: string): Promise<ConversationResponse[]> {
-    const rawConversations =
-      await this.messageRepository.getConversations(userId);
-
-    const getKoreanRoleName = (role: string) => {
-      if (role === 'TEACHER') return '강사';
-      if (role === 'DIRECTOR') return '원장';
-      if (role === 'MANAGER') return '매니저';
-      return '';
-    };
-
-    const response: ConversationResponse[] = rawConversations.map((row: ConversationResponse) => ({
-      otherUser: {
-        id: row.otherUser.id,
-        name: `${getKoreanRoleName(row.otherUser.role)} ${row.otherUser.name}`,
-        role: row.otherUser.role,
-      },
-      lastMessageId: row.lastMessageId,
-      lastMessageContent: row.lastMessageContent,
-      lastMessageUpdatedAt: row.lastMessageUpdatedAt,
-      unreadCount: Number(row.unreadCount),
-    }));
-
+    const response = MessageResponse.fromEntity(entity);
     return response;
   }
 
-  @Transactional()
-  async getConversationMessages(
-    userId: string,
-    otherUserId: string,
-    page?: number,
-    limit?: number,
-  ): Promise<PaginatedMessageResponse> {
-    const skip = ((page || 1) - 1) * (limit || 20);
-    const take = limit || 20;
+  async getReceivedMessages(request: MessageFilterRequest, userId: string) {
+    const { page = 1, limit } = request;
 
-    const [data, total, otherUserEntity] = await Promise.all([
-      this.messageRepository.getConversationMessages(
-        userId,
-        otherUserId,
-        skip,
-        take,
-      ),
-      this.messageRepository.countConversationMessages(userId, otherUserId),
-      this.messageRepository.findUserById(otherUserId),
+    const take = limit ?? 10;
+    const skip = page && take ? (page - 1) * take : 0;
+    const [messages, total] = await Promise.all([
+      this.messageRepository.getReceivedMessages(take, skip, userId),
+      this.messageRepository.receivedMessagesCount(take, skip, userId),
     ]);
-
-    // Auto-read messages where receiver is current user
-    await this.messageRepository.updateReadStatus(userId, otherUserId);
-
-    const getKoreanRoleName = (role: string) => {
-      if (role === 'TEACHER') return '강사';
-      if (role === 'DIRECTOR') return '원장';
-      if (role === 'MANAGER') return '매니저';
-      return '';
-    };
-
-    const mappedData = data.map((item) => {
-      // Return updated isRead state for the response
-      if (item.receiverId === userId && !item.isRead) {
-        item.isRead = true;
-        item.readAt = new Date();
-      }
-      return MessageResponse.fromEntity(item);
-    });
-
-    return {
-      otherUser: {
-        id: otherUserEntity.id,
-        name: `${getKoreanRoleName(otherUserEntity.role)} ${otherUserEntity.name}`,
-        role: otherUserEntity.role,
-      },
-      page: page || 1,
-      total,
-      data: mappedData,
-    };
+    const response = PaginatedMessageResponse.fromEntity(page, total, messages);
+    return response;
   }
 
-  async getUnreadCount(userId: string): Promise<{ count: number }> {
-    const count = await this.messageRepository.getUnreadCountTotal(userId);
-    return { count };
+  async getSentMessages(request: MessageFilterRequest, userId: string) {
+    const { page = 1, limit } = request;
+
+    const take = limit ?? 10;
+    const skip = page && take ? (page - 1) * take : 0;
+    const [messages, total] = await Promise.all([
+      this.messageRepository.getSentMessages(take, skip, userId),
+      this.messageRepository.sentMessagesCount(take, skip, userId),
+    ]);
+    const response = PaginatedMessageResponse.fromEntity(page, total, messages);
+    return response;
   }
 
-  async deleteMessage(userId: string, messageId: string): Promise<void> {
-    const existing = await this.messageRepository.findById(messageId);
-    if (!existing) {
+  async markAsRead(id: string) {
+    const message = await this.messageRepository.findById(id);
+    if (!message) {
       throw new ApiException(ErrorCode.MESSAGE_NOT_FOUND);
     }
-
-    if (existing.senderId === userId) {
-      await this.messageRepository.softDeleteSingleMessage(messageId, true);
-    } else if (existing.receiverId === userId) {
-      await this.messageRepository.softDeleteSingleMessage(messageId, false);
+    if (message.isRead) {
+      return;
     } else {
-      throw new ApiException(ErrorCode.FORBIDDEN); // Or similar, for now let's assume global FORBIDDEN exists, or just use MESSAGE_NOT_FOUND if not found for user. Let's rely on standard logic.
+      await this.messageRepository.updateReadStatus(
+        message.receiverId,
+        message.senderId,
+      );
     }
-  }
-
-  @Transactional()
-  async deleteConversation(userId: string, otherUserId: string): Promise<void> {
-    await this.messageRepository.softDeleteConversation(userId, otherUserId);
   }
 }
