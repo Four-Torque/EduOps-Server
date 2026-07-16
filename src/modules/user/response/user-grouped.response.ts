@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 
 export class UserSimpleResponse {
@@ -25,24 +25,24 @@ export class UserSimpleResponse {
 }
 
 export class UserGroupedResponse {
-  @ApiPropertyOptional({
-    description: '원장님(DIRECTOR) 역할의 유저 목록',
+  @ApiProperty({
+    description: '역할',
+    example: 'DIRECTOR',
+  })
+  role?: string;
+
+  @ApiProperty({
+    description: '역할별 유저 목록',
     type: [UserSimpleResponse],
   })
-  DIRECTOR?: UserSimpleResponse[];
+  contacts: UserSimpleResponse[];
 
-  @ApiPropertyOptional({
-    description: '매니저(MANAGER) 역할의 유저 목록',
-    type: [UserSimpleResponse],
-  })
-  MANAGER?: UserSimpleResponse[];
-
-  @ApiPropertyOptional({
-    description: '선생님(TEACHER) 역할의 유저 목록',
-    type: [UserSimpleResponse],
-  })
-  TEACHER?: UserSimpleResponse[];
-
-  // 그 외의 역할이 추가될 경우를 대비한 인덱스 시그니처
-  [key: string]: UserSimpleResponse[] | undefined;
+  static fromEntity(role: string, entities: User[]): UserGroupedResponse {
+    const response = new UserGroupedResponse();
+    response.role = role;
+    response.contacts = entities.map((entity) =>
+      UserSimpleResponse.fromEntity(entity),
+    );
+    return response;
+  }
 }

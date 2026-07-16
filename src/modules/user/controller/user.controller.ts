@@ -62,7 +62,8 @@ export class UserController {
 
   @ApiOperation({
     summary: '사용자 목록 그룹 조회',
-    description: '본인을 제외한 현재 활동 중인 사용자를 역할(Role)별로 그룹화하여 조회하며 이름으로 검색할 수 있습니다.',
+    description:
+      '본인을 제외한 현재 활동 중인 사용자를 역할(Role)별로 그룹화하여 조회하며 이름으로 검색할 수 있습니다.',
   })
   @ApiSuccessResponse(ResponseMessage.USER_LIST_FETCHED, UserGroupedResponse)
   @ApiQuery({
@@ -75,8 +76,10 @@ export class UserController {
   async getGroupedUsers(
     @CurrentUser() user: JwtPayload,
     @Query('name') name?: string,
-  ): Promise<UserGroupedResponse> {
-    return this.userService.getGroupedList(user.id, name);
+  ): Promise<UserGroupedResponse[]> {
+    const response = await this.userService.getGroupedList(user.id, name);
+    console.log('getGroupedUsers response', response);
+    return response;
   }
 
   @ApiOperation({

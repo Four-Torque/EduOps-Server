@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import { ApiException, ErrorCode } from 'src/global';
 import { UserResponse } from '../response/user.response';
-import { User, Role } from '@prisma/client';
+import { User } from '@prisma/client';
 import { CreateUserRequest } from '../request/create-user.request';
 import * as bcrypt from 'bcryptjs';
 import { ResetPasswordRequest } from 'src/modules/auth/request/reset-password.request';
@@ -10,7 +10,7 @@ import { RedisKey, RedisService } from 'src/redis';
 import { PaginatedUserResponse } from '../response/user-list.response';
 import { UpdateUserRequest } from '../request/update-user.request';
 import { UserFilterRequest } from '../request/user-filter.request';
-import { UserGroupedResponse, UserSimpleResponse } from '../response/user-grouped.response';
+import { UserGroupedResponse } from '../response/user-grouped.response';
 
 @Injectable()
 export class UserService {
@@ -138,16 +138,31 @@ export class UserService {
    * @param excludeId - 제외할 사용자(본인)의 ID
    * @param name - 검색할 사용자 이름 (선택)
    */
-  async getGroupedList(excludeId: string, name?: string): Promise<UserGroupedResponse> {
-    const users = await this.userRepository.findActiveUsersExcludingId(excludeId, name);
+  async getGroupedList(
+    excludeId: string,
+    name?: string,
+  ): Promise<UserGroupedResponse[]> {
+    const users = await this.userRepository.findActiveUsersExcludingId(
+      excludeId,
+      name,
+    );
 
-    const responses = users.map(UserSimpleResponse.fromEntity);
+    const groupedByRole = users.reduce(
+      (acc, user) => {
+        const role = user.role;
+        if (!acc[role]) {
+          acc[role] = [];
+        }
+        acc[role].push(user);
+        return acc;
+      },
+      {} as Record<string, User[]>,
+    );
 
-    return {
-      "DIRECTOR": responses.filter((_, i) => users[i].role === 'DIRECTOR'),
-      "MANAGER": responses.filter((_, i) => users[i].role === 'MANAGER'),
-      "TEACHER": responses.filter((_, i) => users[i].role === 'TEACHER'),
-    }
+    const response = Object.entries(groupedByRole).map(([role, roleUsers]) => {
+      return UserGroupedResponse.fromEntity(role, roleUsers);
+    });
+    return response;
   }
 
   /**
