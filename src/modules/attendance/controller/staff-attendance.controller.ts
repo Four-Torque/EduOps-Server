@@ -21,6 +21,7 @@ import {
   Role,
 } from 'src/global';
 import { CreateStaffAttendanceRequest } from '../request/create-staff-attendance.request';
+import { UpdateStaffAttendanceRequest } from '../request/update-staff-attendance.request';
 
 @ApiTags('직원 출석')
 @Controller('staff-attendance')
@@ -93,6 +94,7 @@ export class StaffAttendanceController {
     return attendance;
   }
 
+  @Role('MANAGER', 'DIRECTOR')
   @ApiOperation({
     summary: '직원 출석 체크인',
     description: '직원의 출석 체크인을 수행합니다.',
@@ -110,14 +112,32 @@ export class StaffAttendanceController {
   @Post('/check-in')
   async checkIn(
     @Body() request: CreateStaffAttendanceRequest,
-    @CurrentUser() user: JwtPayload,
   ): Promise<StaffAttendanceResponse> {
-    const isAdmin = user.role === 'MANAGER' || user.role === 'DIRECTOR';
-    const targetUserId = isAdmin && request.userId ? request.userId : user.id;
+    const attendance = await this.staffAttendanceService.checkIn(request);
+    return attendance;
+  }
 
-    const attendance = await this.staffAttendanceService.checkIn(
+  @ApiOperation({
+    summary: '직원 출석 체크인 수정',
+    description: '직원의 출석 체크인 시간을 수정합니다.',
+  })
+  @ApiSuccessResponse(
+    ResponseMessage.ATTENDANCE_UPDATED,
+    StaffAttendanceResponse,
+  )
+  @ApiErrorResponse(
+    ErrorCode.ATTENDANCE_NOT_FOUND,
+    ErrorCode.INTERNAL_SERVER_ERROR,
+  )
+  @Message(ResponseMessage.ATTENDANCE_UPDATED)
+  @Patch('/:id/check-in')
+  async updateCheckIn(
+    @Param('id') id: string,
+    @Body() request: UpdateStaffAttendanceRequest,
+  ): Promise<StaffAttendanceResponse> {
+    const attendance = await this.staffAttendanceService.updateCheckIn(
+      id,
       request,
-      targetUserId,
     );
     return attendance;
   }
@@ -147,20 +167,20 @@ export class StaffAttendanceController {
     description: '직원의 출석 체크아웃을 수행합니다.',
   })
   @ApiSuccessResponse(
-    ResponseMessage.ATTENDANCE_UPDATED,
+    ResponseMessage.ATTENDANCE_CHECKED_OUT,
     StaffAttendanceResponse,
   )
   @ApiErrorResponse(
     ErrorCode.ATTENDANCE_NOT_FOUND,
     ErrorCode.ATTENDANCE_ALREADY_CHECKED_OUT,
   )
-  @Message(ResponseMessage.ATTENDANCE_UPDATED)
-  @Post('/check-out')
+  @Message(ResponseMessage.ATTENDANCE_CHECKED_OUT)
+  @Patch('/check-out')
   async checkOutByUser(
-    @Body() request: CreateStaffAttendanceRequest,
+    @Body() request: UpdateStaffAttendanceRequest,
   ): Promise<StaffAttendanceResponse> {
-    const attendance =
+    const response =
       await this.staffAttendanceService.checkOutByUserId(request);
-    return attendance;
+    return response;
   }
 }

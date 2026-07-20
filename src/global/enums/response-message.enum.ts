@@ -13,6 +13,7 @@ export enum ResponseMessage {
   ATTENDANCE_FETCHED = '직원 근태 / 학생 출결이 성공적으로 조회되었습니다.',
   ATTENDANCE_CHECKED_IN = '직원 체크인이 성공적으로 완료되었습니다.',
   ATTENDANCE_UPDATED = '직원 근태 / 학생 출결이 성공적으로 업데이트되었습니다.',
+  ATTENDANCE_CHECKED_OUT = '직원 체크아웃이 성공적으로 완료되었습니다.',
   ATTENDANCE_CREATED = '학생 출결이 성공적으로 생성되었습니다.',
 
   // 유저 관련

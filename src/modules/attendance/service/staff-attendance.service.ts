@@ -3,6 +3,8 @@ import { StaffAttendanceRepository } from '../repository/staff-attendance.reposi
 import { StaffAttendanceResponse } from '../response/staff-attendance.response';
 import { ApiException, ErrorCode, formatDate } from 'src/global';
 import { CreateStaffAttendanceRequest } from '../request/create-staff-attendance.request';
+import { UpdateStaffAttendanceRequest } from '../request/update-staff-attendance.request';
+import { isValid, parseISO } from 'date-fns';
 
 @Injectable()
 export class StaffAttendanceService {
@@ -31,44 +33,50 @@ export class StaffAttendanceService {
 
   private checkIsLate(checkInTime: string | Date | undefined | null): boolean {
     if (!checkInTime) return false;
-    const checkIn = new Date(checkInTime);
-    const checkInHour = checkIn.getHours();
-    const checkInMin = checkIn.getMinutes();
-    return checkInHour > 9 || (checkInHour === 9 && checkInMin > 0);
+
+    const checkIn =
+      typeof checkInTime === 'string' ? parseISO(checkInTime) : checkInTime;
+    if (!isValid(checkIn)) return false;
+
+    const hourStr = formatDate(checkIn, 'HH');
+    const minuteStr = formatDate(checkIn, 'mm');
+
+    const hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+
+    return hour > 9 || (hour === 9 && minute > 0);
   }
 
   async checkIn(
-    createStaffAttendanceRequest: CreateStaffAttendanceRequest,
-    userId: string,
+    request: CreateStaffAttendanceRequest,
   ): Promise<StaffAttendanceResponse> {
-    try {
-      const { workDate } = createStaffAttendanceRequest;
-      const today = new Date();
-      const localDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const date = workDate ? workDate : localDateStr;
+    const { checkInTime, userId, workDate } = request;
+    const date = workDate ? formatDate(workDate) : formatDate(checkInTime);
 
-      const existing = await this.staffAttendanceRepository.findByUserId(
+    const existing = await this.staffAttendanceRepository.findByUserId(
+      userId,
+      date,
+    );
+
+    let attendance;
+    if (existing.length > 0) {
+      const data = UpdateStaffAttendanceRequest.toEntity({
+        checkInTime,
+        workDate,
         userId,
-        date,
-      );
-      if (existing.length > 0) {
-        throw new ApiException(ErrorCode.ATTENDANCE_ALREADY_EXISTS);
-      }
-
-      const data = CreateStaffAttendanceRequest.toEntity(userId, {
-        workDate: date,
-        checkInTime: today,
       });
-      const attendance = await this.staffAttendanceRepository.create(data);
-
-      const response: StaffAttendanceResponse =
-        StaffAttendanceResponse.fromEntity(attendance);
-      return response;
-    } catch (error: any) {
-      if (error.code === 'P2025')
-        throw new ApiException(ErrorCode.USER_NOT_FOUND);
-      throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+      attendance = await this.staffAttendanceRepository.update(
+        existing[0].id,
+        data,
+      );
+    } else {
+      const data = CreateStaffAttendanceRequest.toEntity(request);
+      attendance = await this.staffAttendanceRepository.create(data);
     }
+
+    const response: StaffAttendanceResponse =
+      StaffAttendanceResponse.fromEntity(attendance);
+    return response;
   }
 
   async checkOut(id: string): Promise<StaffAttendanceResponse> {
@@ -87,24 +95,78 @@ export class StaffAttendanceService {
   }
 
   async checkOutByUserId(
-    request: CreateStaffAttendanceRequest,
+    request: UpdateStaffAttendanceRequest,
   ): Promise<StaffAttendanceResponse> {
-    const { userId, workDate } = request;
-    const formatWorkDate = formatDate(workDate);
-    const existing = await this.staffAttendanceRepository.findByUserId(
-      userId,
-      formatWorkDate,
-    );
-    if (existing.length === 0) {
+    const { userId, workDate, checkOutTime } = request;
+    const resolvedCheckOutTime = checkOutTime
+      ? new Date(checkOutTime)
+      : new Date();
+
+    let attendance: any = null;
+
+    if (workDate) {
+      const dateStr = formatDate(workDate);
+      const existing = await this.staffAttendanceRepository.findByUserId(
+        userId,
+        dateStr,
+      );
+      if (existing.length > 0) {
+        attendance = existing[0];
+      }
+    } else {
+      const unchecked =
+        await this.staffAttendanceRepository.findLatestUncheckedOut(userId);
+      if (unchecked) {
+        const todayStr = formatDate(resolvedCheckOutTime);
+        const yesterday = new Date(resolvedCheckOutTime);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = formatDate(yesterday);
+
+        if (
+          unchecked.workDate === todayStr ||
+          unchecked.workDate === yesterdayStr
+        ) {
+          attendance = unchecked;
+        }
+      }
+
+      if (!attendance) {
+        const todayStr = formatDate(resolvedCheckOutTime);
+        const existing = await this.staffAttendanceRepository.findByUserId(
+          userId,
+          todayStr,
+        );
+        if (existing.length > 0) {
+          attendance = existing[0];
+        }
+      }
+    }
+
+    if (!attendance) {
       throw new ApiException(ErrorCode.ATTENDANCE_NOT_FOUND);
     }
-    const attendance = existing[0];
     if (attendance.checkOutTime) {
       throw new ApiException(ErrorCode.ATTENDANCE_ALREADY_CHECKED_OUT);
     }
 
     const updatedAttendance = await this.staffAttendanceRepository.checkOut(
       attendance.id,
+      resolvedCheckOutTime,
+    );
+    const response: StaffAttendanceResponse =
+      StaffAttendanceResponse.fromEntity(updatedAttendance);
+    return response;
+  }
+
+  async updateCheckIn(id: string, request: UpdateStaffAttendanceRequest) {
+    const existing = await this.staffAttendanceRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.ATTENDANCE_NOT_FOUND);
+    }
+    const data = UpdateStaffAttendanceRequest.toEntity(request);
+    const updatedAttendance = await this.staffAttendanceRepository.update(
+      id,
+      data,
     );
     const response: StaffAttendanceResponse =
       StaffAttendanceResponse.fromEntity(updatedAttendance);
@@ -120,12 +182,21 @@ export class StaffAttendanceService {
       throw new ApiException(ErrorCode.BAD_REQUEST);
     }
 
-    const baseDate = weekStart ? new Date(weekStart) : new Date();
-    const currentDay = baseDate.getDay();
+    let kstDate: Date;
+    if (weekStart) {
+      kstDate = new Date(`${weekStart}T00:00:00`);
+    } else {
+      const kstISOString = new Date()
+        .toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' })
+        .replace(' ', 'T');
+      kstDate = new Date(kstISOString);
+    }
+
+    const currentDay = kstDate.getDay();
     const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
 
-    const monday = new Date(baseDate);
-    monday.setDate(baseDate.getDate() + diffToMonday);
+    const monday = new Date(kstDate);
+    monday.setDate(kstDate.getDate() + diffToMonday);
 
     const dates: string[] = Array.from({ length: 5 }, (_, i) => {
       const d = new Date(monday);
