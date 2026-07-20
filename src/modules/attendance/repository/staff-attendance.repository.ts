@@ -32,10 +32,38 @@ export class StaffAttendanceRepository {
     });
   }
 
-  async checkOut(id: string): Promise<StaffAttendance> {
+  async checkOut(
+    id: string,
+    checkOutTime: Date = new Date(),
+  ): Promise<StaffAttendance> {
     return this.prisma.staffAttendance.update({
       where: { id },
-      data: { checkOutTime: new Date() },
+      data: { checkOutTime },
+    });
+  }
+
+  async findLatestUncheckedOut(
+    userId: string,
+  ): Promise<StaffAttendance | null> {
+    return this.prisma.staffAttendance.findFirst({
+      where: {
+        userId,
+        checkOutTime: null,
+      },
+      orderBy: {
+        workDate: 'desc',
+      },
+    });
+  }
+
+
+  async update(
+    id: string,
+    data: Prisma.StaffAttendanceUpdateInput,
+  ): Promise<StaffAttendance> {
+    return this.prisma.staffAttendance.update({
+      where: { id },
+      data,
     });
   }
 
