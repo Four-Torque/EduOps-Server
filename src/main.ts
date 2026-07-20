@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
@@ -32,6 +32,13 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      exceptionFactory: (validationErrors = []) => {
+        console.error(
+          '검증 에러 상세:',
+          JSON.stringify(validationErrors, null, 2),
+        );
+        return new BadRequestException(validationErrors);
+      },
     }),
   );
 
@@ -39,6 +46,16 @@ async function bootstrap() {
     .setTitle('EduOps API')
     .setDescription('EduOps API 명세')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        in: 'header',
+      },
+      'eo_atk',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

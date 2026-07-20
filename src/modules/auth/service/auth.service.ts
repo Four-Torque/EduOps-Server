@@ -41,6 +41,12 @@ export class AuthService {
     if (user) {
       throw new ApiException(ErrorCode.USER_ALREADY_EXISTS);
     }
+
+    const existingPhone = await this.userService.findByPhone(request.phone);
+    if (existingPhone) {
+      throw new ApiException(ErrorCode.PHONE_ALREADY_EXISTS);
+    }
+
     this.emailService.sendVerificationEmail({
       type: 'register',
       payload: request,
@@ -53,15 +59,15 @@ export class AuthService {
    * @param type - 인증 유형 ('register' 또는 'reset')
    * @throws ApiException - 토큰이 유효하지 않거나 인증 실패 시 에러 발생
    */
-  async verify(token: string, type: string): Promise<void> {
+  async verify(token: string, type: string): Promise<void | string> {
     if (!token) {
       throw new ApiException(ErrorCode.VERIFICATION_TOKEN_INVALID);
     }
 
     if (type === 'register') {
-      await this.verifyRegister(token);
+      return await this.verifyRegister(token);
     } else if (type === 'reset') {
-      await this.verifyResetPassword(token);
+      return await this.verifyResetPassword(token);
     }
     throw new ApiException(ErrorCode.VERIFICATION_FAILED);
   }
@@ -74,6 +80,11 @@ export class AuthService {
    */
   async login(request: AuthRequest): Promise<TokenResponse> {
     const user: Omit<User, 'password'> = await this.validateUser(request);
+
+    if (user.status === 'INACTIVE') {
+      throw new ApiException(ErrorCode.THIS_USER_IS_INACTIVE);
+    }
+
     const redisKey = RedisKey.userRefreshToken(user.id);
 
     const payload = {
@@ -90,6 +101,16 @@ export class AuthService {
     await this.redis.set(redisKey, tokens.refreshToken, 7 * 24 * 60 * 60);
 
     return tokens;
+  }
+
+  /**
+   * logout 함수는 사용자의 로그아웃 요청을 처리하고 리프레시 토큰을 삭제합니다.
+   * @param userId - 로그아웃 요청을 한 사용자의 ID
+   * @returns - Promise<void>
+   */
+  async logout(userId: string): Promise<void> {
+    const redisKey = RedisKey.userRefreshToken(userId);
+    await this.redis.del(redisKey);
   }
 
   /**
@@ -239,7 +260,7 @@ export class AuthService {
    * @returns - 검증된 이메일 정보
    * @throws ApiException - 토큰이 유효하지 않을 경우 에러 발생
    */
-  private async verifyResetPassword(token: string): Promise<{ email: string }> {
+  private async verifyResetPassword(token: string): Promise<string> {
     const redisKey = RedisKey.verificationReset(token);
     const emailStr = await this.redis.get(redisKey);
     if (!emailStr) {
@@ -248,6 +269,6 @@ export class AuthService {
 
     const email = JSON.parse(emailStr) as string;
 
-    return { email };
+    return email;
   }
 }

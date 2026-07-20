@@ -35,7 +35,7 @@ export class CreateSalaryRequest {
 
   static toEntity(request: CreateSalaryRequest): Prisma.SalaryCreateInput {
     return {
-      User: {
+      user: {
         connect: { id: request.userId },
       },
       baseSalary: request.baseSalary,

@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Injectable,
   NestInterceptor,
+  StreamableFile,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
@@ -34,6 +35,10 @@ export class ApiInterceptor<T> implements NestInterceptor<T, Api<T>> {
           SUCCESS_MESSAGE_METADATA,
           context.getHandler(),
         );
+
+        if (payload instanceof StreamableFile) {
+          return payload as unknown as Api<T>;
+        }
 
         let message = staticMessage || '성공';
         let body: T | null = payload;

@@ -6,16 +6,20 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { SalaryService } from '../service/salary.service';
 import { SalaryStatus } from '@prisma/client';
 import { SalaryResponse } from '../response/salary.response';
 import { CreateSalaryRequest } from '../request/create-salary.request';
+import { UpdateSalaryRequest } from '../request/update-salary.request';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
+  CurrentUser,
   ErrorCode,
+  JwtPayload,
   Message,
   ResponseMessage,
 } from 'src/global';
@@ -50,11 +54,15 @@ export class SalaryController {
   @Message(ResponseMessage.SALARY_FETCHED)
   @Get('/')
   async getSalary(
-    @Query('userId') userId: string,
+    @CurrentUser() user: JwtPayload,
+    @Query('userId') queryUserId?: string,
     @Query('status') status?: SalaryStatus,
   ): Promise<SalaryResponse[]> {
+    const isAdmin = user.role === 'MANAGER' || user.role === 'DIRECTOR';
+    const targetUserId = isAdmin && queryUserId ? queryUserId : user.id;
+
     const response: SalaryResponse[] = await this.salaryService.getSalary(
-      userId,
+      targetUserId,
       status,
     );
     return response;
@@ -70,6 +78,25 @@ export class SalaryController {
   @Patch('/:id/pay')
   async paySalary(@Param('id') id: string): Promise<SalaryResponse> {
     const response: SalaryResponse = await this.salaryService.paySalary(id);
+    return response;
+  }
+
+  @ApiOperation({
+    summary: '급여 지급 정보 업데이트',
+    description: '급여의 정보를 업데이트합니다.',
+  })
+  @ApiSuccessResponse(ResponseMessage.SALARY_UPDATED, SalaryResponse)
+  @ApiErrorResponse(ErrorCode.SALARY_NOT_FOUND)
+  @Message(ResponseMessage.SALARY_UPDATED)
+  @Patch('/:id')
+  async updateSalary(
+    @Param('id') id: string,
+    @Body() updateSalaryRequest: UpdateSalaryRequest,
+  ): Promise<SalaryResponse> {
+    const response: SalaryResponse = await this.salaryService.updateSalary(
+      id,
+      updateSalaryRequest,
+    );
     return response;
   }
 }

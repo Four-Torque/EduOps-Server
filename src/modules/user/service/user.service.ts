@@ -7,6 +7,10 @@ import { CreateUserRequest } from '../request/create-user.request';
 import * as bcrypt from 'bcryptjs';
 import { ResetPasswordRequest } from 'src/modules/auth/request/reset-password.request';
 import { RedisKey, RedisService } from 'src/redis';
+import { PaginatedUserResponse } from '../response/user-list.response';
+import { UpdateUserRequest } from '../request/update-user.request';
+import { UserFilterRequest } from '../request/user-filter.request';
+import { UserGroupedResponse } from '../response/user-grouped.response';
 
 @Injectable()
 export class UserService {
@@ -49,6 +53,15 @@ export class UserService {
   }
 
   /**
+   * findByPhone 메서드는 주어진 전화번호를 가진 사용자를 조회합니다.
+   * @param phone - 조회할 사용자의 전화번호
+   * @returns Promise<User | null> - 조회된 사용자 객체 또는 null을 반환합니다.
+   */
+  async findByPhone(phone: string): Promise<User | null> {
+    return this.userRepository.findByPhone(phone);
+  }
+
+  /**
    * getSession 메서드는 주어진 사용자 ID를 기반으로 세션 정보를 조회합니다.
    * @param userId - 조회할 사용자의 ID
    * @returns Promise<UserResponse> - 조회된 사용자 정보를 UserResponse 형태로 반환합니다.
@@ -86,5 +99,116 @@ export class UserService {
       ResetPasswordRequest.toEntity(user.id, hashedPassword),
     );
     await this.redis.del(redisKey);
+  }
+
+  /**
+   * getUserList 메서드는 유저의 목록을 조회합니다
+   * @param role
+   * @param status
+   * @param page
+   * @param limit
+   * @returns
+   */
+  async getList(request: UserFilterRequest): Promise<PaginatedUserResponse> {
+    const { search, role, status, isApproved } = request;
+    const page = request.page ? Number(request.page) : 1;
+    const limit = request.limit ? Number(request.limit) : 10;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.userRepository.findList(
+        search,
+        role,
+        status,
+        skip,
+        limit,
+        isApproved,
+      ),
+      this.userRepository.countList(search, role, status, isApproved),
+    ]);
+    return {
+      total,
+      page,
+      data: users.map((user) => UserResponse.fromEntity(user)),
+    };
+  }
+
+  /**
+   * getGroupedList 메서드는 본인을 제외한 활동 중인 유저들을 Role별로 그룹화하여 조회합니다.
+   * @param excludeId - 제외할 사용자(본인)의 ID
+   * @param name - 검색할 사용자 이름 (선택)
+   */
+  async getGroupedList(
+    excludeId: string,
+    name?: string,
+  ): Promise<UserGroupedResponse[]> {
+    const users = await this.userRepository.findActiveUsersExcludingId(
+      excludeId,
+      name,
+    );
+
+    const groupedByRole = users.reduce(
+      (acc, user) => {
+        const role = user.role;
+        if (!acc[role]) {
+          acc[role] = [];
+        }
+        acc[role].push(user);
+        return acc;
+      },
+      {} as Record<string, User[]>,
+    );
+
+    const response = Object.entries(groupedByRole).map(([role, roleUsers]) => {
+      return UserGroupedResponse.fromEntity(role, roleUsers);
+    });
+    return response;
+  }
+
+  /**
+   * updateUser 메서드는 사용자의 특정 정보를 수정/업데이트합니다
+   * @param id
+   * @param request
+   * @returns
+   */
+  async update(id: string, request: UpdateUserRequest): Promise<UserResponse> {
+    const existing = await this.userRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const data = UpdateUserRequest.toEntity(request);
+    const updated = await this.userRepository.update(id, data);
+
+    const response: UserResponse = UserResponse.fromEntity(updated);
+    return response;
+  }
+
+  /**
+   * delete 메서드는 사용자의 정보를 완전 삭제합니다
+   * @param id
+   */
+  async delete(id: string): Promise<void> {
+    const existing = await this.userRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    await this.userRepository.delete(id);
+  }
+
+  async updateApprovedStatus(id: string): Promise<UserResponse> {
+    const existing = await this.userRepository.findById(id);
+    if (!existing) {
+      throw new ApiException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    const updated = await this.userRepository.update(id, {
+      isApproved: true,
+      approvedAt: new Date(),
+      status: 'ACTIVE',
+    });
+    const response: UserResponse = UserResponse.fromEntity(updated);
+    return response;
   }
 }

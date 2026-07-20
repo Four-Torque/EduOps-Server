@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { Prisma, EmploymentStatus, Role, UserStatus } from '@prisma/client';
+import {
+  IsDate,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateUserRequest {
   @ApiProperty({
@@ -36,6 +44,51 @@ export class CreateUserRequest {
   @Length(8, 20)
   password: string;
 
+  @ApiProperty({
+    description: '역할',
+    example: 'TEACHER',
+    required: false,
+  })
+  @IsEnum(Role)
+  @IsOptional()
+  role?: Role;
+
+  @ApiProperty({
+    description: '사용자 상태',
+    example: 'ACTIVE',
+    required: false,
+  })
+  @IsEnum(UserStatus)
+  @IsOptional()
+  status?: UserStatus;
+
+  @ApiProperty({
+    description: '근로 상태',
+    example: 'WORKING',
+    required: false,
+  })
+  @IsEnum(EmploymentStatus)
+  @IsOptional()
+  employmentStatus?: EmploymentStatus;
+
+  @ApiProperty({
+    description: '입사일',
+    example: '2023-01-01T00:00:00.000Z',
+    required: false,
+  })
+  @IsDate()
+  @IsOptional()
+  joinedAt?: Date;
+
+  @ApiProperty({
+    description: '퇴사일',
+    example: '2026-07-01T00:00:00.000Z',
+    required: false,
+  })
+  @IsDate()
+  @IsOptional()
+  resignedAt?: Date;
+
   static toEntity(
     request: CreateUserRequest,
     hashedPassword: string,
@@ -45,6 +98,11 @@ export class CreateUserRequest {
       name: request.name,
       phone: request.phone,
       password: hashedPassword,
+      ...(request.role && { role: request.role }),
+      ...(request.employmentStatus && {
+        employmentStatus: request.employmentStatus,
+      }),
+      ...(request.status && { status: request.status }),
     };
   }
 }

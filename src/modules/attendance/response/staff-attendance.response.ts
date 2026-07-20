@@ -10,9 +10,9 @@ export class StaffAttendanceResponse {
 
   @ApiProperty({
     description: '근무 날짜',
-    example: '2023-12-31T00:00:00.000Z',
+    example: '2023-12-31',
   })
-  workDate: Date;
+  workDate: string;
 
   @ApiProperty({
     description: '출근 시간',

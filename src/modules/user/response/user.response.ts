@@ -33,10 +33,32 @@ export class UserResponse {
   role: Role;
 
   @ApiProperty({
-    description: '사용자 상태',
-    example: 'ACTIVE | INACTIVE | LEAVED',
+    description: '계정 상태',
+    example: 'ACTIVE | INACTIVE',
   })
   status: UserStatus;
+
+  @ApiProperty({
+    description: '근로 상태',
+    example: 'WORKING | ON_LEAVE | RESIGNED',
+  })
+  employmentStatus: string;
+
+  @ApiProperty({
+    description: '입사일',
+    example: '2023-01-01T00:00:00.000Z',
+    required: false,
+    nullable: true,
+  })
+  joinedAt: Date | null;
+
+  @ApiProperty({
+    description: '퇴사일',
+    example: '2026-07-01T00:00:00.000Z',
+    required: false,
+    nullable: true,
+  })
+  resignedAt: Date | null;
 
   @ApiProperty({
     description: '사용자 생성일',
@@ -50,6 +72,20 @@ export class UserResponse {
   })
   updatedAt: Date;
 
+  @ApiProperty({
+    description: '사용자 승인 여부',
+    example: true,
+  })
+  isApproved: boolean;
+
+  @ApiProperty({
+    description: '사용자 승인일',
+    example: '2026-06-25 16:27:23.356',
+    required: false,
+    nullable: true,
+  })
+  approvedAt: Date | null;
+
   static fromEntity(entity: Omit<User, 'password'>): UserResponse {
     const response = new UserResponse();
     response.id = entity.id;
@@ -58,8 +94,13 @@ export class UserResponse {
     response.phone = entity.phone;
     response.role = entity.role;
     response.status = entity.status;
+    response.employmentStatus = entity.employmentStatus;
+    response.joinedAt = entity.joinedAt;
+    response.resignedAt = entity.resignedAt;
     response.createdAt = entity.createdAt;
     response.updatedAt = entity.updatedAt;
+    response.isApproved = entity.isApproved;
+    response.approvedAt = entity.approvedAt;
     return response;
   }
 }

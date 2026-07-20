@@ -3,6 +3,7 @@ import { SalaryRepository } from '../repository/salary.repository';
 import { SalaryStatus } from '@prisma/client';
 import { SalaryResponse } from '../response/salary.response';
 import { CreateSalaryRequest } from '../request/create-salary.request';
+import { UpdateSalaryRequest } from '../request/update-salary.request';
 import { UserService } from 'src/modules/user/service/user.service';
 import { ApiException, ErrorCode } from 'src/global';
 
@@ -54,5 +55,19 @@ export class SalaryService {
     const updatedSalary = await this.salaryRepository.updateSalary(id);
     const response: SalaryResponse = SalaryResponse.fromEntity(updatedSalary);
     return response;
+  }
+
+  async updateSalary(
+    id: string,
+    updateSalaryRequest: UpdateSalaryRequest,
+  ): Promise<SalaryResponse> {
+    const salary = await this.salaryRepository.findById(id);
+    if (!salary) throw new ApiException(ErrorCode.SALARY_NOT_FOUND);
+
+    const updatedSalary = await this.salaryRepository.updateSalaryById(id, {
+      ...updateSalaryRequest,
+    });
+    
+    return SalaryResponse.fromEntity(updatedSalary);
   }
 }

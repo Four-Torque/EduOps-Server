@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Class" ADD COLUMN     "capacity" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "room" VARCHAR(50) NOT NULL DEFAULT '미배정';
