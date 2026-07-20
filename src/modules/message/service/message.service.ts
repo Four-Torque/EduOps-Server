@@ -61,4 +61,18 @@ export class MessageService {
       );
     }
   }
+
+  async deleteMessage(id: string, type: string, userId: string) {
+    const message = await this.messageRepository.findById(id);
+    if (!message) {
+      throw new ApiException(ErrorCode.MESSAGE_NOT_FOUND);
+    }
+
+    if (type === 'sender' && message.senderId === userId) {
+      await this.messageRepository.delete(id, 'sender');
+    }
+    if (type === 'receiver' && message.receiverId === userId) {
+      await this.messageRepository.delete(id, 'receiver');
+    }
+  }
 }

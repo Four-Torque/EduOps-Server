@@ -120,4 +120,14 @@ export class MessageRepository {
       skip,
     });
   }
+  async delete(id: string, type: 'sender' | 'receiver') {
+    const data =
+      type === 'sender'
+        ? { deletedBySender: true }
+        : { deletedByReceiver: true };
+    return this.prisma.message.update({
+      where: { id },
+      data,
+    });
+  }
 }

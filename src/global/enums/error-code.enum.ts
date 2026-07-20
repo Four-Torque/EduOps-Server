@@ -13,6 +13,7 @@ export enum ErrorCode {
   INVALID_EMAIL_OR_PASSWORD = 'AUTH_003',
   REFRESH_TOKEN_NOT_FOUND = 'AUTH_004',
   INVALID_REFRESH_TOKEN = 'AUTH_005',
+  THIS_USER_IS_INACTIVE = 'AUTH_006',
 
   // 사용자 관련 에러
   USER_NOT_FOUND = 'USER_001',
@@ -117,6 +118,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.INVALID_REFRESH_TOKEN]: {
     status: HttpStatus.UNAUTHORIZED,
     message: '리프레시 토큰이 유효하지 않습니다.',
+  },
+  [ErrorCode.THIS_USER_IS_INACTIVE]: {
+    status: HttpStatus.FORBIDDEN,
+    message: '사용자 계정이 비활성화 상태입니다. 관리자에게 문의하세요.',
   },
 
   // 사용자 관련 에러

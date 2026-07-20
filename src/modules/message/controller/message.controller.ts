@@ -87,4 +87,20 @@ export class MessageController {
     const response = await this.messageService.markAsRead(id);
     return response;
   }
+
+  @ApiOperation({
+    summary: '쪽지 삭제',
+    description: '특정 쪽지를 삭제합니다.',
+  })
+  @ApiSuccessResponse()
+  @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
+  @Put('/:id/delete')
+  async deleteMessage(
+    @Param('id') id: string,
+    @Body('type') type: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<void> {
+    const response = await this.messageService.deleteMessage(id, type, user.id);
+    return response;
+  }
 }
