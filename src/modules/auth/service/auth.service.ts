@@ -80,6 +80,11 @@ export class AuthService {
    */
   async login(request: AuthRequest): Promise<TokenResponse> {
     const user: Omit<User, 'password'> = await this.validateUser(request);
+
+    if (user.status === 'INACTIVE') {
+      throw new ApiException(ErrorCode.THIS_USER_IS_INACTIVE);
+    }
+
     const redisKey = RedisKey.userRefreshToken(user.id);
 
     const payload = {
