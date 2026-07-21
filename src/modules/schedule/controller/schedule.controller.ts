@@ -53,7 +53,7 @@ export class ScheduleController {
     @Query('room') room?: string,
     @Query('teacherName') teacherName?: string,
     @Query('subject') subject?: string,
-  ): Promise<any[]> {
+  ): Promise<ScheduleResponse[]> {
     if (classId) {
       return this.scheduleService.findAllByClassId(classId);
     }
