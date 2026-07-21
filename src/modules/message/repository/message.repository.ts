@@ -120,13 +120,22 @@ export class MessageRepository {
       skip,
     });
   }
-  async delete(id: string, type: 'sender' | 'receiver') {
+
+  async findByIds(ids: string[]): Promise<Message[]> {
+    return this.prisma.message.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+  }
+
+  async delete(ids: string[], type: 'sender' | 'receiver') {
     const data =
       type === 'sender'
         ? { deletedBySender: true }
         : { deletedByReceiver: true };
-    return this.prisma.message.update({
-      where: { id },
+    return this.prisma.message.updateMany({
+      where: { id: { in: ids } },
       data,
     });
   }

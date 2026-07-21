@@ -234,6 +234,8 @@ export class StaffAttendanceService {
             day: dayLabel,
             status: isLate ? 'late' : 'present',
             checkedOut: !!record.checkOutTime,
+            checkInTime: record.checkInTime,
+            checkOutTime: record.checkOutTime,
           };
         }
 
@@ -242,7 +244,12 @@ export class StaffAttendanceService {
           status = 'absent';
         }
 
-        return { day: dayLabel, status };
+        return {
+          day: dayLabel,
+          status,
+          checkInTime: null,
+          checkOutTime: null,
+        };
       });
 
       const todayRecord = attendanceMap.get(`${user.id}:${todayStr}`);

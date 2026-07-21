@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Query, Put, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Put,
+  Param,
+  Sse,
+  MessageEvent,
+  Delete,
+} from '@nestjs/common';
 import { CurrentUser } from 'src/global/decorators/current-user.decorator';
 import { MessageService } from '../service/message.service';
 import { CreateMessageRequest } from '../request/create-message.request';
@@ -14,11 +25,17 @@ import {
   ResponseMessage,
 } from 'src/global';
 import { MessageFilterRequest } from '../request/message-filter.request';
+import { MessageSseService } from '../service/message-sse.service';
+import { Observable, interval, merge } from 'rxjs';
+import { map, filter } from 'rxjs/operators';
 
 @ApiTags('쪽지')
 @Controller('message')
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly messageSseService: MessageSseService,
+  ) {}
 
   @ApiOperation({
     summary: '쪽지 전송',
@@ -92,15 +109,38 @@ export class MessageController {
     summary: '쪽지 삭제',
     description: '특정 쪽지를 삭제합니다.',
   })
-  @ApiSuccessResponse()
-  @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
-  @Put('/:id/delete')
+  @ApiSuccessResponse(ResponseMessage.MESSAGE_DELETED)
+  @ApiErrorResponse(ErrorCode.MESSAGE_NOT_FOUND)
+  @Message(ResponseMessage.MESSAGE_DELETED)
+  @Delete('/')
   async deleteMessage(
-    @Param('id') id: string,
+    @Body('ids') ids: string[],
     @Body('type') type: string,
     @CurrentUser() user: JwtPayload,
   ): Promise<void> {
-    const response = await this.messageService.deleteMessage(id, type, user.id);
+    const response = await this.messageService.deleteMessage(
+      ids,
+      type,
+      user.id,
+    );
     return response;
+  }
+
+  @ApiOperation({
+    summary: '실시간 쪽지 알림 SSE',
+    description: '새로운 쪽지가 수신되면 이벤트를 실시간으로 전송받습니다.',
+  })
+  @Sse('/sse')
+  sse(@CurrentUser() user: JwtPayload): Observable<MessageEvent> {
+    const keepAlive$ = interval(30000).pipe(
+      map(() => ({ data: 'ping' }) as MessageEvent),
+    );
+
+    const message$ = this.messageSseService.getEventStream().pipe(
+      filter((msg) => msg.receiverId === user.id),
+      map((msg) => ({ data: msg }) as MessageEvent),
+    );
+
+    return merge(keepAlive$, message$);
   }
 }
