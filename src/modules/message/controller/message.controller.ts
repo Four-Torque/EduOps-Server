@@ -137,7 +137,7 @@ export class MessageController {
     );
 
     const message$ = this.messageSseService.getEventStream().pipe(
-      filter((msg) => msg.receiverId === user.id),
+      filter((msg) => msg.receiverId === user?.id),
       map((msg) => ({ data: msg }) as MessageEvent),
     );
 

@@ -60,10 +60,7 @@ export class MessageService {
     if (message.isRead) {
       return;
     } else {
-      await this.messageRepository.updateReadStatus(
-        message.receiverId,
-        message.senderId,
-      );
+      await this.messageRepository.updateReadStatus(id);
     }
   }
 

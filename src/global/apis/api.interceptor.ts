@@ -29,6 +29,10 @@ export class ApiInterceptor<T> implements NestInterceptor<T, Api<T>> {
     const request = ctx.getRequest();
     const response = ctx.getResponse();
 
+    if (request.headers['accept']?.includes('text/event-stream')) {
+      return next.handle() as Observable<any>;
+    }
+
     return next.handle().pipe(
       map((payload: T) => {
         const staticMessage = this.reflector.get<string>(

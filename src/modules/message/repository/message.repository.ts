@@ -74,14 +74,9 @@ export class MessageRepository {
     });
   }
 
-  async updateReadStatus(userId: string, otherUserId: string) {
-    return this.prisma.message.updateMany({
-      where: {
-        senderId: otherUserId,
-        receiverId: userId,
-        isRead: false,
-        deletedByReceiver: false,
-      },
+  async updateReadStatus(id: string) {
+    return this.prisma.message.update({
+      where: { id },
       data: {
         isRead: true,
         readAt: new Date(),
