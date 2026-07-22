@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma, EmploymentStatus, Role } from '@prisma/client';
+import { Prisma, EmploymentStatus, Role, UserStatus } from '@prisma/client';
 import {
   IsDate,
   IsEmail,
@@ -63,6 +63,15 @@ export class CreateUserRequest {
   employmentStatus?: EmploymentStatus;
 
   @ApiProperty({
+    description: '사용자 상태',
+    example: 'ACTIVE',
+    required: false,
+  })
+  @IsEnum(UserStatus)
+  @IsOptional()
+  status?: UserStatus;
+
+  @ApiProperty({
     description: '입사일',
     example: '2023-01-01T00:00:00.000Z',
     required: false,
@@ -93,6 +102,8 @@ export class CreateUserRequest {
       ...(request.employmentStatus && {
         employmentStatus: request.employmentStatus,
       }),
+      ...(request.status && { status: request.status }),
+      ...(request.joinedAt && { joinedAt: request.joinedAt }),
     };
   }
 }
