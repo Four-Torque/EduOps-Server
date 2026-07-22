@@ -14,7 +14,7 @@ model User {
   phone            String           @unique @db.VarChar(20)
   password         String           @db.VarChar(100)
   role             Role             @default(TEACHER)
-  status           UserStatus       @default(ACTIVE)
+  status           UserStatus       @default(INACTIVE)
   employmentStatus EmploymentStatus @default(WORKING)
   joinedAt         DateTime?        @db.Date
   resignedAt       DateTime?        @db.Date

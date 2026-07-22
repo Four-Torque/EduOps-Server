@@ -85,6 +85,10 @@ export class AuthService {
       throw new ApiException(ErrorCode.THIS_USER_IS_INACTIVE);
     }
 
+    if (!user.isApproved) {
+      throw new ApiException(ErrorCode.USER_NOT_APPROVED);
+    }
+
     const redisKey = RedisKey.userRefreshToken(user.id);
 
     const payload = {

@@ -14,6 +14,7 @@ export enum ErrorCode {
   REFRESH_TOKEN_NOT_FOUND = 'AUTH_004',
   INVALID_REFRESH_TOKEN = 'AUTH_005',
   THIS_USER_IS_INACTIVE = 'AUTH_006',
+  USER_NOT_APPROVED = 'AUTH_007',
 
   // 사용자 관련 에러
   USER_NOT_FOUND = 'USER_001',
@@ -127,6 +128,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.THIS_USER_IS_INACTIVE]: {
     status: HttpStatus.FORBIDDEN,
     message: '사용자 계정이 비활성화 상태입니다. 관리자에게 문의하세요.',
+  },
+  [ErrorCode.USER_NOT_APPROVED]: {
+    status: HttpStatus.FORBIDDEN,
+    message: '사용자 계정이 승인되지 않았습니다. 관리자에게 문의하세요.',
   },
 
   // 사용자 관련 에러
