@@ -29,6 +29,7 @@ import { ClassSyllabusModule } from './modules/class-syllabus/class-syllabus.mod
 import { MessageModule } from './modules/message/message.module';
 import { AcademyModule } from './modules/academy/academy.module';
 import { FinanceModule } from './modules/finance/finance.module';
+import { SubjectModule } from './modules/subject/subject.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { FinanceModule } from './modules/finance/finance.module';
     MessageModule,
     AcademyModule,
     FinanceModule,
+    SubjectModule,
   ],
 
   providers: [

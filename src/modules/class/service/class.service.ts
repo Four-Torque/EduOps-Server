@@ -3,23 +3,34 @@ import { ClassRepository } from '../repository/class.repository';
 import { CreateClassRequest } from '../request/create-class.request';
 import { ClassResponse } from '../response/class.response';
 import { ClassStudentAttendanceResponse } from '../response/class-student-attendance.response';
-import { ApiException, ErrorCode } from 'src/global';
+import { ApiException, ErrorCode, Transactional } from 'src/global';
 import { UpdateClassRequest } from '../request/update-class.request';
+import { SubjectRepository } from 'src/modules/subject/repository/subject.repository';
 
 @Injectable()
 export class ClassService {
-  constructor(private readonly classRepository: ClassRepository) {}
+  constructor(
+    private readonly classRepository: ClassRepository,
+    private readonly subjectRepository: SubjectRepository,
+  ) {}
 
   /**
    * create 메서드는 강좌를 생성합니다
    * @param request
    * @returns
    */
+  @Transactional()
   async create(request: CreateClassRequest): Promise<ClassResponse> {
-    const response = await this.classRepository.create(
-      CreateClassRequest.toEntity(request),
+    let subject;
+    subject = await this.subjectRepository.findByName(request.subjectName);
+    if (!subject) {
+      subject = await this.subjectRepository.create(request.subjectName);
+    }
+    const newClass = await this.classRepository.create(
+      CreateClassRequest.toEntity(request, subject),
     );
-    return ClassResponse.fromEntity(response);
+    const response = ClassResponse.fromEntity(newClass);
+    return response;
   }
 
   /**

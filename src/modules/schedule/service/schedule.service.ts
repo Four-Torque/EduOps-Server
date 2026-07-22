@@ -22,7 +22,9 @@ export class ScheduleService {
     if (!cls) {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
-    const studentIds = await this.scheduleRepository.getStudentIdsByClassId(request.classId);
+    const studentIds = await this.scheduleRepository.getStudentIdsByClassId(
+      request.classId,
+    );
 
     // 2. 유효성 검사 및 중복 검사
     for (const schedule of request.schedules) {
@@ -55,13 +57,14 @@ export class ScheduleService {
 
       // 학생 중복 검사
       if (studentIds.length > 0) {
-        const studentOverlap = await this.scheduleRepository.findOverlappingForStudents(
-          request.classId,
-          studentIds,
-          schedule.dayOfWeek,
-          schedule.startTime,
-          schedule.endTime,
-        );
+        const studentOverlap =
+          await this.scheduleRepository.findOverlappingForStudents(
+            request.classId,
+            studentIds,
+            schedule.dayOfWeek,
+            schedule.startTime,
+            schedule.endTime,
+          );
         if (studentOverlap) {
           throw new ApiException(ErrorCode.STUDENT_SCHEDULE_CONFLICT);
         }
@@ -105,14 +108,15 @@ export class ScheduleService {
     classId?: string,
     room?: string,
     teacherName?: string,
-    subject?: string,
+    subjectId?: string,
   ): Promise<ScheduleResponse[]> {
     const schedules = await this.scheduleRepository.findAll(
       classId,
       room,
       teacherName,
-      subject,
+      subjectId,
     );
+    console.log('schedules', schedules);
     return schedules.map(ScheduleResponse.fromEntity);
   }
 }

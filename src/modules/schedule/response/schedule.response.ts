@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Class, Schedule } from '@prisma/client';
 
 type ScheduleWithClass = Schedule & {
-  class: Class & { teacher?: { name: string } | null };
+  class: Class & {
+    teacher?: { name: string } | null;
+    subject?: { name: string } | null;
+  };
 };
 
 export class ScheduleResponse {
@@ -70,6 +73,13 @@ export class ScheduleResponse {
   })
   classEndDate?: Date | null;
 
+  @ApiProperty({
+    description: '과목명',
+    example: '수학',
+    required: false,
+  })
+  subjectName?: string;
+
   static fromEntity(entity: Schedule | ScheduleWithClass): ScheduleResponse {
     const response = new ScheduleResponse();
     response.id = entity.id;
@@ -84,6 +94,7 @@ export class ScheduleResponse {
       response.instructor = entity.class.teacher?.name || '미지정';
       response.classStartDate = entity.class.startDate;
       response.classEndDate = entity.class.endDate;
+      response.subjectName = entity.class.subject?.name || '미지정';
     }
 
     return response;

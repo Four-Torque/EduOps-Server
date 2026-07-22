@@ -74,6 +74,9 @@ export enum ErrorCode {
 
   // 쪽지/메시지 관련 에러
   MESSAGE_NOT_FOUND = 'MESSAGE_001',
+
+  // 과목 관련 에러
+  SUBJECT_ALREADY_EXISTS = 'SUBJECT_001',
 }
 
 export const ErrorCodeMap: Record<
@@ -275,5 +278,11 @@ export const ErrorCodeMap: Record<
   [ErrorCode.MESSAGE_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '해당 쪽지를 찾을 수 없습니다.',
+  },
+
+  // 과목 관련 에러
+  [ErrorCode.SUBJECT_ALREADY_EXISTS]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 존재하는 과목입니다.',
   },
 };

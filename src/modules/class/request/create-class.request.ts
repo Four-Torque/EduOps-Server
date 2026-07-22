@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
+import { Prisma, Subject } from '@prisma/client';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 
 export class CreateClassRequest {
@@ -16,6 +16,13 @@ export class CreateClassRequest {
   })
   @IsString()
   name: string;
+
+  @ApiProperty({
+    description: '과목명',
+    example: '수학',
+  })
+  @IsString()
+  subjectName: string;
 
   @ApiProperty({
     description: '강좌 비용',
@@ -45,7 +52,10 @@ export class CreateClassRequest {
   @IsDate()
   endDate: Date;
 
-  static toEntity(request: CreateClassRequest): Prisma.ClassCreateInput {
+  static toEntity(
+    request: CreateClassRequest,
+    subject: Subject,
+  ): Prisma.ClassCreateInput {
     return {
       teacher: { connect: { id: request.teacherId } },
       name: request.name,
@@ -53,6 +63,7 @@ export class CreateClassRequest {
       capacity: request.capacity,
       startDate: request.startDate,
       endDate: request.endDate,
+      subject: { connect: { id: subject.id } },
     };
   }
 }

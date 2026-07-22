@@ -60,6 +60,7 @@ model Class {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   teacher   User        @relation(fields: [teacherId], references: [id])
   teacherId String      @db.Uuid
+  subjectId String?     @db.Uuid
   name      String      @db.VarChar(20)
   fee       Int
   capacity  Int         @default(0)
@@ -69,6 +70,7 @@ model Class {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  subject            Subject?            @relation(fields: [subjectId], references: [id])
   classFiles         ClassFile[]
   schedules          Schedule[]
   studentAttendances StudentAttendance[]
@@ -276,6 +278,15 @@ model AcademyInfo {
   address             String   @db.Text
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+}
+
+model Subject {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String   @unique @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes Class[]
 }
 
 enum Role {

@@ -61,6 +61,7 @@ export class ClassRepository {
         _count: {
           select: { enrollments: true },
         },
+        subject: { select: { name: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -88,10 +89,7 @@ export class ClassRepository {
       include: {
         student: true,
       },
-      orderBy: [
-        { student: { name: 'asc' } },
-        { student: { phone: 'asc' } },
-      ],
+      orderBy: [{ student: { name: 'asc' } }, { student: { phone: 'asc' } }],
     });
 
     const attendances = await this.prisma.studentAttendance.findMany({
