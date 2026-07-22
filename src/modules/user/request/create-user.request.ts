@@ -80,15 +80,6 @@ export class CreateUserRequest {
   @IsOptional()
   joinedAt?: Date;
 
-  @ApiProperty({
-    description: '퇴사일',
-    example: '2026-07-01T00:00:00.000Z',
-    required: false,
-  })
-  @IsDate()
-  @IsOptional()
-  resignedAt?: Date;
-
   static toEntity(
     request: CreateUserRequest,
     hashedPassword: string,
