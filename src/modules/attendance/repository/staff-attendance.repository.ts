@@ -56,7 +56,6 @@ export class StaffAttendanceRepository {
     });
   }
 
-
   async update(
     id: string,
     data: Prisma.StaffAttendanceUpdateInput,
@@ -71,7 +70,9 @@ export class StaffAttendanceRepository {
     department?: string,
     search?: string,
     dates?: string[],
-  ): Promise<{ users: any[]; attendances: StaffAttendance[] }> {
+    skip?: number,
+    limit?: number,
+  ) {
     const roleFilter: any = {};
     if (department === '강사') {
       roleFilter.role = 'TEACHER';
@@ -79,11 +80,15 @@ export class StaffAttendanceRepository {
       roleFilter.role = { in: ['MANAGER', 'DIRECTOR'] };
     }
 
+    console.log('skip', skip, 'limit', limit);
+
     const users = await this.prisma.user.findMany({
       where: {
         ...roleFilter,
         ...(search && { name: { contains: search, mode: 'insensitive' } }),
       },
+      skip,
+      take: limit,
     });
 
     const attendances = await this.prisma.staffAttendance.findMany({
@@ -94,5 +99,17 @@ export class StaffAttendanceRepository {
     });
 
     return { users, attendances };
+  }
+
+  async userCount(department?: string, search?: string) {
+    return this.prisma.user.count({
+      where: {
+        ...(department === '강사' && { role: 'TEACHER' }),
+        ...(department === '관리자' && {
+          role: { in: ['MANAGER', 'DIRECTOR'] },
+        }),
+        ...(search && { name: { contains: search, mode: 'insensitive' } }),
+      },
+    });
   }
 }

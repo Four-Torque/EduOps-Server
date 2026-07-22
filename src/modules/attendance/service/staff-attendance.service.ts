@@ -15,6 +15,8 @@ export class StaffAttendanceService {
   async getStaffAttendance(
     userId: string,
     workDate?: string,
+    page?: number,
+    limit?: number,
   ): Promise<StaffAttendanceResponse[]> {
     if (workDate && isNaN(new Date(workDate).getTime())) {
       throw new ApiException(ErrorCode.BAD_REQUEST);
@@ -177,7 +179,14 @@ export class StaffAttendanceService {
     weekStart?: string,
     department?: string,
     search?: string,
+    page?: number,
+    limit?: number,
   ) {
+    console.log('pageNum', page, 'limitNum', limit);
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+
     if (weekStart && isNaN(new Date(weekStart).getTime())) {
       throw new ApiException(ErrorCode.BAD_REQUEST);
     }
@@ -204,12 +213,22 @@ export class StaffAttendanceService {
       return formatDate(d);
     });
 
-    const { users, attendances } =
+    const [data, total] = await Promise.all([
       await this.staffAttendanceRepository.findWeeklyAttendance(
         department,
         search,
         dates,
-      );
+        skip,
+        limitNum,
+      ),
+        await this.staffAttendanceRepository.userCount(department, search),
+    ]);
+
+    console.log('user', data.users.length);
+    console.log('attendances ', data.attendances.length);
+    console.log('total', total);
+
+    const { users, attendances } = data;
 
     const todayStr = formatDate(new Date());
 
@@ -274,6 +293,8 @@ export class StaffAttendanceService {
 
     return {
       items,
+      total,
+      totalPages: Math.ceil(total / limitNum),
       stats: {
         totalEmployees: users.length,
         presentToday,

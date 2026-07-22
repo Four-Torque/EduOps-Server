@@ -53,11 +53,15 @@ export class StaffAttendanceController {
     @Query('weekStart') weekStart?: string,
     @Query('department') department?: string,
     @Query('search') search?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
   ) {
     return this.staffAttendanceService.getWeeklySummary(
       weekStart,
       department,
       search,
+      page,
+      limit,
     );
   }
 
