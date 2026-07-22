@@ -37,7 +37,7 @@ export class AssetApplicationService {
 
     const [assetApplications, total] = await Promise.all([
       this.assetApplicationRepository.findAll(take, skip, status),
-      this.assetApplicationRepository.count(take, skip, status),
+      this.assetApplicationRepository.count(status),
     ]);
 
     const assetNames = assetApplications.map((app) => app.name);
@@ -52,6 +52,8 @@ export class AssetApplicationService {
       const stock = stockMap.get(app.name) ?? 0;
       return AssetApplicationResponse.fromEntity(app, stock);
     });
+
+    console.log('total count: ', total);
 
     const response = PaginatedAssetApplicationResponse.fromEntity(
       page,

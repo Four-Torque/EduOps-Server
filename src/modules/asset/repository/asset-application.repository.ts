@@ -69,11 +69,15 @@ export class AssetApplicationRepository {
     });
   }
 
-  count(take: number, skip: number, status?: string): Promise<number> {
+  count(status?: string): Promise<number> {
+    const where: Prisma.AssetsApplicationWhereInput = {};
+
+    if (status) {
+      where.status = status as ApplicationStatus;
+    }
+
     return this.prisma.assetsApplication.count({
-      where: status ? { status: status as ApplicationStatus } : undefined,
-      skip,
-      take,
+      where,
     });
   }
 

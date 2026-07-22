@@ -7,7 +7,7 @@ import { CreateUserRequest } from '../request/create-user.request';
 import * as bcrypt from 'bcryptjs';
 import { ResetPasswordRequest } from 'src/modules/auth/request/reset-password.request';
 import { RedisKey, RedisService } from 'src/redis';
-import { PaginatedUserResponse } from '../response/user-list.response';
+import { PaginatedUserResponse } from '../response/paginated-user.response';
 import { UpdateUserRequest } from '../request/update-user.request';
 import { UserFilterRequest } from '../request/user-filter.request';
 import { UserGroupedResponse } from '../response/user-grouped.response';
@@ -126,11 +126,12 @@ export class UserService {
       ),
       this.userRepository.countList(search, role, status, isApproved),
     ]);
-    return {
-      total,
+    return PaginatedUserResponse.fromEntity(
       page,
-      data: users.map((user) => UserResponse.fromEntity(user)),
-    };
+      total,
+      Math.ceil(total / limit),
+      users,
+    );
   }
 
   /**

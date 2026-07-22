@@ -35,7 +35,7 @@ export class VendorRepository {
     });
   }
 
-  count(take: number, skip: number, search?: string): Promise<number> {
+  count(search?: string): Promise<number> {
     const where: Prisma.VendorWhereInput = {};
     if (search) {
       where.name = {
@@ -45,8 +45,6 @@ export class VendorRepository {
     }
     return this.prisma.vendor.count({
       where,
-      skip,
-      take,
     });
   }
 

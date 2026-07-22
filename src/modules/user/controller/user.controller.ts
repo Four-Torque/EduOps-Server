@@ -21,7 +21,7 @@ import {
   ResponseMessage,
 } from 'src/global';
 import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
-import { PaginatedUserResponse } from '../response/user-list.response';
+import { PaginatedUserResponse } from '../response/paginated-user.response';
 import { CreateUserRequest } from '../request/create-user.request';
 import { UpdateUserRequest } from '../request/update-user.request';
 import { UserFilterRequest } from '../request/user-filter.request';

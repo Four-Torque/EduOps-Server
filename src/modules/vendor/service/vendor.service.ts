@@ -38,9 +38,16 @@ export class VendorService {
 
     const [vendors, total] = await Promise.all([
       this.vendorRepository.findAll(take, skip, search),
-      this.vendorRepository.count(take, skip, search),
+      this.vendorRepository.count(search),
     ]);
-    const response = PaginatedVendorResponse.fromEntity(page, total, vendors);
+
+    console.log('total count: ', total);
+    const response = PaginatedVendorResponse.fromEntity(
+      page,
+      total,
+      Math.ceil(total / take),
+      vendors,
+    );
     return response;
   }
 
