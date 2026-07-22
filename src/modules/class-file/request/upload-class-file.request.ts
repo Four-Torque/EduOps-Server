@@ -1,24 +1,34 @@
 import { Prisma } from '@prisma/client';
+import { IsNumber, IsString } from 'class-validator';
 
 export class UploadClassFileRequest {
+  @IsString()
   classId: string;
+
+  @IsString({ each: true })
   urls: string[];
+
+  @IsString({ each: true })
   existingDocuments?: string[];
+
+  @IsString()
+  fileName?: string;
+
+  @IsNumber()
+  fileSize?: number;
 
   static toEntity(
     request: UploadClassFileRequest,
     userId: string,
-  ): Prisma.ClassFileCreateManyInput[] {
-    const { classId, urls } = request;
+  ): Prisma.ClassFileCreateInput {
+    const { classId, urls, fileName, fileSize } = request;
 
-    return urls.map((url) => ({
-      url,
-      classId,
-      fileName: url.split('/').pop() || '',
-      filePath: url,
-      fileSize: 0,
-      fileType: url.split('.').pop() || '',
-      uploaderId: userId,
-    }));
+    return {
+      class: { connect: { id: classId } },
+      fileName: fileName || urls[0].split('/').pop() || '',
+      filePath: urls[0],
+      fileSize: fileSize || 0,
+      uploader: { connect: { id: userId } },
+    };
   }
 }

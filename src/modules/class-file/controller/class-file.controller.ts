@@ -26,7 +26,6 @@ import {
   ResponseMessage,
 } from 'src/global';
 import { Response } from 'express';
-import * as fs from 'fs';
 import { UploadClassFileRequest } from '../request/upload-class-file.request';
 
 @ApiTags('수업 파일')
@@ -67,14 +66,14 @@ export class ClassFileController {
   @ApiErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.CLASS_FILE_FETCHED)
   @ApiQuery({ name: 'classId', required: false })
-  @ApiQuery({ name: 'fileName', required: false })
+  @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @Get()
   async getFilesByClassId(
     @CurrentUser() user: JwtPayload,
     @Query('classId') classId?: string,
-    @Query('fileName') fileName?: string,
+    @Query('search') search?: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
   ): Promise<PaginatedClassFileResponse> {
@@ -84,7 +83,7 @@ export class ClassFileController {
     return this.classFileService.getFilesByClassId(
       user.id,
       classId,
-      fileName,
+      search,
       pageNum,
       limitNum,
     );
@@ -103,13 +102,10 @@ export class ClassFileController {
     const { filePath, fileName } =
       await this.classFileService.getFileForDownload(id);
 
-    // 파일 스트림 생성
-    const fileStream = fs.createReadStream(filePath);
+    const fileStream = await this.classFileService.getFileStream(filePath);
 
-    // 한글 등 특수문자 파일명을 위한 URL 인코딩
     const encodedFileName = encodeURIComponent(fileName);
 
-    // 다운로드를 위한 헤더 설정
     res.set({
       'Content-Type': 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`,
@@ -128,8 +124,8 @@ export class ClassFileController {
     ErrorCode.INTERNAL_SERVER_ERROR,
   )
   @Message(ResponseMessage.CLASS_FILE_DELETED)
-  @Delete(':id')
-  async deleteFile(@Param('id') id: string): Promise<void> {
-    return this.classFileService.deleteFile(id);
+  @Delete()
+  async deleteFile(@Body('ids') ids: string[]): Promise<void> {
+    return this.classFileService.deleteFiles(ids);
   }
 }

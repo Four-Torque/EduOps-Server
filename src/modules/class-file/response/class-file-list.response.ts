@@ -15,6 +15,12 @@ export class PaginatedClassFileResponse {
   page: number;
 
   @ApiProperty({
+    description: '총 페이지 수',
+    example: 5,
+  })
+  totalPages: number;
+
+  @ApiProperty({
     description: '수업 파일 정보',
     type: [ClassFileResponse],
   })

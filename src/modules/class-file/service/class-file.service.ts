@@ -1,12 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { APP_NAME, FILE_URL } from 'src/global';
+import { APP_NAME, FILE_URL, Transactional } from 'src/global';
 import { HttpService } from '@nestjs/axios';
 import { ClassFileRepository } from '../repository/class-file.repository';
 import { ClassFileResponse } from '../response/class-file.response';
 import { PaginatedClassFileResponse } from '../response/class-file-list.response';
 import { ApiException, ErrorCode } from 'src/global';
-import * as fs from 'fs';
-import * as path from 'path';
 import { firstValueFrom } from 'rxjs';
 import { UploadClassFileRequest } from '../request/upload-class-file.request';
 import { Prisma } from '@prisma/client';
@@ -32,24 +30,19 @@ export class ClassFileService {
   async uploadFile(files: Express.Multer.File[]) {
     let formData = new FormData();
     files.forEach((file) => {
-      console.log('파일명:', file.originalname);
-      console.log('버퍼 존재 여부:', file.buffer);
       const filename = file.originalname?.trim() ? file.originalname : 'file';
       formData.append('files', file.buffer, {
         filename,
         contentType: file.mimetype,
       });
     });
-
-    console.log('formData: ', formData);
     try {
       const response = await firstValueFrom(
-        this.httpService.post<string[]>(`${FILE_URL}/documents`, formData, {
+        this.httpService.post(`${FILE_URL}/documents`, formData, {
           headers: formData.getHeaders(),
         }),
       );
-
-      return response.data ?? [];
+      return response.data.body.documents ?? [];
     } catch (error) {
       this.LOGGER.error(
         `파일 업로드 실패: ${error instanceof Error ? error.message : String(error)}`,
@@ -58,54 +51,68 @@ export class ClassFileService {
     }
   }
 
+  @Transactional()
   async createFile(request: UploadClassFileRequest, userId: string) {
-    const { classId, urls } = request;
+    const { classId, urls, fileName, fileSize } = request;
+
     if (!urls || urls.length === 0) {
       throw new ApiException(ErrorCode.CLASS_FILE_NOT_FOUND);
     }
 
-    const requestObj = {
-      id: classId,
-      images: urls,
-      existingImages: [],
-      entity: 'classFile',
-    };
-
     try {
-      this.LOGGER.log(`1. 문서 생성 요청 전송 중`);
+      const initialEntity: Prisma.ClassFileCreateInput =
+        UploadClassFileRequest.toEntity(
+          {
+            classId,
+            urls,
+            existingDocuments: [],
+            fileName,
+            fileSize,
+          },
+          userId,
+        );
+
+      if (!initialEntity) {
+        return [];
+      }
+
+      const savedClassFile = await this.classFileRepository.save(initialEntity);
+
+      const classFileId = savedClassFile?.id;
+
+      if (!classFileId) {
+        throw new ApiException(ErrorCode.CLASS_FILE_CREATE_FAILED);
+      }
+
+      const requestObj = {
+        id: classFileId,
+        documents: urls,
+        existingDocuments: [],
+        entity: 'classFile',
+      };
+
       const res = await firstValueFrom(
         this.httpService.post(
           `${FILE_URL}/documents/${APP_NAME}/create`,
           requestObj,
         ),
       );
-      this.LOGGER.log(`2. 문서 생성 요청 완료`);
+      const finalUrls = res.data?.body?.documents ?? [];
 
-      this.LOGGER.log(`3. 문서 생성 결과 처리 중`);
-      console.log('응답받은 문서들: ', res.data);
-      const classFileObj: Prisma.ClassFileCreateManyInput[] =
-        UploadClassFileRequest.toEntity(
-          {
-            classId,
-            urls: res.data.body.documents ?? [],
-          },
-          userId,
-        );
+      await this.classFileRepository.updateUrl(classFileId, finalUrls[0]);
 
-      if (classFileObj.length === 0) {
-        return [];
-      }
-      await this.classFileRepository.saveAll(classFileObj);
-      this.LOGGER.log(`4. 문서들 저장 완료`);
       const classFiles = await this.classFileRepository.findAllByclassId([
         classId,
       ]);
-      this.LOGGER.log(`5. 문서들 조회 완료`);
-      const response = classFiles.map((classFile) =>
+
+      return classFiles.map((classFile) =>
         ClassFileResponse.fromEntity(classFile),
       );
-      return response;
     } catch (error) {
+      if (error instanceof ApiException) {
+        this.LOGGER.error(`ClassFile 생성 중 에러 발생: ${error.message}`);
+        throw error;
+      }
       throw error;
     }
   }
@@ -118,20 +125,21 @@ export class ClassFileService {
   async getFilesByClassId(
     userId: string,
     classId?: string,
-    fileName?: string,
+    search?: string,
     page: number = 1,
     limit: number = 20,
   ): Promise<PaginatedClassFileResponse> {
     const { files, total } = await this.classFileRepository.findClassFiles(
       userId,
       classId,
-      fileName,
+      search,
       page,
       limit,
     );
     return {
       total,
       page,
+      totalPages: Math.ceil(total / limit),
       data: files.map((file) => ClassFileResponse.fromEntity(file)),
     };
   }
@@ -150,13 +158,22 @@ export class ClassFileService {
       throw new ApiException(ErrorCode.CLASS_FILE_NOT_FOUND);
     }
 
-    // 파일이 디스크에 실제 존재하는지 확인
-    const absolutePath = path.resolve(fileEntity.filePath);
-    if (!fs.existsSync(absolutePath)) {
-      throw new ApiException(ErrorCode.CLASS_FILE_NOT_FOUND_ON_DISK);
-    }
+    return { filePath: fileEntity.filePath, fileName: fileEntity.fileName };
+  }
 
-    return { filePath: absolutePath, fileName: fileEntity.fileName };
+  async getFileStream(url: string) {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(url, { responseType: 'stream' }),
+      );
+      return response.data;
+    } catch (error) {
+      this.LOGGER.error(
+        `Failed to stream file from external server: ${url}`,
+        error,
+      );
+      throw new ApiException(ErrorCode.CLASS_FILE_NOT_FOUND);
+    }
   }
 
   /**
@@ -164,23 +181,34 @@ export class ClassFileService {
    * @param id - 파일 ID
    * @throws ApiException - 파일이 존재하지 않을 경우
    */
-  async deleteFile(id: string): Promise<void> {
-    const fileEntity = await this.classFileRepository.findById(id);
-    if (!fileEntity) {
+  @Transactional()
+  async deleteFiles(ids: string[]): Promise<void> {
+    const fileEntity = await this.classFileRepository.findByIds(ids);
+    if (!fileEntity || fileEntity.length === 0) {
       throw new ApiException(ErrorCode.CLASS_FILE_NOT_FOUND);
     }
 
-    // 1. 물리적 파일 삭제 (에러 무시 가능하도록 try-catch)
-    try {
-      const absolutePath = path.resolve(fileEntity.filePath);
-      if (fs.existsSync(absolutePath)) {
-        await fs.promises.unlink(absolutePath);
-      }
-    } catch (e) {
-      console.warn(`Failed to delete file physically: ${fileEntity.filePath}`);
-    }
+    const requestObj = {
+      ids: fileEntity.map((file) => file.id),
+      serviceName: APP_NAME,
+      entity: 'classFile',
+    };
 
-    // 2. DB 기록 삭제
-    await this.classFileRepository.delete(id);
+    try {
+      await firstValueFrom(
+        this.httpService.delete<boolean>(
+          `${FILE_URL}/documents/${APP_NAME}/delete`,
+          { data: requestObj },
+        ),
+      );
+
+      await this.classFileRepository.delete(ids);
+    } catch (error) {
+      this.LOGGER.error(
+        `Failed to delete file from external server: ${fileEntity.map((file) => file.filePath).join(', ')}`,
+        error,
+      );
+      throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
   }
 }

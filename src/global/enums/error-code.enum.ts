@@ -68,6 +68,7 @@ export enum ErrorCode {
   CLASS_FILE_NOT_FOUND = 'CLASS_FILE_001',
   FILE_NOT_PROVIDED = 'CLASS_FILE_002',
   CLASS_FILE_NOT_FOUND_ON_DISK = 'CLASS_FILE_003',
+  CLASS_FILE_CREATE_FAILED = 'CLASS_FILE_004',
 
   // 강좌계획서 관련 에러
   CLASS_SYLLABUS_NOT_FOUND = 'CLASS_SYLLABUS_001',
@@ -267,6 +268,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.CLASS_FILE_NOT_FOUND_ON_DISK]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: '해당 파일을 디스크에서 찾을 수 없습니다.',
+  },
+  [ErrorCode.CLASS_FILE_CREATE_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '수업 파일 생성에 실패했습니다.',
   },
 
   // 강좌계획서 관련 에러

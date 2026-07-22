@@ -13,22 +13,22 @@ export class ClassFileRepository {
   async findClassFiles(
     userId: string,
     classId?: string,
-    fileName?: string,
+    search?: string,
     page: number = 1,
     limit: number = 10,
   ): Promise<{ files: any[]; total: number }> {
     const where = {
       uploaderId: userId,
       ...(classId && { classId }),
-      ...(fileName && {
+      ...(search && {
         fileName: {
-          contains: fileName,
+          contains: search,
           mode: 'insensitive' as Prisma.QueryMode,
         },
       }),
     };
 
-    const [files, total] = await this.prisma.$transaction([
+    const [files, total] = await Promise.all([
       this.prisma.classFile.findMany({
         where,
         skip: (page - 1) * limit,
@@ -63,14 +63,20 @@ export class ClassFileRepository {
     });
   }
 
-  async delete(id: string): Promise<ClassFile> {
-    return this.prisma.classFile.delete({
-      where: { id },
+  async findByIds(ids: string[]): Promise<ClassFile[]> {
+    return this.prisma.classFile.findMany({
+      where: { id: { in: ids } },
     });
   }
 
-  saveAll(data: Prisma.ClassFileCreateManyInput[]) {
-    return this.prisma.classFile.createMany({
+  async delete(ids: string[]): Promise<{ count: number }> {
+    return this.prisma.classFile.deleteMany({
+      where: { id: { in: ids } },
+    });
+  }
+
+  async save(data: Prisma.ClassFileCreateInput): Promise<ClassFile> {
+    return this.prisma.classFile.create({
       data,
     });
   }
@@ -80,6 +86,13 @@ export class ClassFileRepository {
       where: {
         classId: { in: classIds },
       },
+    });
+  }
+
+  async updateUrl(id: string, filePath: string): Promise<ClassFile> {
+    return this.prisma.classFile.update({
+      where: { id },
+      data: { filePath },
     });
   }
 }
