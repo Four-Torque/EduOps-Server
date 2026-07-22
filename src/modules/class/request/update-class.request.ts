@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ClassStatus, Prisma } from '@prisma/client';
+import { ClassStatus, Prisma, Subject } from '@prisma/client';
 import {
   IsDate,
   IsEnum,
@@ -41,6 +41,22 @@ export class UpdateClassRequest {
   capacity: number;
 
   @ApiProperty({
+    description: '강좌 과목',
+    example: '국어',
+  })
+  @IsString()
+  @IsOptional()
+  subjectName: string;
+
+  @ApiProperty({
+    description: '강좌 청구일',
+    example: '2023-10-31T00:00:00.000Z',
+  })
+  @IsDate()
+  @IsOptional()
+  billingDay: Date;
+
+  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -64,15 +80,20 @@ export class UpdateClassRequest {
   @IsOptional()
   status: ClassStatus;
 
-  static toEntity(request: UpdateClassRequest): Prisma.ClassUpdateInput {
+  static toEntity(
+    request: UpdateClassRequest,
+    subject: Subject,
+  ): Prisma.ClassUpdateInput {
     return {
       teacher: { connect: { id: request.teacherId } },
       name: request.name,
       fee: request.fee,
       capacity: request.capacity,
+      billingDay: request.billingDay,
       startDate: request.startDate,
       endDate: request.endDate,
       status: request.status,
+      subject: { connect: { id: subject.id } },
     };
   }
 }

@@ -102,6 +102,13 @@ export class ClassResponse {
   @IsString()
   subjectName?: string;
 
+  @ApiProperty({
+    description: '강좌 청구일',
+    example: '2023-10-31T00:00:00.000Z',
+  })
+  @IsDate()
+  billingDay: Date;
+
   static fromEntity(
     entity: Class & {
       schedules?: any[];
@@ -120,6 +127,7 @@ export class ClassResponse {
     response.startDate = entity.startDate;
     response.endDate = entity.endDate;
     response.status = entity.status;
+    response.billingDay = entity.billingDay;
     response.createdAt = entity.createdAt;
     response.updatedAt = entity.updatedAt;
 

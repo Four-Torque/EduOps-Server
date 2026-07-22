@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prisma, Subject } from '@prisma/client';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateClassRequest {
   @ApiProperty({
@@ -39,6 +39,14 @@ export class CreateClassRequest {
   capacity: number;
 
   @ApiProperty({
+    description: '강좌 청구일',
+    example: '2023-10-31T00:00:00.000Z',
+  })
+  @IsDate()
+  @IsOptional()
+  billingDay: Date;
+
+  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -61,6 +69,7 @@ export class CreateClassRequest {
       name: request.name,
       fee: request.fee,
       capacity: request.capacity,
+      billingDay: request.billingDay,
       startDate: request.startDate,
       endDate: request.endDate,
       subject: { connect: { id: subject.id } },

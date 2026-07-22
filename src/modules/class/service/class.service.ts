@@ -43,12 +43,25 @@ export class ClassService {
     id: string,
     request: UpdateClassRequest,
   ): Promise<ClassResponse> {
+    let subject;
+    subject = await this.subjectRepository.findByName(request.subjectName);
+    if (!subject) {
+      subject = await this.subjectRepository.create(request.subjectName);
+    }
     const existing = await this.classRepository.findById(id);
     if (!existing) {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
 
-    const data = UpdateClassRequest.toEntity(request);
+    const isError =
+      new Date(request.billingDay) >
+      new Date(new Date(request.startDate).getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    if (isError) {
+      throw new ApiException(ErrorCode.CLASS_BILLING_DAY_INVALID);
+    }
+
+    const data = UpdateClassRequest.toEntity(request, subject);
     const updated = await this.classRepository.update(id, data);
 
     const response: ClassResponse = ClassResponse.fromEntity(updated);

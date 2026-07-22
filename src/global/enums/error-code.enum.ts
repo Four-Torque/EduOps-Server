@@ -41,6 +41,7 @@ export enum ErrorCode {
   // 강좌 관련 에러
   CLASS_NOT_FOUND = 'CLASS_001',
   CLASS_CAPACITY_EXCEEDED = 'CLASS_002',
+  CLASS_BILLING_DAY_INVALID = 'CLASS_003',
 
   // 카테고리 관련 에러
   CATEGORY_NOT_FOUND = 'CATEGORY_001',
@@ -197,6 +198,10 @@ export const ErrorCodeMap: Record<
   [ErrorCode.CLASS_CAPACITY_EXCEEDED]: {
     status: HttpStatus.BAD_REQUEST,
     message: '해당 강좌의 정원이 초과되었습니다.',
+  },
+  [ErrorCode.CLASS_BILLING_DAY_INVALID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '청구일은 시작일로부터 7일 이내여야 합니다.',
   },
 
   // 카테고리 관련 에러

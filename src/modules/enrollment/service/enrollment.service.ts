@@ -52,18 +52,22 @@ export class EnrollmentService {
       }
     }
 
-
-
     // 학생 시간표 충돌 확인
     const schedules: any[] = (cls as any).schedules || [];
     if (schedules.length > 0) {
-      const existingSchedules = await this.enrollmentRepository.findSchedulesByStudentId(request.studentId);
-      
+      const existingSchedules =
+        await this.enrollmentRepository.findSchedulesByStudentId(
+          request.studentId,
+        );
+
       for (const newSchedule of schedules) {
         for (const existingSchedule of existingSchedules) {
           if (newSchedule.dayOfWeek === existingSchedule.dayOfWeek) {
             // 시간 겹침 유효성 검사: (새 시작시간 < 기존 종료시간) && (새 종료시간 > 기존 시작시간)
-            if (newSchedule.startTime < existingSchedule.endTime && newSchedule.endTime > existingSchedule.startTime) {
+            if (
+              newSchedule.startTime < existingSchedule.endTime &&
+              newSchedule.endTime > existingSchedule.startTime
+            ) {
               throw new ApiException(ErrorCode.STUDENT_SCHEDULE_CONFLICT);
             }
           }

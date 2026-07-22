@@ -67,6 +67,7 @@ model Class {
   startDate DateTime?   @db.Timestamptz()
   endDate   DateTime?   @db.Timestamptz()
   status    ClassStatus @default(OPEN)
+  billingDay DateTime? @db.Timestamptz()
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
