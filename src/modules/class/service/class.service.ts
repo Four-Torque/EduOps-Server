@@ -53,6 +53,14 @@ export class ClassService {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
 
+    const isError =
+      new Date(request.billingDay) >
+      new Date(new Date(request.startDate).getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    if (isError) {
+      throw new ApiException(ErrorCode.CLASS_BILLING_DAY_INVALID);
+    }
+
     const data = UpdateClassRequest.toEntity(request, subject);
     const updated = await this.classRepository.update(id, data);
 

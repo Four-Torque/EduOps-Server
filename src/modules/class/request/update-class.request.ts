@@ -49,6 +49,14 @@ export class UpdateClassRequest {
   subjectName: string;
 
   @ApiProperty({
+    description: '강좌 청구일',
+    example: '2023-10-31T00:00:00.000Z',
+  })
+  @IsDate()
+  @IsOptional()
+  billingDay: Date;
+
+  @ApiProperty({
     description: '강좌 시작일',
     example: '2023-10-31T00:00:00.000Z',
   })
@@ -81,6 +89,7 @@ export class UpdateClassRequest {
       name: request.name,
       fee: request.fee,
       capacity: request.capacity,
+      billingDay: request.billingDay,
       startDate: request.startDate,
       endDate: request.endDate,
       status: request.status,
