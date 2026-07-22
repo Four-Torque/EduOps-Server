@@ -1,27 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { Prisma } from '@prisma/client';
 
 export class UploadClassFileRequest {
-  @ApiProperty({
-    description: '강좌 ID',
-    example: 'class-uuid-1234',
-  })
-  @IsString()
-  @IsNotEmpty()
   classId: string;
+  urls: string[];
+  existingDocuments?: string[];
 
-  // @ApiProperty({
-  //   description:
-  //     '업로더 ID (보통 헤더 토큰에서 추출하지만, 현재 명시적으로 받음)',
-  //   example: 'user-uuid-1234',
-  // })
-  // @IsString()
-  // uploaderId: string;
+  static toEntity(
+    request: UploadClassFileRequest,
+    userId: string,
+  ): Prisma.ClassFileCreateManyInput[] {
+    const { classId, urls } = request;
 
-  @ApiProperty({
-    description: '업로드할 파일',
-    type: 'string',
-    format: 'binary',
-  })
-  file: any;
+    return urls.map((url) => ({
+      url,
+      classId,
+      fileName: url.split('/').pop() || '',
+      filePath: url,
+      fileSize: 0,
+      fileType: url.split('.').pop() || '',
+      uploaderId: userId,
+    }));
+  }
 }

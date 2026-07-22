@@ -15,3 +15,4 @@ export const JWT_SECRET_EXPIRES_IN = Number(process.env.JWT_SECRET_EXPIRES_IN);
 export const JWT_REFRESH_EXPIRES_IN = Number(
   process.env.JWT_REFRESH_EXPIRES_IN,
 );
+export const FILE_URL = process.env.FILE_URL;

@@ -1,15 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { APP_NAME, FILE_URL } from 'src/global';
+import { HttpService } from '@nestjs/axios';
 import { ClassFileRepository } from '../repository/class-file.repository';
-import { UploadClassFileRequest } from '../request/upload-class-file.request';
 import { ClassFileResponse } from '../response/class-file.response';
 import { PaginatedClassFileResponse } from '../response/class-file-list.response';
 import { ApiException, ErrorCode } from 'src/global';
 import * as fs from 'fs';
 import * as path from 'path';
+import { firstValueFrom } from 'rxjs';
+import { UploadClassFileRequest } from '../request/upload-class-file.request';
+import { Prisma } from '@prisma/client';
+import FormData = require('form-data');
 
 @Injectable()
 export class ClassFileService {
-  constructor(private readonly classFileRepository: ClassFileRepository) {}
+  constructor(
+    private readonly classFileRepository: ClassFileRepository,
+    private readonly httpService: HttpService,
+  ) {
+    this.LOGGER = new Logger(ClassFileService.name);
+  }
+  private readonly LOGGER: Logger;
 
   /**
    * uploadFile 메서드는 업로드된 파일의 메타데이터를 DB에 저장합니다.
@@ -18,24 +29,85 @@ export class ClassFileService {
    * @param file - Multer가 처리한 파일 객체
    * @returns Promise<ClassFileResponse> - 저장된 파일 객체를 반환합니다.
    */
-  async uploadFile(
-    userId: string,
-    request: UploadClassFileRequest,
-    file: Express.Multer.File,
-  ): Promise<ClassFileResponse> {
-    if (!file) {
-      throw new ApiException(ErrorCode.FILE_NOT_PROVIDED);
-    }
-
-    const entity = await this.classFileRepository.create({
-      fileName: file.originalname,
-      filePath: file.path, // Multer에 의해 지정된 로컬 경로 (예: uploads/class-files/xxx.pdf)
-      fileSize: file.size,
-      class: { connect: { id: request.classId } },
-      uploader: { connect: { id: userId } },
+  async uploadFile(files: Express.Multer.File[]) {
+    let formData = new FormData();
+    files.forEach((file) => {
+      console.log('파일명:', file.originalname);
+      console.log('버퍼 존재 여부:', file.buffer);
+      const filename = file.originalname?.trim() ? file.originalname : 'file';
+      formData.append('files', file.buffer, {
+        filename,
+        contentType: file.mimetype,
+      });
     });
 
-    return ClassFileResponse.fromEntity(entity);
+    console.log('formData: ', formData);
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<string[]>(`${FILE_URL}/documents`, formData, {
+          headers: formData.getHeaders(),
+        }),
+      );
+
+      return response.data ?? [];
+    } catch (error) {
+      this.LOGGER.error(
+        `파일 업로드 실패: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async createFile(request: UploadClassFileRequest, userId: string) {
+    const { classId, urls } = request;
+    if (!urls || urls.length === 0) {
+      throw new ApiException(ErrorCode.CLASS_FILE_NOT_FOUND);
+    }
+
+    const requestObj = {
+      id: classId,
+      images: urls,
+      existingImages: [],
+      entity: 'classFile',
+    };
+
+    try {
+      this.LOGGER.log(`1. 문서 생성 요청 전송 중`);
+      const res = await firstValueFrom(
+        this.httpService.post(
+          `${FILE_URL}/documents/${APP_NAME}/create`,
+          requestObj,
+        ),
+      );
+      this.LOGGER.log(`2. 문서 생성 요청 완료`);
+
+      this.LOGGER.log(`3. 문서 생성 결과 처리 중`);
+      console.log('응답받은 문서들: ', res.data);
+      const classFileObj: Prisma.ClassFileCreateManyInput[] =
+        UploadClassFileRequest.toEntity(
+          {
+            classId,
+            urls: res.data.body.documents ?? [],
+          },
+          userId,
+        );
+
+      if (classFileObj.length === 0) {
+        return [];
+      }
+      await this.classFileRepository.saveAll(classFileObj);
+      this.LOGGER.log(`4. 문서들 저장 완료`);
+      const classFiles = await this.classFileRepository.findAllByclassId([
+        classId,
+      ]);
+      this.LOGGER.log(`5. 문서들 조회 완료`);
+      const response = classFiles.map((classFile) =>
+        ClassFileResponse.fromEntity(classFile),
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**

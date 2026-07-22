@@ -68,4 +68,18 @@ export class ClassFileRepository {
       where: { id },
     });
   }
+
+  saveAll(data: Prisma.ClassFileCreateManyInput[]) {
+    return this.prisma.classFile.createMany({
+      data,
+    });
+  }
+
+  findAllByclassId(classIds: string[]): Promise<ClassFile[]> {
+    return this.prisma.classFile.findMany({
+      where: {
+        classId: { in: classIds },
+      },
+    });
+  }
 }

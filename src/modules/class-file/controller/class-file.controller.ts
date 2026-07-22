@@ -8,13 +8,12 @@ import {
   Query,
   Res,
   StreamableFile,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ClassFileService } from '../service/class-file.service';
-import { UploadClassFileRequest } from '../request/upload-class-file.request';
 import { ClassFileResponse } from '../response/class-file.response';
 import { PaginatedClassFileResponse } from '../response/class-file-list.response';
 import {
@@ -28,6 +27,7 @@ import {
 } from 'src/global';
 import { Response } from 'express';
 import * as fs from 'fs';
+import { UploadClassFileRequest } from '../request/upload-class-file.request';
 
 @ApiTags('수업 파일')
 @Controller('class-file')
@@ -39,18 +39,21 @@ export class ClassFileController {
     description:
       '강좌에 필요한 파일을 서버에 업로드합니다. (multipart/form-data)',
   })
-  @ApiConsumes('multipart/form-data')
   @ApiSuccessResponse(ResponseMessage.CLASS_FILE_UPLOADED, ClassFileResponse)
   @ApiErrorResponse(ErrorCode.BAD_REQUEST, ErrorCode.INTERNAL_SERVER_ERROR)
   @Message(ResponseMessage.CLASS_FILE_UPLOADED)
   @Post()
-  @UseInterceptors(FileInterceptor('file')) 
-  async uploadFile(
+  @UseInterceptors(FilesInterceptor('files'))
+  async uploadFile(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.classFileService.uploadFile(files);
+  }
+
+  @Post('create')
+  async createFile(
     @CurrentUser() user: JwtPayload,
     @Body() request: UploadClassFileRequest,
-    @UploadedFile() file: Express.Multer.File,
-  ): Promise<ClassFileResponse> {
-    return this.classFileService.uploadFile(user.id, request, file);
+  ) {
+    await this.classFileService.createFile(request, user.id);
   }
 
   @ApiOperation({
