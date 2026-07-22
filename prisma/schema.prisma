@@ -94,7 +94,7 @@ model ClassFile {
 
 model Schedule {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  class     Class    @relation(fields: [classId], references: [id])
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   classId   String   @db.Uuid
   dayOfWeek Int
   startTime String   @db.VarChar(5)
@@ -178,7 +178,7 @@ model StudentAttendance {
   id          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   student     Student                 @relation(fields: [studentId], references: [id])
   studentId   String                  @db.Uuid
-  class       Class                   @relation(fields: [classId], references: [id])
+  class       Class                   @relation(fields: [classId], references: [id], onDelete: Cascade)
   classId     String                  @db.Uuid
   lectureDate String                  @db.VarChar(20)
   status      StudentAttendanceStatus @default(ABSENT)
@@ -188,7 +188,7 @@ model StudentAttendance {
 
 model Enrollment {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  class      Class    @relation(fields: [classId], references: [id])
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
   classId    String   @db.Uuid
   student    Student  @relation(fields: [studentId], references: [id])
   studentId  String   @db.Uuid
@@ -199,7 +199,7 @@ model Enrollment {
 
 model Payment {
   id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  class       Class       @relation(fields: [classId], references: [id])
+  class       Class       @relation(fields: [classId], references: [id], onDelete: Cascade)
   classId     String      @db.Uuid
   student     Student     @relation(fields: [studentId], references: [id])
   studentId   String      @db.Uuid
@@ -214,7 +214,7 @@ model Payment {
 
 model Exam {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  class     Class     @relation(fields: [classId], references: [id])
+  class     Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
   classId   String    @db.Uuid
   name      String    @db.VarChar(20)
   examDate  DateTime? @db.Timestamptz()
@@ -226,9 +226,9 @@ model Exam {
 
 model ExamResult {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  exam      Exam     @relation(fields: [examId], references: [id])
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   examId    String   @db.Uuid
-  student   Student  @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId String   @db.Uuid
   score     Int
   createdAt DateTime @default(now())
