@@ -10,7 +10,6 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
-ENV PRISMA_CLI_BINARY_TARGETS="native,linux-musl-openssl-3.0.x"
 RUN npx prisma generate
 
 RUN yarn build
