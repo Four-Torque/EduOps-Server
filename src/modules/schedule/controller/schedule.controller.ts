@@ -67,7 +67,6 @@ export class ScheduleController {
       return this.scheduleService.findAllByClassId(classId);
     }
 
-    console.log('subjectId', subjectId);
     return this.scheduleService.findAll(
       undefined,
       room,

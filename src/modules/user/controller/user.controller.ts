@@ -78,7 +78,6 @@ export class UserController {
     @Query('name') name?: string,
   ): Promise<UserGroupedResponse[]> {
     const response = await this.userService.getGroupedList(user.id, name);
-    console.log('getGroupedUsers response', response);
     return response;
   }
 

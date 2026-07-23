@@ -182,7 +182,6 @@ export class StaffAttendanceService {
     page?: number,
     limit?: number,
   ) {
-    console.log('pageNum', page, 'limitNum', limit);
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 10;
     const skip = (pageNum - 1) * limitNum;
@@ -221,12 +220,8 @@ export class StaffAttendanceService {
         skip,
         limitNum,
       ),
-        await this.staffAttendanceRepository.userCount(department, search),
+      await this.staffAttendanceRepository.userCount(department, search),
     ]);
-
-    console.log('user', data.users.length);
-    console.log('attendances ', data.attendances.length);
-    console.log('total', total);
 
     const { users, attendances } = data;
 

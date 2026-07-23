@@ -80,8 +80,6 @@ export class StaffAttendanceRepository {
       roleFilter.role = { in: ['MANAGER', 'DIRECTOR'] };
     }
 
-    console.log('skip', skip, 'limit', limit);
-
     const users = await this.prisma.user.findMany({
       where: {
         ...roleFilter,

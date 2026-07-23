@@ -53,8 +53,6 @@ export class AssetApplicationService {
       return AssetApplicationResponse.fromEntity(app, stock);
     });
 
-    console.log('total count: ', total);
-
     const response = PaginatedAssetApplicationResponse.fromEntity(
       page,
       total,
@@ -100,7 +98,6 @@ export class AssetApplicationService {
   }
 
   async delete(ids: string[]) {
-    console.log('delete called with ids:', JSON.stringify(ids));
     const assetApplications =
       await this.assetApplicationRepository.findByIds(ids);
     if (assetApplications.length !== ids.length) {

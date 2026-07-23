@@ -116,7 +116,6 @@ export class ScheduleService {
       teacherName,
       subjectId,
     );
-    console.log('schedules', schedules);
     return schedules.map(ScheduleResponse.fromEntity);
   }
 }
