@@ -7,6 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { Public } from 'src/global';
 import { CategoryService } from '../service/category.service';
 import { CategoryResponse } from '../response/category.response';
 import { CreateCategoryRequest } from '../request/create-category.request';
@@ -40,6 +41,7 @@ export class CategoryController {
     return response;
   }
 
+  @Public()
   @ApiOperation({
     summary: '카테고리 조회',
     description: '모든 카테고리를 조회합니다.',
