@@ -6,10 +6,14 @@ import { StudentStatus } from '@prisma/client';
 import { ApiException, ErrorCode } from 'src/global';
 import { CreateStudentRequest } from '../request/create-student.request';
 import { UpdateStudentRequest } from '../request/update-student.request';
+import { RedisKey, RedisService } from 'src/redis';
 
 @Injectable()
 export class StudentService {
-  constructor(private readonly studentRepository: StudentRepository) {}
+  constructor(
+    private readonly studentRepository: StudentRepository,
+    private readonly redis: RedisService,
+  ) {}
 
   /**
    * getList 메서드는 학생 목록을 조회합니다
@@ -46,11 +50,18 @@ export class StudentService {
    * @param id
    */
   async findById(id: string): Promise<StudentResponse> {
-    const student = await this.studentRepository.findById(id);
-    if (!student) {
-      throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
-    }
-    return StudentResponse.fromEntity(student);
+    const key = RedisKey.studentDetail(id);
+    return this.redis.getOrSet(
+      key,
+      async () => {
+        const student = await this.studentRepository.findById(id);
+        if (!student) {
+          throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
+        }
+        return StudentResponse.fromEntity(student);
+      },
+      600,
+    );
   }
 
   /**
@@ -62,6 +73,7 @@ export class StudentService {
     const response = await this.studentRepository.create(
       CreateStudentRequest.toEntity(request),
     );
+    await this.redis.del(RedisKey.studentStats());
     return StudentResponse.fromEntity(response);
   }
 
@@ -77,6 +89,9 @@ export class StudentService {
     const data = UpdateStudentRequest.toEntity(request);
     const updated = await this.studentRepository.update(id, data);
 
+    await this.redis.del(RedisKey.studentDetail(id));
+    await this.redis.del(RedisKey.studentStats());
+
     const response: StudentResponse = StudentResponse.fromEntity(updated);
     return response;
   }
@@ -87,9 +102,16 @@ export class StudentService {
       throw new ApiException(ErrorCode.STUDENT_NOT_FOUND);
     }
     await this.studentRepository.delete(id);
+    await this.redis.del(RedisKey.studentDetail(id));
+    await this.redis.del(RedisKey.studentStats());
   }
 
   async getStats() {
-    return this.studentRepository.getStats();
+    const key = RedisKey.studentStats();
+    return this.redis.getOrSet(
+      key,
+      () => this.studentRepository.getStats(),
+      600,
+    );
   }
 }

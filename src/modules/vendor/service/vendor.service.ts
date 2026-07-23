@@ -6,10 +6,14 @@ import { PaginatedVendorRequest } from '../request/paginated-vendor.request';
 import { PaginatedVendorResponse } from '../response/paignated-vendor.response';
 import { ApiException, ErrorCode } from 'src/global';
 import { UpdateVendorRequest } from '../request/update-vendor.request';
+import { RedisKey, RedisService } from 'src/redis';
 
 @Injectable()
 export class VendorService {
-  constructor(private readonly vendorRepository: VendorRepository) {}
+  constructor(
+    private readonly vendorRepository: VendorRepository,
+    private readonly redis: RedisService,
+  ) {}
 
   /**
    * 구매처 생성
@@ -57,12 +61,18 @@ export class VendorService {
    * @returns VendorResponse
    */
   async findById(id: string): Promise<VendorResponse> {
-    const vendor = await this.vendorRepository.findById(id);
-    if (!vendor) {
-      throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
-    }
-    const response = VendorResponse.fromEntity(vendor);
-    return response;
+    const key = RedisKey.vendorDetail(id);
+    return this.redis.getOrSet(
+      key,
+      async () => {
+        const vendor = await this.vendorRepository.findById(id);
+        if (!vendor) {
+          throw new ApiException(ErrorCode.VENDOR_NOT_FOUND);
+        }
+        return VendorResponse.fromEntity(vendor);
+      },
+      1800,
+    );
   }
 
   /**
@@ -83,6 +93,7 @@ export class VendorService {
       id,
       UpdateVendorRequest.toEntity(request),
     );
+    await this.redis.del(RedisKey.vendorDetail(id));
     const response = VendorResponse.fromEntity(updatedVendor);
     return response;
   }
@@ -99,6 +110,9 @@ export class VendorService {
     }
     try {
       await this.vendorRepository.delete(ids);
+      for (const id of ids) {
+        await this.redis.del(RedisKey.vendorDetail(id));
+      }
     } catch (error: any) {
       if (error.code === 'P2003') {
         throw new ApiException(ErrorCode.VENDOR_ALREADY_IN_USE);

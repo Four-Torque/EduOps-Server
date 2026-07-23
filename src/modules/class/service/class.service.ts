@@ -6,12 +6,14 @@ import { ClassStudentAttendanceResponse } from '../response/class-student-attend
 import { ApiException, ErrorCode, Transactional } from 'src/global';
 import { UpdateClassRequest } from '../request/update-class.request';
 import { SubjectRepository } from 'src/modules/subject/repository/subject.repository';
+import { RedisKey, RedisService } from 'src/redis';
 
 @Injectable()
 export class ClassService {
   constructor(
     private readonly classRepository: ClassRepository,
     private readonly subjectRepository: SubjectRepository,
+    private readonly redis: RedisService,
   ) {}
 
   /**
@@ -63,6 +65,7 @@ export class ClassService {
 
     const data = UpdateClassRequest.toEntity(request, subject);
     const updated = await this.classRepository.update(id, data);
+    await this.redis.del(RedisKey.classDetail(id));
 
     const response: ClassResponse = ClassResponse.fromEntity(updated);
     return response;
@@ -74,11 +77,18 @@ export class ClassService {
    * @returns
    */
   async findById(id: string): Promise<ClassResponse> {
-    const existing = await this.classRepository.findById(id);
-    if (!existing) {
-      throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
-    }
-    return ClassResponse.fromEntity(existing);
+    const key = RedisKey.classDetail(id);
+    return this.redis.getOrSet(
+      key,
+      async () => {
+        const existing = await this.classRepository.findById(id);
+        if (!existing) {
+          throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
+        }
+        return ClassResponse.fromEntity(existing);
+      },
+      600,
+    );
   }
 
   /**
@@ -148,5 +158,6 @@ export class ClassService {
       throw new ApiException(ErrorCode.CLASS_NOT_FOUND);
     }
     await this.classRepository.delete(id);
+    await this.redis.del(RedisKey.classDetail(id));
   }
 }

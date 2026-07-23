@@ -38,8 +38,12 @@ export class UserService {
    * @returns Promise<User | null> - 조회된 사용자 객체 또는 null을 반환합니다.
    */
   async findById(id: string): Promise<User | null> {
-    const user: User | null = await this.userRepository.findById(id);
-    return user;
+    const redisKey = RedisKey.userEntity(id);
+    return this.redis.getOrSet(
+      redisKey,
+      () => this.userRepository.findById(id),
+      600,
+    );
   }
 
   /**
@@ -68,13 +72,19 @@ export class UserService {
    * @throws ApiException - 사용자가 존재하지 않을 경우 USER_NOT_FOUND 에러 발생
    */
   async getSession(userId: string): Promise<UserResponse> {
-    const user: User | null = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new ApiException(ErrorCode.USER_NOT_FOUND);
-    }
-    const { password, ...rest } = user;
-    const response: UserResponse = UserResponse.fromEntity(rest);
-    return response;
+    const redisKey = RedisKey.userProfile(userId);
+    return this.redis.getOrSet(
+      redisKey,
+      async () => {
+        const user: User | null = await this.userRepository.findById(userId);
+        if (!user) {
+          throw new ApiException(ErrorCode.USER_NOT_FOUND);
+        }
+        const { password, ...rest } = user;
+        return UserResponse.fromEntity(rest);
+      },
+      600,
+    );
   }
 
   /**
@@ -99,6 +109,8 @@ export class UserService {
       ResetPasswordRequest.toEntity(user.id, hashedPassword),
     );
     await this.redis.del(redisKey);
+    await this.redis.del(RedisKey.userProfile(user.id));
+    await this.redis.del(RedisKey.userEntity(user.id));
   }
 
   /**
@@ -180,6 +192,8 @@ export class UserService {
 
     const data = UpdateUserRequest.toEntity(request);
     const updated = await this.userRepository.update(id, data);
+    await this.redis.del(RedisKey.userProfile(id));
+    await this.redis.del(RedisKey.userEntity(id));
 
     const response: UserResponse = UserResponse.fromEntity(updated);
     return response;
@@ -196,6 +210,8 @@ export class UserService {
     }
 
     await this.userRepository.delete(id);
+    await this.redis.del(RedisKey.userProfile(id));
+    await this.redis.del(RedisKey.userEntity(id));
   }
 
   async updateApprovedStatus(id: string): Promise<UserResponse> {
@@ -209,6 +225,9 @@ export class UserService {
       approvedAt: new Date(),
       status: 'ACTIVE',
     });
+    await this.redis.del(RedisKey.userProfile(id));
+    await this.redis.del(RedisKey.userEntity(id));
+
     const response: UserResponse = UserResponse.fromEntity(updated);
     return response;
   }
