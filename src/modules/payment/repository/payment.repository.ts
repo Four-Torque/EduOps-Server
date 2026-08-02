@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Payment } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { toKstDateRange } from 'src/global';
 
 @Injectable()
 export class PaymentRepository {
@@ -126,6 +127,30 @@ export class PaymentRepository {
     });
   }
 
+  /** PAID 결제를 paymentDate 기준 기간으로 집계 (합계·건수) */
+  async aggregatePaidByPeriod(gte: Date, lt: Date) {
+    return this.prisma.payment.aggregate({
+      where: { paymentType: 'PAID', paymentDate: { gte, lt } },
+      _sum: { amount: true },
+      _count: { _all: true },
+    });
+  }
+
+  /** UNPAID 건수를 dueDate 기준 기간으로 집계 */
+  async countUnpaidByPeriod(gte: Date, lt: Date) {
+    return this.prisma.payment.count({
+      where: { paymentType: 'UNPAID', dueDate: { gte, lt } },
+    });
+  }
+
+  /** 차트 버킷용 PAID 결제 목록 (paymentDate 기준 기간) */
+  async findPaidByPeriod(gte: Date, lt: Date) {
+    return this.prisma.payment.findMany({
+      where: { paymentType: 'PAID', paymentDate: { gte, lt } },
+      select: { amount: true, paymentDate: true },
+    });
+  }
+
   private buildPaymentWhereInput(params: {
     studentId?: string;
     classId?: string;
@@ -149,12 +174,13 @@ export class PaymentRepository {
   }
 
   async getPaymentsByStartDateAndEndDate(startDate: string, endDate: string) {
+    const { gte, lt } = toKstDateRange(startDate, endDate);
     return this.prisma.payment.findMany({
       where: {
         paymentType: {
           not: 'UNPAID',
         },
-        paymentDate: { gte: new Date(startDate), lte: new Date(endDate) },
+        paymentDate: { gte, lt },
       },
       include: { student: true, class: true },
     });

@@ -55,6 +55,22 @@ export class PaymentController {
     return response;
   }
 
+  @ApiOperation({
+    summary: '결제 요약(통계·매출 차트) 조회',
+    description:
+      '상단 통계 카드와 매출 차트를 위한 집계를 조회합니다. ' +
+      'startDate/endDate로 기간을 지정할 수 있으며(생략 시 최근 6개월), ' +
+      '차트 버킷은 기간에 따라 월별/일별로 자동 결정됩니다.',
+  })
+  @ApiSuccessResponse()
+  @Get('/summary')
+  async getBillingSummary(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.paymentService.getBillingSummary(startDate, endDate);
+  }
+
   // 원생 결제 관리 목록(findAll)만 쓰는 걸로 정리하면서 주석 처리.
   // (getMonthlyTrends는 서비스에 대응 메서드가 이미 없어 컴파일 에러 상태였음)
   // @ApiOperation({

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AssetsApplication, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { toKstDateRange } from 'src/global';
 
 @Injectable()
 export class AssetRepository {
@@ -110,12 +111,13 @@ export class AssetRepository {
     startDate: string,
     endDate: string,
   ) {
+    const { gte, lt } = toKstDateRange(startDate, endDate);
     return this.prisma.assetsApplication.findMany({
       where: {
         status: {
           not: 'REJECTED',
         },
-        processedAt: { gte: new Date(startDate), lte: new Date(endDate) },
+        processedAt: { gte, lt },
       },
       include: { user: true, category: true },
     });

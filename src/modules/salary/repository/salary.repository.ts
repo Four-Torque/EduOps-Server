@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, Salary, SalaryStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { toKstDateRange } from 'src/global';
 
 @Injectable()
 export class SalaryRepository {
@@ -71,9 +72,10 @@ export class SalaryRepository {
   }
 
   async getSalariesByStartDateAndEndDate(startDate: string, endDate: string) {
+    const { gte, lt } = toKstDateRange(startDate, endDate);
     return this.prisma.salary.findMany({
       where: {
-        paymentDate: { gte: new Date(startDate), lte: new Date(endDate) },
+        paymentDate: { gte, lt },
       },
       include: { user: true },
     });

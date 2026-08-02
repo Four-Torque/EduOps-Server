@@ -76,6 +76,105 @@ export class PaymentService {
   }
 
   /**
+   * getBillingSummary 메서드는 결제 관리 상단 통계 카드와 매출 차트를 위한 집계를 반환합니다.
+   * startDate/endDate로 기간을 지정할 수 있으며(연간·월간·대시보드 날짜필터 공용),
+   * 생략 시 최근 6개월을 기본값으로 사용합니다.
+   * 차트 버킷은 기간 길이에 따라 자동으로 월별(>90일) 또는 일별로 나뉩니다.
+   */
+  async getBillingSummary(startDate?: string, endDate?: string) {
+    const now = new Date();
+    const DAY_MS = 24 * 60 * 60 * 1000;
+
+    // 조회 경계: [startD, ltEnd). endDate는 그날 전체를 포함하도록 +1일.
+    const startD = startDate
+      ? new Date(startDate)
+      : new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const ltEnd = endDate
+      ? new Date(new Date(endDate).getTime() + DAY_MS)
+      : new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    // 증감률 비교용: 직전 동일 길이 기간
+    const rangeMs = ltEnd.getTime() - startD.getTime();
+    const prevStart = new Date(startD.getTime() - rangeMs);
+
+    const [paidAgg, unpaidCount, prevAgg, paidList] = await Promise.all([
+      this.paymentRepository.aggregatePaidByPeriod(startD, ltEnd),
+      this.paymentRepository.countUnpaidByPeriod(startD, ltEnd),
+      this.paymentRepository.aggregatePaidByPeriod(prevStart, startD),
+      this.paymentRepository.findPaidByPeriod(startD, ltEnd),
+    ]);
+
+    const totalRevenue = paidAgg._sum.amount ?? 0;
+    const paidCount = paidAgg._count._all;
+    const denom = paidCount + unpaidCount;
+    const paidRate = denom === 0 ? 0 : Math.round((paidCount / denom) * 100);
+
+    const prevRevenue = prevAgg._sum.amount ?? 0;
+    const revenueGrowthRate =
+      prevRevenue === 0
+        ? 0
+        : Math.round(((totalRevenue - prevRevenue) / prevRevenue) * 100);
+
+    return {
+      stats: { totalRevenue, revenueGrowthRate, paidRate, paidCount, unpaidCount },
+      monthly: this.buildRevenueBuckets(paidList, startD, ltEnd),
+    };
+  }
+
+  /**
+   * PAID 결제 목록을 기간 길이에 맞춰 월별(>90일) 또는 일별 버킷으로 합산한다.
+   * 반환 형태는 프론트 차트가 쓰는 { month: 라벨, amount } 배열로 통일.
+   */
+  private buildRevenueBuckets(
+    items: { amount: number; paymentDate: Date | null }[],
+    start: Date,
+    ltEnd: Date,
+  ): { month: string; amount: number }[] {
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const useMonth = (ltEnd.getTime() - start.getTime()) / DAY_MS > 90;
+    const last = new Date(ltEnd.getTime() - 1);
+
+    const buckets: { key: string; label: string; amount: number }[] = [];
+    if (useMonth) {
+      const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+      while (cursor <= last) {
+        buckets.push({
+          key: `${cursor.getFullYear()}-${cursor.getMonth()}`,
+          label: `${cursor.getMonth() + 1}월`,
+          amount: 0,
+        });
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+    } else {
+      const cursor = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate(),
+      );
+      while (cursor <= last) {
+        buckets.push({
+          key: `${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`,
+          label: `${cursor.getMonth() + 1}/${cursor.getDate()}`,
+          amount: 0,
+        });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+    }
+
+    const indexByKey = new Map(buckets.map((b, i) => [b.key, i]));
+    for (const payment of items) {
+      const d = payment.paymentDate ?? start;
+      const key = useMonth
+        ? `${d.getFullYear()}-${d.getMonth()}`
+        : `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const idx = indexByKey.get(key);
+      if (idx !== undefined) buckets[idx].amount += payment.amount;
+    }
+
+    return buckets.map((b) => ({ month: b.label, amount: b.amount }));
+  }
+
+  /**
    * update 메서드는 결제 정보를 업데이트합니다.
    * @param id
    * @param request
