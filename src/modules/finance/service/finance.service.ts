@@ -53,7 +53,6 @@ export class FinanceService {
     const details = assets.map(FinanceDetailResponse.fromAssetApplications);
 
     const response = this.groupAndFormatDetails(details);
-    console.log('response', response);
     return response;
   }
 
@@ -66,7 +65,6 @@ export class FinanceService {
     const details = payments.map(FinanceDetailResponse.fromPayment);
 
     const response = this.groupAndFormatDetails(details);
-    console.log('response', response);
     return response;
   }
 
@@ -82,7 +80,6 @@ export class FinanceService {
     const details = salaries.map(FinanceDetailResponse.fromSalary);
 
     const response = this.groupAndFormatDetails(details);
-    console.log('response', response);
     return response;
   }
 

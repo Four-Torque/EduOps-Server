@@ -53,8 +53,6 @@ export class AssetApplicationService {
       return AssetApplicationResponse.fromEntity(app, stock);
     });
 
-    console.log('total count: ', total);
-
     const response = PaginatedAssetApplicationResponse.fromEntity(
       page,
       total,

@@ -41,7 +41,6 @@ export class VendorService {
       this.vendorRepository.count(search),
     ]);
 
-    console.log('total count: ', total);
     const response = PaginatedVendorResponse.fromEntity(
       page,
       total,

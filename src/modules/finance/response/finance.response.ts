@@ -47,8 +47,10 @@ export class FinanceDetailResponse {
   ) {
     const response = new FinanceDetailResponse();
     response.id = entity.id;
-    response.date = format(entity.requestedAt, 'yyyy-MM-dd', { locale: ko });
-    response.time = format(entity.requestedAt, 'HH:mm', { locale: ko });
+
+    const expenseDate = entity.processedAt ?? entity.requestedAt;
+    response.date = format(expenseDate, 'yyyy-MM-dd', { locale: ko });
+    response.time = format(expenseDate, 'HH:mm', { locale: ko });
     response.type = 'EXPENSE';
     response.amount = entity.price * entity.quantity;
     response.category = 'ASSET';
